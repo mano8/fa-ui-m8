@@ -1,0 +1,16 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { OAuthCallback } from '@/components/auth/OAuthCallback';
+import { getTranslations } from '@/content/i18n/app';
+
+const t = getTranslations('en');
+---
+
+<StarlightPage frontmatter={{
+  title: t.pages.callbackTitle,
+  tableOfContents: false
+}}>
+  <div class="py-12">
+    <OAuthCallback client:only="react" locale="en" />
+  </div>
+</StarlightPage>

@@ -1,0 +1,35 @@
+---
+// Overrides Starlight's SocialIcons slot to add app entry points to the top bar.
+// Renders the default social icons and prepends locale-aware "Media" and
+// "Account / Sign in" links. Each target page handles its own login state.
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+import { getTranslations } from '@/content/i18n/app';
+import { localeFromPath } from '@/lib/locale';
+
+const locale = localeFromPath(Astro.url.pathname);
+const t = getTranslations(locale);
+const mediaHref = `/${locale}/media`;
+const accountHref = `/${locale}/user/account`;
+---
+
+<a class="fa-auth-navlink" href={mediaHref}>{t.nav.media}</a>
+<a class="fa-auth-navlink" href={accountHref}>{t.nav.account}</a>
+<Default><slot /></Default>
+
+<style>
+  .fa-auth-navlink {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    color: var(--sl-color-white);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .fa-auth-navlink:hover {
+    background: var(--sl-color-gray-6);
+  }
+</style>
