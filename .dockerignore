@@ -1,0 +1,15 @@
+**/node_modules
+**/.astro
+**/dist
+**/coverage
+
+docker_compose/**/db_data
+docker_compose/**/grafana/data
+docker_compose/**/minio/data
+docker_compose/**/prometheus/data
+docker_compose/**/redis/redis_data
+docker_compose/**/media_redis/data
+
+.git
+.github
+.vscode
