@@ -1,0 +1,137 @@
+---
+title: Permissions des Fichiers
+description: CheatSheet - Permissions des Fichiers et Répertoires sous Linux
+---
+
+Sous Linux et Unix, **tout est considéré comme un fichier**, y compris les répertoires et les périphériques. Tous les fichiers d'un système possèdent des permissions qui régissent l'accès et les actions possibles par différents types d'utilisateurs. Ces permissions, souvent appelées "bits", sont associées à la propriété du fichier. Le super utilisateur "**root**" a la capacité d'accéder à n'importe quel fichier sur le système. Pour modifier des fichiers appartenant à `root`, l'utilisation de `sudo` est nécessaire.
+
+---
+
+## Types de Restrictions d'Accès (Permissions)
+
+Il existe trois types principaux de restrictions d'accès (permissions) qui définissent ce que les utilisateurs peuvent faire avec un fichier ou un répertoire.
+
+| Permission | Description | Valeur |
+|-----------|-------------|--------|
+| **Lecture** (`r` ou `4`) | Sur un **fichier** : Permet d'accéder au contenu du fichier. Sur un **répertoire** : Permet de lister le contenu du répertoire (`ls`), mais pas d'y accéder (sauf si la permission d'exécution est également présente). | 4 |
+| **Écriture** (`w` ou `2`) | Sur un **fichier** : Permet de modifier le contenu du fichier. Sur un **répertoire** : Permet de modifier le contenu du répertoire, d'y créer ou supprimer des fichiers ou sous-répertoires (nécessite également la permission d'exécution). | 2 |
+| **Exécution** (`x` ou `1`) | Sur un **fichier** : Permet de lancer les scripts et applications. Sur un **répertoire** : Permet de "changer" dans le répertoire (`cd`) et d'utiliser les fichiers/sous-répertoires qu'il contient. Les répertoires doivent impérativement avoir la permission 'exécution' pour fonctionner correctement. | 1 |
+
+Ces permissions sont souvent représentées par une série de 9 caractères (`rwxrwxrwx`) ou en notation octale (trois nombres de 0 à 7). Un tiret (`-`) indique l'absence de la permission.
+
+---
+
+## Types de Restrictions Utilisateurs (Propriété)
+
+Les permissions s'appliquent à trois catégories d'utilisateurs :
+
+| Catégorie | Description | Symbole |
+|----------|-------------|--------|
+| **Propriétaire** | L'utilisateur qui possède le fichier, généralement son créateur. | `u` |
+| **Groupe** | Le groupe d'utilisateurs qui possède le fichier. Un utilisateur membre de ce groupe peut avoir certaines permissions particulières sur le fichier. | `g` |
+| **Autres** | Tous les autres utilisateurs qui ne sont ni le propriétaire ni membre du groupe propriétaire. | `o` |
+
+L'affichage détaillé d'une liste de fichiers (`ls -l`) montre ces permissions sous la forme `-rwxr-xr-x` où le premier caractère indique le type de fichier, suivi de 3 caractères pour le propriétaire, 3 pour le groupe, et 3 pour les autres.
+
+---
+
+## Gestion des Permissions (`chmod`)
+
+La commande `chmod` est utilisée pour modifier les permissions d'accès à un fichier ou un répertoire. L'utilisation de `sudo` est souvent nécessaire pour modifier les permissions de fichiers dont l'utilisateur n'est pas propriétaire.
+
+### Méthodes de Modification des Permissions
+
+| Méthode | Description | Exemple |
+|---------|-------------|---------|
+| **Avec des lettres** | Utilise des codes pour les utilisateurs (`u`, `g`, `o`, `a` pour tous) et les permissions (`r`, `w`, `x`), combinés avec `+` (ajouter), `-` (enlever), ou `=` (définir). | `chmod u+x fichier1` |
+| **Avec des nombres (Octal)** | Représente les permissions de lecture (4), écriture (2) et exécution (1) par des nombres. On additionne ces valeurs pour chaque catégorie (propriétaire, groupe, autres) pour obtenir un nombre à trois chiffres. | `chmod 755 répertoire` |
+
+### Exemples de Commandes
+
+| Commande | Description |
+|----------|-------------|
+| `chmod u+x fichier1` | Ajoute la permission d'exécution pour le propriétaire. |
+| `chmod g-r fichier3` | Enlève la permission de lecture pour le groupe. |
+| `chmod u=rw,go=r MonFichier` | Définit rw pour le propriétaire et r pour le groupe/autres. |
+| `chmod 755 répertoire` | Définit rwx pour le propriétaire et r-x pour le groupe/autres. |
+| `chmod 644 fichier` | Définit rw- pour le propriétaire et r-- pour le groupe/autres. |
+| `chmod 667 filename` | Définit rw- pour le propriétaire et le groupe, et rwx pour les autres. |
+
+---
+
+## Modification Récursive des Permissions
+
+Pour modifier les permissions de plusieurs fichiers et répertoires sous un chemin donné :
+
+| Commande | Description |
+|----------|-------------|
+| `chmod -R` | Applique les permissions de manière récursive à tous les fichiers et sous-répertoires. |
+| `find` et `chmod` | Permet une application plus sélective en combinant la commande `find` avec `chmod`. |
+
+### Exemples de Commandes Récursives
+
+| Commande | Description |
+|----------|-------------|
+| `sudo chmod 777 -R /chemin/du/dossier` | Applique les permissions 777 récursivement. |
+| `sudo find /chemin/vers/dossier -type f -print0 | xargs -0 sudo chmod 644` | Applique les permissions 644 aux fichiers uniquement. |
+| `sudo find /chemin/vers/dossier -type d -print0 | xargs -0 sudo chmod 755` | Applique les permissions 755 aux répertoires uniquement. |
+
+> **ATTENTION** : Les commandes récursives, surtout combinées avec `sudo`, sont extrêmement dangereuses. Une faute de frappe peut entraîner la suppression ou la modification des permissions de fichiers système critiques. Soyez très prudent !
+
+---
+
+## Changement de Propriétaire et de Groupe
+
+| Commande | Description | Exemple |
+|----------|-------------|---------|
+| `chown` | Permet de changer le propriétaire d'un fichier ou répertoire. Peut également changer le groupe propriétaire. | `sudo chown utilisateur_cible fichier` |
+| `chgrp` | Permet spécifiquement de changer le groupe propriétaire d'un fichier ou répertoire. | `sudo chgrp groupe_cible fichier` |
+
+### Exemples de Commandes
+
+| Commande | Description |
+|----------|-------------|
+| `sudo chown utilisateur_cible:groupe_cible fichier` | Change le propriétaire et le groupe. |
+| `sudo chown :groupe_cible fichier` | Change le groupe seulement. |
+| `sudo chgrp groupe_cible fichier` | Change le groupe propriétaire. |
+| `sudo chown -R utilisateur_cible:groupe_cible /chemin/du/dossier` | Change récursivement le propriétaire et le groupe. |
+
+Par défaut, l'utilisation de `sudo` est requise pour changer le propriétaire ou le groupe d'un fichier.
+
+---
+
+## Permissions par Défaut (`umask`)
+
+Lorsqu'un nouveau fichier ou répertoire est créé, il obtient automatiquement des permissions par défaut. Ce comportement est déterminé par un paramètre appelé le **masque utilisateur** (`umask`).
+
+| Concept | Description |
+|---------|-------------|
+| **Valeur par défaut de l'`umask`** | Souvent `022` dans Ubuntu. |
+| **Permissions par défaut** | `644` (`rw-r--r--`) pour les **fichiers** et `755` (`rwxr-xr-x`) pour les **répertoires**. |
+| **Modification de l'`umask`** | Peut être modifié pour la session courante (`umask 007`), pour un utilisateur particulier (`~/.bashrc` ou `~/.profile`), ou globalement (`/etc/profile` ou `/etc/pam.d/common-session` - déconseillé globalement). |
+
+Les systèmes de fichiers compatibles POSIX (comme ext4) gèrent les permissions directement sur le système de fichiers. Pour les systèmes de fichiers incompatibles POSIX (comme FAT/NTFS), les permissions sont émulées au moment du montage et définies par les options de montage (`mount -o`).
+
+---
+
+## Le Sticky Bit
+
+Le sticky bit est une permission spéciale qui s'applique principalement aux répertoires, typiquement ceux accessibles en écriture par "autres" (comme `/tmp`).
+
+| Concept | Description |
+|---------|-------------|
+| **Sticky Bit** | Lorsqu'il est activé sur un répertoire, le sticky bit **empêche les utilisateurs de supprimer ou de renommer les fichiers qu'ils ne possèdent pas personnellement** dans ce répertoire. |
+| **Définition** | Il est défini ou retiré à l'aide de `chmod` avec l'indicateur `t` : |
+| | Ajouter : `chmod +t <répertoire>`. |
+| | Retirer : `chmod -t <répertoire>`. |
+
+Dans l'affichage détaillé de `ls -l`, la présence du sticky bit est indiquée par un `t` ou `T` à la place du bit d'exécution pour les "autres".
+
+---
+
+## Autres Concepts Liés
+
+| Concept | Description |
+|---------|-------------|
+| **ACL (Access Control List)** | Une méthode pour obtenir une granularité de permissions plus fine que les permissions Unix standard. Cela nécessite l'installation du package `acl` et l'activation de l'option `acl` dans `/etc/fstab`. Les commandes `setfacl` et `getfacl` sont utilisées pour gérer les ACLs. |
+| **Gestion des utilisateurs et groupes** | Les commandes comme `adduser`, `addgroup`, `useradd`, `groupadd`, `userdel`, `deluser`, `usermod`, `passwd`, `groups` sont utilisées pour gérer les utilisateurs et les groupes. Elles sont fondamentales car elles définissent les utilisateurs et groupes auxquels les permissions sont attribuées. Ces commandes modifient des fichiers système critiques comme `/etc/passwd`, `/etc/shadow`, et `/etc/group`. |

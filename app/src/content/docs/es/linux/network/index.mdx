@@ -1,0 +1,141 @@
+---
+title: Network
+description: Linux Network CheatSheet on Debian/Ubuntu
+---
+
+Network management is essential on a Linux system, whether it's a server or a workstation. It involves configuring network interfaces, IP addressing, name resolution, and traffic security. Various command-line tools are available for these tasks.
+
+## Basic Network Configuration Concepts
+
+Linux systems identify network interfaces using logical names. In modern systems, predictable network interface names might be used, such as `eno1` or `enp0s25`. Network configuration on Debian/Ubuntu-based distributions is managed via Netplan, which uses YAML configuration files (`/etc/netplan/`).
+
+### Identifying Network Interfaces
+
+| Command | Description |
+|---------|-------------|
+| `ip a` or `ip address show` | Displays IP address information and interface properties. |
+| `lshw -class network` | Provides hardware details, driver, and supported features for network interfaces. |
+
+For wireless interfaces (WiFi), the `iwconfig` command is used to manage wireless interfaces and check if the WiFi card is detected.
+
+### Configuring IP Addressing
+
+#### Persistent Configuration (DHCP)
+
+| Method | Description |
+|--------|-------------|
+| Netplan | Create or modify a YAML configuration file in `/etc/netplan/`. Add `dhcp4: true` under the interface definition. |
+
+Example of a Netplan configuration file:
+
+```yml
+network:
+  version: 2
+  ethernets:
+    enp3s0:
+      dhcp4: true
+```
+
+Apply changes with:
+
+```bash
+sudo netplan apply
+```
+
+#### Persistent Configuration (Static)
+
+| Method | Description |
+|--------|-------------|
+| Netplan | Create or modify a Netplan YAML file. Specify `addresses`, `routes`, and `nameservers`. |
+
+Example of a Netplan configuration file:
+
+```yml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses: [10.10.10.2/24]
+      routes:
+        - to: default
+          via: 10.10.10.1
+      nameservers:
+        search: [mydomain]
+        addresses: [10.10.10.1]
+```
+
+Apply changes with:
+
+```bash
+sudo netplan apply
+```
+
+| Concept | Description |
+|--------|-------------|
+| Loopback Interfaces | The loopback interface (`lo`) is identified by default with the IP address 127.0.0.1. |
+| Multiple IP Addresses or Interfaces | It is possible to configure multiple IP addresses on a single interface or use multiple physical interfaces. |
+
+### Name Resolution
+
+| Concept | Description |
+|---------|-------------|
+| DNS Client Configuration | Managed by `/etc/resolv.conf`. In modern systems, this file is often a symbolic link managed by `systemd-resolved`. |
+| Persistent DNS Configuration | Achieved by adding name server addresses and DNS suffix search lists in the Netplan YAML file. |
+
+Example of DNS configuration in Netplan:
+
+```yml
+network:
+  ethernets:
+    eth0:
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+        search: [example.com, example.org]
+```
+
+| Concept | Description |
+|---------|-------------|
+| Static Hostnames | Locally defined hostname-to-IP mappings are found in the `/etc/hosts` file. |
+
+Example of `/etc/hosts`:
+
+```ini
+127.0.0.1 localhost
+192.168.1.10 myserver
+```
+
+| Concept | Description |
+|---------|-------------|
+| Name Service Switch (NSS) Configuration | The order of hostname resolution is controlled by the `/etc/nsswitch.conf` file. |
+
+Example of `/etc/nsswitch.conf`:
+
+```ini
+hosts: files dns
+```
+
+### Wireless Network Configuration
+
+| Command | Description |
+|---------|-------------|
+| Discover Networks | Use `iwlist <interface> scan` to scan available networks and obtain information such as ESSID. |
+| Connect with `nmcli` | A command-line interface for NetworkManager. |
+| Connect with `nmtui` | A text-based interactive interface. |
+| Connect with `wpa_supplicant` | Manages the authentication process for wireless networks. |
+
+Example of connecting with `wpa_supplicant`:
+
+```bash
+wpa_passphrase <essid> <password> | sudo tee -a /etc/wpa_supplicant.conf
+sudo wpa_supplicant -c /etc/wpa_supplicant.conf -i <interface>
+sudo dhclient <interface>
+```
+
+### Other Network Configurations
+
+| Command | Description |
+|---------|-------------|
+| `ethtool` | Allows displaying and changing parameters of an Ethernet card such as auto-negotiation, port speed, duplex mode, etc. |
+| Network Bridging | Useful for filtering traffic between network segments or allowing virtual machines to access the external network. |
+
+Network configuration is a broad field, and the tools and methods available may vary slightly depending on the distribution and system version.

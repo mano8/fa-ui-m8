@@ -1,0 +1,269 @@
+---
+title: File Management
+description: CheatSheet - Linux Files and Directories Management
+---
+
+This section brings together the fundamental commands for interacting with the Linux file system.
+In Linux, everything is treated as a file: whether it's documents, programs, directories, or even peripherals.
+These commands allow you to navigate through the directory tree, manipulate files and folders, and search for information, all directly from the command line.
+
+## File and Directory Management
+
+### Directory Navigation Commands
+
+| Command | Description |
+|---------|-------------|
+| `ls` | Lists the contents of a directory. |
+| `ls -l` | Displays a long format including access permissions, the number of physical links, the owner, the group, the size in bytes, and the date of last modification. |
+| `ls -a` | Includes hidden files and directories. |
+| `ls -t` | Sorts files and directories by modification date, from newest to oldest. |
+| `ls -h` | Displays file sizes in a human-readable format. |
+| `ls -lct` | Displays details, sorts by last modification date, and uses the time of the last status modification for sorting. |
+| `ls -1` | Lists one file or directory per line. |
+
+> The `dir` command is almost identical to `ls` with the same options, but its default display may differ slightly (for example, no default color, escaped special characters).
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/ls.1.html)
+
+### Display the current working directory
+
+| Command | Description |
+|---------|-------------|
+| `pwd` | Displays the current working directory. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/pwd.1.html)
+
+### Navigate through the directory tree
+
+| Command | Description |
+|---------|-------------|
+| `cd` | Navigate through the directory tree. |
+| `cd -` | Return to the previous directory (the last visited directory). |
+| `cd ~` | Return to the user's home directory. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/cd.1p.html)
+
+### Copy/Move/Delete
+
+#### Move/Rename
+
+| Command | Description |
+|---------|-------------|
+| `mv` | Move or rename files and directories. |
+
+| Option | Description |
+|--------|-------------|
+| `-f` | Forces execution, overwrites destination files without asking for confirmation. |
+| `-i` | Asks for confirmation before overwriting an existing file. |
+| `-u` | Only moves or renames the file if the source file is newer than the destination file, or if the destination file does not exist. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/mv.1.html)
+
+#### Copy
+
+| Command | Description |
+|---------|-------------|
+| `cp` | Copy files or directories. |
+
+| Option | Description |
+|--------|-------------|
+| `-r` | Copies recursively, including subdirectories and all their contents. Essential for copying directories. |
+| `-a` | Archive mode. Copies files while preserving as many original attributes as possible. Very useful for backup operations. |
+| `-i` | Asks for confirmation before overwriting an existing file. |
+| `-f` | If the destination file exists and cannot be opened, it is destroyed and an attempt is made to create it again. |
+| `-u` | Only copies files that are newer than their equivalent in the destination, or that do not exist in the destination. |
+| `-v` | Displays a message for each file or directory copied (verbose mode). |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/cp.1.html)
+
+#### Delete
+
+| Command | Description |
+|---------|-------------|
+| `rm` | Delete files or directories. |
+
+| Option | Description |
+|--------|-------------|
+| `-f` | Forces execution, does not ask for confirmation before deleting, even if the file is write-protected. |
+| `-r` | Deletes recursively. Allows deleting a directory and all its contents (files and subdirectories). Essential for deleting non-empty directories. |
+| `-i` | Asks for confirmation before deleting each file. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/rm.1.html)
+
+### Directory Management
+
+#### Create Directories
+
+| Command | Description |
+|---------|-------------|
+| `mkdir` | Create one or more directories. |
+
+| Option | Description |
+|--------|-------------|
+| `-p` | Creates parent directories if they do not exist. Without this option, `mkdir` will fail if a parent directory in the specified path does not exist. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/mkdir.1.html)
+
+#### Delete Directories
+
+| Command | Description |
+|---------|-------------|
+| `rmdir` | Delete one or more directories, but only if they are empty. |
+
+| Option | Description |
+|--------|-------------|
+| `-p` | Deletes parent directories if they become empty after the child directory is deleted. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/rmdir.1.html)
+
+## Hard/Soft Links
+
+| Command | Description |
+|---------|-------------|
+| `ln` | Creates a link to a file or directory. |
+| `ln -s Rep1/Rep2/Monfichier MonLien` | Create a symbolic link named `MonLien` pointing to `Rep1/Rep2/Monfichier`. |
+
+| Option | Description |
+|--------|-------------|
+| `-s` | Creates a symbolic link. |
+| `-f` | Forces the overwriting of the destination file if it already exists. |
+| `-d` | Allows the `root` user to create a hard link on a directory. (Generally discouraged due to complexity and potential for loops in the file system). |
+
+> By default (without the `-s` option), `ln` creates a hard link. A hard link is an additional directory entry for the same file. Hard links cannot point to files on a different partition and cannot point to directories (except with `-d` and for root, discouraged).
+> Make sure you are in the directory where you want to create the link, or specify the full path for the link (`link`).
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/ln.1.html)
+
+## Identify File Type
+
+| Command | Description |
+|---------|-------------|
+| `file` | Identifies the type of file. |
+| `file dossier/*` | Display the type of each file in the `dossier/` directory. |
+
+-> [man page](https://manpages.ubuntu.com/manpages/latest/man1/file.1.html)
+
+## File Creation and Writing
+
+| Command | Description |
+|---------|-------------|
+| `touch` | Creates empty files if they do not exist. If the file already exists, `touch` updates its timestamp (date and time of last modification and access) to the current time, without modifying its content. |
+| `cat > file` | Redirects standard input to the specified file. |
+| `echo "text" > file` | Creates a file with the specified `text` as content. |
+| `echo "text" >> file` | Appends the specified `text` to the end of an existing file. |
+| `tee` | Reads standard input and writes it simultaneously to standard output and to one or more files. |
+
+- -> [touch man page](https://manpages.ubuntu.com/manpages/latest/man1/touch.1.html)
+- -> [cat man page](https://manpages.ubuntu.com/manpages/latest/man1/cat.1.html)
+- -> [echo man page](https://manpages.ubuntu.com/manpages/latest/man1/echo.1.html)
+- -> [tee man page](https://manpages.ubuntu.com/manpages/latest/man1/tee.1.html)
+
+**Examples:**
+
+  ```bash
+  # Overwrite a system file (with sudo) and suppress display on standard output
+  echo "important content" | sudo tee /path/to/system_file > /dev/null
+
+  # Add multiple lines to a system file (with sudo) using a "here document" (<< EOF)
+  sudo tee -a /path/to/another_system_file << EOF
+  Line 1
+  Line 2
+  EOF
+
+  # Using cat
+  cat > new_file.txt
+  # Enter your text here
+  # ...
+  # Press Ctrl+D to save and exit
+  ```
+
+## Displaying Files
+
+| Command | Description |
+|---------|-------------|
+| `head` | Displays the first lines of a file (by default, the first 10 lines). |
+| `cat` | Displays the complete content of one or more text files. |
+| `cat -n` | Displays the file content with line numbers. |
+| `tail` | Displays the last lines of a file (by default, the last 10 lines). |
+| `tail -n 20 file.log` | To display the last 20 lines of a file. |
+| `tail -f file.log` | To display the content of a file in real-time as it is added (useful for log files that are continuously updated). |
+| `more` | Displays the content of a file page by page (by default, the first 10 lines). |
+| `less` | Allows browsing a file page by page with more advanced navigation and search capabilities. |
+
+- -> [head man page](https://manpages.ubuntu.com/manpages/latest/man1/head.1.html)
+- -> [cat man page](https://manpages.ubuntu.com/manpages/latest/man1/cat.1.html)
+- -> [tail man page](https://manpages.ubuntu.com/manpages/latest/man1/tail.1.html)
+- -> [more man page](https://manpages.ubuntu.com/manpages/latest/man1/more.1.html)
+- -> [less man page](https://manpages.ubuntu.com/manpages/latest/man1/less.1.html)
+
+## Searching for Files and Content
+
+### Using find
+
+| Command | Description |
+|---------|-------------|
+| `find` | Searches for files and directories in a directory hierarchy. |
+| `find /var/log -name "*.log"` | Searches for files with the `.log` extension in the `/var/log` directory. |
+| `find /var/log -iname "MyFile.log"` | Searches for a file by name (case-insensitive). |
+| `find /var/log -name "myfile*" -type "f"` | Searches for all files whose names start with `myfile`. |
+| `find /var/log -name "myfile*" -user "root"` | Searches for all files whose names start with `myfile` and whose owner is `root`. |
+| `find /var/log -name "myfile*" -group "root"` | Searches for all files whose names start with `myfile` and whose group is `root`. |
+| `find . -mtime -1` | Searches for files/directories modified less than 1 day ago. |
+| `find /path/to/directory -name "*.old" -exec rm {} \;` | Deletes all files with the `.old` extension from the `/path/to/directory` directory. |
+| `find /path/to/directory -name "*.old" -ok rm {} \;` | Asks the user for confirmation before executing the command. |
+
+| Option | Description |
+|--------|-------------|
+| `-name` | Searches by file/directory name (supports wildcards such as `*` for zero or more characters, `?` for a single character). |
+| `-iname` | Searches for a file/directory by name (case-insensitive). |
+| `-type` | Searches by file type (`f`=regular file, `d`=directory, `l`=symbolic link, etc.). |
+| `-user` | Searches for files/directories belonging to a specific user. |
+| `-group` | Searches for files/directories belonging to a specific group. |
+| `-size +NC` | Searches for files/directories larger than `N` units. Common units are `c` for bytes, `k` for KiB (kilobytes), `M` for MiB (megabytes), `G` for GiB (gigabytes). For example, `+500k` means more than 500 KiB. |
+| `-mtime -N` | Searches for files/directories modified less than `N` days ago. (Example: `-1` for less than one day, i.e., modified today or yesterday). |
+| `-exec command {} \;` | Executes a `command` for each file found. `{}` is a placeholder that will be replaced by the full path of the found file. The final `;` must be escaped (`\;`). |
+| `-ok command {} \;` | Similar to `-exec`, but asks the user for confirmation before executing the command for each file. |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/latest/man1/find.1.html)
+
+### Using grep
+
+| Command | Description |
+|---------|-------------|
+| `grep` | Searches for a string of characters in files or standard input. |
+| `grep "search_string" file.txt` | To search for a string in a file. |
+| `grep -rl "search_string" /path/to/directory/` | To search for a string in multiple files recursively in `/path/to/directory/` and display only the names of matching files. |
+| `grep "pattern1\|pattern2" file` | Searches for lines containing one or the other pattern (logical OR operator). |
+| `ps aux | grep -i "firefox"` | Filters the output of a `command` to display only the lines containing the specified "pattern". |
+
+| Option | Description |
+|--------|-------------|
+| `-r` | Searches recursively in subdirectories. (The command `rgrep` is a common alias for `grep -r`). |
+| `-l` | Displays only the names of matching files. |
+| `-i` | Searches case-insensitively. |
+| `-n` | Displays the line number for each match found. |
+| `-c` | Displays the number of matching lines in each file. |
+| `-v` | Inverts the search; displays lines that do *not* match the pattern. |
+| `-A N` | Displays `N` lines *after* each match. |
+| `-B N` | Displays `N` lines *before* each match. |
+| `-C N` | Displays `N` lines *around* each match (`-A N -B N`). |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/latest/man1/grep.1.html)
+
+### Using locate
+
+| Command | Description |
+|---------|-------------|
+| `locate` | Quickly finds files using a pre-indexed database of the file system. |
+| `sudo updatedb` | Updates the database. |
+
+- -> [locate man page](https://manpages.ubuntu.com/manpages/latest/man1/locate.1.html)
+- -> [updatedb man page](https://manpages.ubuntu.com/manpages/latest/man8/updatedb.8.html)
+
+> It is extremely fast, but the database must be updated regularly (usually by a nightly cron job, or manually with `sudo updatedb`).
+
+## Open a Directory in the Graphical File Manager
+
+| Command | Description |
+|---------|-------------|
+| `xdg-open .` | Opens the current directory in the default graphical file manager. |

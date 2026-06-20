@@ -1,0 +1,56 @@
+---
+title: File System
+description: Disk and Filesystem Management CheatSheet
+---
+
+## Disk Space
+
+### Disk space on filesystems
+
+| Option | Description |
+|--------|-------------|
+| `df -h` | Displays free disk space on filesystems in human-readable units |
+| `df -T` | Displays filesystem type |
+
+| Command | Description |
+|---------|-------------|
+| `df` | Displays disk space used by filesystems. |
+| `df -h` | Displays disk space in human-readable units |
+| `df -Th` | Displays disk space and filesystem type |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/df.1.html)
+
+### Disk space used
+
+| Option | Description |
+|--------|-------------|
+| `du -h [directory]` | To display the size of a directory in human-readable units |
+| `du -s [directory]` | Displays the total size of a directory or specified files |
+
+| Command | Description |
+|---------|-------------|
+| `du` | Displays disk space used by files or directories. |
+| `du -h /path/to/directory` | Displays the size of a directory |
+| `du -sh /path/to/directory` | Displays the total size of a directory |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/du.1.html)
+
+## Mount / Unmount
+
+| Command | Description |
+|---------|-------------|
+| `mount` | Displays mounted filesystems. |
+| `mount device mount_point` | Mounts a filesystem |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man2/mount.2.html)
+
+| Command | Description |
+|---------|-------------|
+| `umount mount_point` | Unmounts a filesystem by mount_point. |
+| `mount device_name` | Mounts a filesystem by device_name |
+
+| Option | Description |
+|--------|-------------|
+| `-f` | Forces unmount (dangerous) |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man2/umount.2.html)

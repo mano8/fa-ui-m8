@@ -1,0 +1,107 @@
+---
+title: Users and Groups
+description: Linux User/Groups Cheatsheet
+---
+
+## User and Group Information
+
+> Information about **users** and **groups** is stored in the following system files:
+
+| File/Directory       | Description                                  |
+| :------------------- | :------------------------------------------- |
+| `/etc/passwd`        | Basic user account information.              |
+| `/etc/shadow`        | Hashed user passwords (restricted access).   |
+| `/etc/group`         | Group information.                           |
+| `/etc/gshadow`       | Hashed group passwords (restricted access).  |
+
+| Command                        | Description                                                                                                                                                                                                                                                                          |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chage -l username`            | Displays password expiration information for a user.                                                                                                                                                                                                                                   |
+| `groups`                       | Displays the groups your user belongs to.                                                                                                                                                                                                                                            |
+| `groups username`              | Displays the groups another user belongs to.                                                                                                                                                                                                                                         |
+| `compgen -u`                   | Lists all users present on the system.                                                                                                                                                                                                                                               |
+| `compgen -g`                   | Lists all groups present on the system.                                                                                                                                                                                                                                              |
+| `cut -d: -f1 /etc/passwd`      | Extracts and lists only usernames from the `/etc/passwd` file.                                                                                                                                                                                                                       |
+| `cut -d: -f1 /etc/etc/group`   | Extracts and lists only group names from the `/etc/group` file.                                                                                                                                                                                                                      |
+| `id`                           | Displays the numerical user ID (**UID**), primary group ID (**GID**), and secondary groups your user belongs to.                                                                                                                                                                      |
+| `id username`                  | Displays information (UID, GID, groups) for another user.                                                                                                                                                                                                                            |
+| `whoami`                       | Displays the effective username of the currently logged-in person.                                                                                                                                                                                                                   |
+
+**Associated Man Pages:**
+
+* `chage`: [View man page](https://manpages.ubuntu.com/manpages/latest/man1/chage.1.html)
+* `groups`: [View man page](https://manpages.ubuntu.com/manpages/latest/man1/groups.1.html)
+* `compgen`: [View man page (built-in to bash)](https://manpages.ubuntu.com/manpages/latest/man1/bash.1.html)
+* `cut`: [View man page](https://manpages.ubuntu.com/manpages/latest/man1/cut.1.html)
+* `id`: [View man page](https://manpages.ubuntu.com/manpages/latest/man1/id.1.html)
+* `whoami`: [View man page](https://manpages.ubuntu.com/manpages/latest/man1/whoami.1.html)
+
+---
+
+## User Management
+
+| Command                                    | Description                                                                                                                            |
+| :----------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `adduser new_username`                     | Adds a new user to the system interactively (recommended for Debian/Ubuntu-based distributions).                                         |
+| `adduser username groupname`               | Adds an existing user to an existing group. The user must log out and log back in for changes to take effect.                            |
+| `useradd username`                         | Non-interactive command to create a user, often used in automation scripts.                                                              |
+| `deluser old_username`                     | Deletes a user from the system. By default, the user's home directory is NOT deleted.                                                    |
+| `deluser username groupname`               | Removes a user from a specific group.                                                                                                    |
+| `passwd`                                   | Changes the password for the current user.                                                                                               |
+| `passwd username`                          | Changes the password for another user (requires `sudo`).                                                                               |
+| `usermod --login new_login old_login`      | Changes the username (the account must be inactive for this operation).                                                                  |
+| `usermod -d /new/path -m username`         | Changes a user's home directory and moves its content to the new path.                                                                   |
+
+**Specific Command Options:**
+
+* **`adduser` options:**
+    | Option              | Description                                                                 |
+    | :------------------ | :-------------------------------------------------------------------------- |
+    | `--disabled-password` | Creates a user without a password, useful for SSH key authentication only. |
+    | `--no-create-home`  | Prevents the creation of a home directory for the user.                     |
+
+* **`deluser` options:**
+    | Option          | Description                                                                                             |
+    | :-------------- | :------------------------------------------------------------------------------------------------------ |
+    | `--remove-home` | Deletes the user AND their home directory. **Warning: This option uses `rm -R` in the background, be extremely cautious!** |
+
+* **`passwd` options:**
+    | Option               | Description                                                                                     |
+    | :------------------- | :---------------------------------------------------------------------------------------------- |
+    | `-l username`        | Locks a user's password, disabling password login (does not affect SSH key login if configured). |
+    | `-u username`        | Unlocks a user's password.                                                                      |
+    | `-e username`        | Forces the user to change their password upon next login.                                       |
+    | `-S username`        | Displays a user's password status (locked, no password, usable, expiration dates, etc.).        |
+
+* **`usermod` options:**
+    | Option                       | Description                                                                                 |
+    | :--------------------------- | :------------------------------------------------------------------------------------------ |
+    | `-G GROUP1[,...]`            | Sets the user's supplementary groups. **Warning: This option replaces the user's existing supplementary groups.** |
+    | `-aG GROUP1[,...]`           | **Adds** the user to the specified groups without removing them from existing groups.       |
+    | `--expiredate YYYY-MM-DD`    | Sets an expiration date for the user account. Use `1` to lock the account immediately, or `""` (empty string) to unlock. |
+
+**Associated Man Pages:**
+
+* `adduser`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/adduser.8.html)
+* `useradd`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/useradd.8.html)
+* `deluser`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/deluser.8.html)
+* `passwd`: [View man page](https://manpages.ubuntu.com/manpages/latest/man1/passwd.1.html)
+* `usermod`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/usermod.8.html)
+
+---
+
+## Group Management
+
+| Command                               | Description                                         |
+| :------------------------------------ | :-------------------------------------------------- |
+| `addgroup new_group`                  | Adds a new group to the system interactively.       |
+| `groupadd group_name`                 | Non-interactive command to create a group, often used in scripts. |
+| `delgroup old_group`                  | Deletes a group from the system.                    |
+| `groupmod --new-name new_name old_name` | Changes the name of an existing group.              |
+
+**Associated Man Pages:**
+
+* `addgroup`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/addgroup.8.html)
+* `groupadd`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/groupadd.8.html)
+* `delgroup`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/delgroup.8.html)
+* `groupmod`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/groupmod.8.html)

@@ -1,0 +1,464 @@
+---
+title: Sistema
+description: Hoja de trucos de comandos del sistema Linux
+---
+
+## Variables de Entorno
+
+| Comando                 | Descripción                                       |
+| :---------------------- | :------------------------------------------------ |
+| `printenv`              | Muestra el valor de todas las variables de entorno. |
+| `printenv VARIABLE`     | Muestra el valor de una variable específica.      |
+| `cat /proc/self/environ`| Muestra el valor de todas las variables de entorno. |
+| `echo $VARIABLE`        | Muestra el valor de una variable de entorno.      |
+
+---
+
+## Atajos de Teclado (Terminal)
+
+| Atajo            | Descripción                                                                     |
+| :---------------- | :------------------------------------------------------------------------------ |
+| **`Ctrl+Alt+T`** | Abre una nueva terminal.                                                        |
+| **`Ctrl+C`** | Interrumpe el proceso actual (`SIGINT`, una detención "educada").             |
+| **`Ctrl+Z`** | Suspende el proceso actual (`SIGTSTP`, puede reanudarse con `fg` o `bg`).      |
+| **`Ctrl+D`** | Señala el fin de la entrada (equivalente a `exit` si la terminal está vacía).  |
+| **`Ctrl+L`** | Limpia la pantalla (equivalente a `clear`).                                    |
+| **`Ctrl+W`** | Elimina la palabra antes del cursor.                                            |
+| **`Ctrl+U`** | Elimina toda la línea antes del cursor.                                         |
+| **`Ctrl+R`** | Busca en el historial de comandos.                                              |
+| **`!!`** | Repite el último comando.                                                       |
+| **Historial de comandos**| Usa las flechas Arriba/Abajo para navegar por los comandos anteriores.  |
+
+---
+
+## Información del Sistema
+
+Para obtener información sobre el sistema, hardware, SO, etc.:
+
+### Sistema / SO / Núcleo
+
+| Comando                    | Descripción                                        |
+| :------------------------- | :------------------------------------------------- |
+| `uname -a`                 | Para mostrar toda la información sobre el sistema y el núcleo. |
+| `hostnamectl`              | Muestra la información del nombre de host.                     |
+| `lsb_release -a`           | Para mostrar toda la información sobre la distribución de Linux. |
+| `hostname`                 | Para mostrar el nombre de host del sistema.                    |
+| `hostname -i`              | Para mostrar la dirección IP del sistema.                      |
+| `uptime`                   | Indica cuánto tiempo lleva el sistema en funcionamiento.       |
+| `last reboot`              | Lista el historial de reinicios del sistema.                   |
+| `dmesg`                    | Muestra los mensajes de inicio.                                |
+
+---
+
+* **`uname`**: Muestra información sobre el sistema y el núcleo.
+
+    | Opción | Descripción                |
+    | :----- | :------------------------- |
+    | `-a`   | Para mostrar toda la información. |
+    | `-r`   | Para mostrar la versión del núcleo. |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man1/uname.1posix.html)
+
+* **`hostnamectl`**: Comando alternativo para obtener y controlar información sobre el `hostname` del sistema.
+
+    | Comando       | Descripción                |
+    | :------------ | :------------------------- |
+    | `hostnamectl` | Muestra la información del nombre de host. |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/focal/man1/hostnamectl.1.html)
+
+* **`lsb_release`**: Muestra información sobre la distribución Linux Standard Base (LSB), incluyendo el ID y la versión de la distribución.
+
+    | Opción | Descripción                                |
+    | :----- | :----------------------------------------- |
+    | `-d`   | Para mostrar la descripción de la distribución. |
+    | `-r`   | Para mostrar el número de la versión.           |
+    | `-c`   | Para mostrar el nombre en clave de la distribución. |
+    | `-a`   | Para mostrar todo.                             |
+    | `-s`   | Para mostrar un resumen.                       |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/man1/lsb_release.1.html)
+
+* **`/etc/*-release`**: Archivos que contienen información sobre la distribución.
+
+    | Comando             | Descripción                                   |
+    | :------------------ | :-------------------------------------------- |
+    | `cat /etc/os-release` | Para mostrar el contenido de `/etc/os-release`. |
+
+---
+
+### Usuarios
+
+| Comando                  | Descripción                                |
+| :----------------------- | :----------------------------------------- |
+| `w`                      | Lista los usuarios conectados.             |
+| `whoami`                 | Muestra qué usuario estás usando.          |
+| `finger [user_name]`     | Muestra información sobre un usuario en particular. |
+
+---
+
+### Red
+
+| Comando                          | Descripción                                              |
+| :------------------------------- | :------------------------------------------------------- |
+| `hostnamectl`                    | Muestra la información del nombre de host.               |
+| `hostname`                       | Para mostrar el nombre de host del sistema.              |
+| `hostname -i`                    | Para mostrar la dirección IP del sistema.                |
+| `ip a`                           | Lista las direcciones IP y las interfaces de red.        |
+| `ping [remote_host]`             | Hace ping a un host remoto.                              |
+| `netstat -tulpn`                 | Muestra los puertos activos.                             |
+| `netstat -tulpn | grep LISTEN`    | Muestra los puertos de escucha activos.                  |
+| `netstat -tulpn | grep ':443'`    | Muestra los servicios de escucha activos en el puerto 443. |
+| `netstat -tuln`                  | Muestra los puertos TCP y UDP y sus programas.           |
+| `sudo ss -tulw`                  | Muestra los puertos de escucha activos.                  |
+| `sudo ss -tulpn`                 | Muestra los puertos de escucha activos.                  |
+| `sudo ss -tulpn | grep LISTEN`    | Muestra los puertos de escucha activos.                  |
+| `sudo lsof -i -U`                | Para listar todos los archivos de Internet, x.25 (HP-UX) y de dominio UNIX abiertos. |
+| `sudo lsof -i 4 -U`              | Para listar todos los archivos de red IPv4 abiertos.     |
+| `sudo lsof -i 6 -U`              | Para listar todos los archivos de red IPv6 abiertos.     |
+| `sudo lsof -i -P -n`             | Muestra los puertos activos.                             |
+| `sudo lsof -i -P -n | grep LISTEN`| Muestra los puertos de escucha activos.                  |
+| `whois [domain_name]`            | Muestra más información sobre un dominio.                |
+| `dig [domain_name]`              | Muestra información DNS sobre un dominio.                |
+| `dig -x [domain_name]`           | Realiza una búsqueda DNS inversa en el dominio.          |
+| `dig -x [IP_address]`            | Realiza una búsqueda DNS inversa de una dirección IP.    |
+| `host [domain_name]`             | Realiza una búsqueda de IP para un dominio.              |
+| `nslookup [domain_name]`         | Recibe información sobre un dominio.                     |
+
+---
+
+* **`netstat`**:
+
+    | Opción | Descripción                                                                                                                                                                             |
+    | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `-t`   | Selecciona todos los puertos TCP.                                                                                                                                                       |
+    | `-u`   | Selecciona todos los puertos UDP.                                                                                                                                                       |
+    | `-l`   | Muestra los sockets de servidor en escucha (puertos TCP y UDP abiertos en estado de escucha).                                                                                         |
+    | `-p`   | Muestra el PID/nombre del programa para los sockets. En otras palabras, esta opción indica quién abrió el puerto TCP o UDP. Por ejemplo, en mi sistema, Nginx abrió el puerto TCP 80/443, por lo que se mostrará `/usr/sbin/nginx` o su PID. |
+    | `-n`   | No resuelve nombres (evita la búsqueda DNS, lo que acelera `netstat` en servidores Linux/Unix ocupados).                                                                              |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man8/netstat.8.html)
+
+    > `netstat` está mayormente obsoleto. El reemplazo de `netstat` es `ss`.
+
+* **`ss`**:
+
+    | Opción | Descripción                                      |
+    | :----- | :----------------------------------------------- |
+    | `-t`   | Muestra solo sockets TCP.                        |
+    | `-u`   | Muestra solo sockets UDP.                        |
+    | `-l`   | Muestra los sockets en escucha. Por ejemplo, el puerto TCP 22 es abierto por el servidor SSHD. |
+    | `-w`   | Muestra sockets RAW.                             |
+    | `-p`   | Muestra el proceso que usa el socket.            |
+    | `-n`   | No resuelve nombres de servicio (es decir, no usa DNS). |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man8/ss.8.html)
+
+* **`lsof`**:
+
+    | Opción | Descripción                                              |
+    | :----- | :------------------------------------------------------- |
+    | `-i`   | Selecciona la lista de todos los archivos de red (si no se especifica una IP). |
+    | `-P`   | Inhibe la conversión de números de puerto a nombres de puerto para archivos de red. |
+    | `-n`   | Inhibe la conversión de números de red a nombres de host para archivos de red. |
+    | `-U`   | Selecciona la lista de archivos de socket de dominio UNIX. |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man8/lsof.8.html)
+
+---
+
+### Hardware
+
+| Comando                 | Descripción                                      |
+| :---------------------- | :----------------------------------------------- |
+| `lspci -tv`             | Lista los dispositivos PCI, mostrando información detallada en un diagrama de árbol. |
+| `lsusb -tv`             | Lista los dispositivos USB, mostrando información detallada en un diagrama de árbol. |
+| `lshw`                  | Para mostrar información de la CPU.              |
+| `lscpu`                 | Para mostrar información detallada de la CPU.    |
+| `cat /proc/cpuinfo`     | Para mostrar información detallada de la CPU.    |
+| `free -th`              | Muestra la memoria disponible y utilizada (RAM y swap). |
+| `cat /proc/meminfo`     | Para mostrar información detallada de la memoria. |
+
+---
+
+* **`free`**: Muestra la memoria disponible y utilizada (RAM y swap).
+
+    | Opción | Descripción                              |
+    | :----- | :--------------------------------------- |
+    | `-g`   | Para mostrar la memoria en gigabytes.    |
+    | `-h`   | Para mostrar la memoria en unidades legibles por humanos. |
+    | `-t`   | Para mostrar la memoria con los totales. |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man1/free.1.html)
+
+* **`lspci`** y **`lsusb`**:
+
+    | Opción | Descripción                          |
+    | :----- | :----------------------------------- |
+    | `-t`   | Muestra un diagrama de árbol.        |
+    | `-v`   | Muestra información detallada.       |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/man8/lspci.8.html)
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man8/lsusb.8.html)
+
+* **`lshw`**: Lista el hardware.
+
+    | Comando                 | Descripción            |
+    | :---------------------- | :--------------------- |
+    | `sudo lshw -class network` | Lista las interfaces de red. |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man1/lshw.1.html)
+
+---
+
+### Disco y Sistema de Archivos
+
+| Comando                       | Descripción                                      |
+| :---------------------------- | :----------------------------------------------- |
+| `lsblk`                       | Para mostrar información de los dispositivos de bloque. |
+| `cat /proc/mounts`            | Para mostrar los sistemas de archivos montados.   |
+| `mount`                       | Para mostrar los sistemas de archivos montados.   |
+| `hdparm -i /dev/[device_name]`| Para mostrar información de los datos del disco. |
+| `hdparm -tT /dev/[device_name]`| Realiza una prueba de velocidad de lectura en el dispositivo/disco. |
+| `badblocks -s /dev/[device_name]`| Prueba en busca de bloques ilegibles en el dispositivo/disco. |
+| `df -h`                       | Muestra el espacio en disco en unidades legibles por humanos. |
+| `df -Th`                      | Muestra el espacio en disco y el tipo de sistema de archivos. |
+| `du -h /path/to/directory`    | Muestra el tamaño de un directorio.               |
+| `du -sh /path/to/directory`   | Muestra el tamaño total de un directorio.        |
+
+* **`df`**: Muestra el espacio en disco utilizado por los sistemas de archivos.
+
+    | Opción | Descripción                                      |
+    | :----- | :----------------------------------------------- |
+    | `df -h`| Muestra el espacio libre en disco en los sistemas de archivos en unidades legibles por humanos. |
+    | `df -T`| Muestra el tipo de sistema de archivos.          |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man1/df.1.html)
+
+* **`du`**: Muestra el espacio en disco utilizado por archivos o directorios.
+
+    | Opción | Descripción                                      |
+    | :----- | :----------------------------------------------- |
+    | `du -h [directory]` | Para mostrar el tamaño de un directorio en unidades legibles por humanos. |
+    | `du -s [directory]` | Muestra el tamaño total de un directorio o archivos especificados. |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man1/du.1.html)
+
+---
+
+### Información del Proceso
+
+| Comando                    | Descripción                                       |
+| :------------------------- | :------------------------------------------------ |
+| `top`                      | Muestra los procesos en curso, el uso de CPU, el uso de memoria, etc. |
+| `htop`                     | Una alternativa más completa y colorida.          |
+| `ps aux`                   | Para mostrar todos los procesos del sistema.      |
+| `pstree`                   | Muestra los procesos en un diagrama de árbol.     |
+| `pmap`                     | Muestra un mapa de uso de memoria de los procesos. |
+| `prgrep [keyword]`         | Lista los procesos basándose en la palabra clave proporcionada. |
+| `pidof [process_name]`     | Muestra el PID de un proceso.                     |
+| `lsof`                     | Lista los archivos abiertos por los procesos en ejecución con el comando `lsof`. |
+
+---
+-> [página man de `top`](https://manpages.ubuntu.com/manpages/questing/en/man1/top.1.html)
+-> [página man de `htop`](https://manpages.ubuntu.com/manpages/questing/en/man1/htop.1.html)
+-> [página man de `ps`](https://manpages.ubuntu.com/manpages/questing/en/man1/ps.1posix.html)
+
+---
+
+### Registro (Logs)
+
+Los registros generales del sistema se encuentran en archivos como `/var/log/syslog`, `/var/log/messages`, `/var/log/kern.log`.
+
+* **`journalctl`**: Muestra los registros del diario de `systemd`.
+
+    | Opción                            | Descripción                            |
+    | :-------------------------------- | :------------------------------------- |
+    | `-u service.service`              | Muestra los registros de un servicio específico. |
+    | `--since "YYYY-MM-DD HH:MM:SS"` | Muestra los registros desde una fecha/hora específica. |
+    | `-f`                              | Sigue las nuevas entradas del diario.  |
+
+---
+
+### Tareas Cron
+
+Administra las tareas programadas (tareas cron) para un usuario.
+
+#### Directorios
+
+Las tareas cron se encuentran en los directorios spool, en tablas llamadas `crontabs`. Su ubicación varía entre diferentes distribuciones; aquí nos centramos en los sistemas Debian/Ubuntu.
+
+| Ubicación                    | Descripción                               |
+| :--------------------------- | :---------------------------------------- |
+| `/etc/crontab`               | Ubicación de las tareas cron para el usuario `root`. |
+| `/var/spool/cron/crontabs`   | Ubicación de las tareas cron para otros usuarios. |
+
+#### Listar Tareas Cron
+
+| Comando                              | Descripción                                      |
+| :----------------------------------- | :----------------------------------------------- |
+| `sudo cat /etc/crontab`              | Lista las tareas Cron para el usuario `root`.    |
+| `sudo cat /var/spool/cron/crontabs`  | Lista las tareas Cron para otros usuarios.       |
+| `crontab -l`                         | Lista todas las tareas Cron activas para el usuario actual. |
+| `sudo crontab -u [username] -l`      | Lista todas las tareas Cron activas por usuario. |
+| `ls -la /etc/cron.hourly`            | Lista las tareas Cron por hora.                  |
+| `ls -la /etc/cron.daily`             | Lista las tareas Cron diarias.                   |
+| `ls -la /etc/cron.weekly`            | Lista las tareas Cron semanales.                 |
+| `ls -la /etc/cron.monthly`           | Lista las tareas Cron mensuales.                 |
+| `ls -l /etc/cron.d`                  | Muestra las tareas Cron específicas del software. |
+
+---
+
+## Administración del Sistema
+
+### Gestión de Procesos
+
+Para gestionar y detener procesos en curso:
+
+| Comando                    | Descripción                                             |
+| :------------------------- | :------------------------------------------------------ |
+| `kill 5678`                | Detiene un proceso de forma segura por su ID (PID).     |
+| `kill -9 5678`             | Fuerza la detención de un proceso por su ID (PID).      |
+| `killall firefox`          | Detiene todos los procesos de 'firefox'.                |
+| `sudo pkill -u username`   | Detiene todos los procesos de un usuario.               |
+| `bg`                       | Lista y reanuda trabajos detenidos en segundo plano.    |
+| `fg`                       | Trae el último proceso en segundo plano al primer plano. |
+| `fg [job]`                 | Trae un trabajo en particular al primer plano.          |
+| `wait`                     | Pausa la terminal o un script Bash hasta que se complete un proceso en ejecución. |
+| `nohup [command] &`        | Ejecuta un proceso de Linux en segundo plano.           |
+
+---
+
+### Gestión de Paquetes
+
+Para instalar, eliminar y gestionar software (paquetes):
+
+* **`apt` / `apt-get`**: Herramienta de gestión de paquetes para distribuciones basadas en Debian (como Ubuntu).
+
+    | Comando                                       | Descripción                                                                 |
+    | :-------------------------------------------- | :-------------------------------------------------------------------------- |
+    | `sudo apt update`                             | Actualiza la lista de paquetes disponibles.                                |
+    | `sudo apt upgrade`                            | Actualiza todos los paquetes instalados.                                    |
+    | `sudo apt install package_name`               | Instala un paquete.                                                         |
+    | `sudo apt-get install -y package_name`        | Instala un paquete, asume "sí" como respuesta a todas las indicaciones y se ejecuta de forma no interactiva. |
+    | `sudo apt-get install -s package_name`        | Realiza una simulación de los eventos que ocurrirían basándose en el estado actual del sistema. |
+    | `sudo apt-get install -f package_name`        | Intenta corregir un sistema con dependencias rotas.                         |
+    | `sudo apt-get install --no-install-recommends package_name` | No considera los paquetes recomendados como una dependencia para la instalación. |
+    | `sudo apt remove package_name`                | Elimina un paquete.                                                         |
+    | `sudo apt --purge remove package_name`        | Elimina un paquete y sus archivos de configuración.                         |
+    | `sudo apt purge package_name`                 | Elimina un paquete y sus archivos de configuración.                         |
+    | `sudo apt clean`                              | Limpia la caché de paquetes deb del sistema.                                |
+    | `sudo apt list`                               | Lista los paquetes instalados con APT.                                      |
+    | `sudo apt show [package_name]`                | Muestra información sobre un paquete.                                       |
+
+    ---
+    -> [página man de `apt`](https://manpages.ubuntu.com/manpages/questing/en/man8/apt.8.html)
+    -> [página man de `apt-get`](https://manpages.ubuntu.com/manpages/questing/en/man8/apt-get.8.html)
+
+* **`apt-cache`**: Herramienta para consultar la caché de paquetes APT.
+
+    | Comando                     | Descripción                                          |
+    | :-------------------------- | :--------------------------------------------------- |
+    | `apt-cache search keyword`  | Busca un paquete por nombre o descripción.           |
+    | `apt-cache show package_name` | Muestra información detallada sobre un paquete.      |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man8/apt-cache.8.html)
+
+---
+
+### Gestión de Servicios
+
+Los servicios del sistema son gestionados por un sistema de inicialización (`init system`), a menudo `systemd` en Ubuntu.
+
+* **`systemctl`**: Usado para controlar y consultar el estado de los servicios del sistema bajo `systemd`.
+
+| Comando                                     | Descripción                                       |
+| :------------------------------------------ | :------------------------------------------------ |
+| `sudo systemctl reboot`                     | Reinicia el servidor.                             |
+| `sudo systemctl poweroff`                   | Apaga el servidor.                                |
+| `sudo systemctl rescue`                     | Entra en modo de rescate.                         |
+| `sudo systemctl start {servicename}`        | Inicia un servicio.                               |
+| `sudo systemctl restart {servicename}`      | Reinicia un servicio.                             |
+| `sudo systemctl stop {servicename}`         | Detiene un servicio.                              |
+| `sudo systemctl status {servicename}`       | Muestra el estado de un servicio.                 |
+| `sudo systemctl is-active {servicename}`    | Comprueba si un servicio está activo.             |
+| `sudo systemctl is-enabled {servicename}`   | Comprueba si un servicio está habilitado (al inicio). |
+| `sudo systemctl list-units --type=service`  | Muestra el estado de todos los servicios.         |
+| `sudo systemctl list-units --type=service --state=active` | Muestra el estado de todos los servicios activos. |
+| `sudo systemctl enable {servicename}`       | Habilita un servicio para que se inicie al arrancar. |
+| `sudo systemctl disable {servicename}`      | Deshabilita un servicio.                          |
+| `sudo systemctl mask {servicename}`         | Impide que un servicio se inicie.                 |
+| `sudo systemctl kill {servicename}`         | Detiene un servicio.                              |
+| `sudo systemctl kill -s 9 {servicename}`    | Fuerza la detención de un servicio.               |
+| `sudo systemd-analyze`                      | Analiza el rendimiento del arranque del sistema.  |
+| `sudo systemd-analyze blame`                | Muestra el desglose del tiempo de arranque del sistema por servicio. |
+
+---
+-> [página man de `systemctl`](https://manpages.ubuntu.com/manpages/questing/en/man1/systemctl.1.html)
+-> [página man de `systemd-analyze`](https://manpages.ubuntu.com/manpages/questing/en/man1/systemd-analyze.1.html)
+
+---
+
+### Montar Discos
+
+| Comando                 | Descripción                                      |
+| :---------------------- | :----------------------------------------------- |
+| `mount`                 | Muestra los sistemas de archivos montados.         |
+| `mount device mount_point`| Monta un sistema de archivos.                    |
+| `umount mount_point`    | Desmonta un sistema de archivos por punto de montaje. |
+| `umount device`         | Desmonta un sistema de archivos por dispositivo. |
+
+---
+-> [página man](https://manpages.ubuntu.com/manpages/questing/en/man8/mount.8.html)
+
+* **`umount`**:
+
+    | Opción | Descripción             |
+    | :----- | :---------------------- |
+    | `-f`   | Fuerza el desmontaje (peligroso). |
+
+    ---
+    -> [página man](https://manpages.ubuntu.com/manpages/questing/en/man2/umount.2.html)
+
+#### Ejemplo
+
+  <div className='fd-steps [&_h3]:fd-step'>
+    1. Crea un directorio para el punto de montaje
+    ```bash
+    mkdir /media/usb-drive
+    ```
+  </div>
+
+  <div className='fd-steps [&_h3]:fd-step'>
+    2. Encuentra el dispositivo USB y el tipo de sistema de archivos. Ejecuta:
+    ```
+    fdisk -l
+    ```
+  </div>
+
+  <div className='fd-steps [&_h3]:fd-step'>
+    3. Usando el identificador del dispositivo de la salida de fdisk, ejecuta:
+    > por ejemplo, si el dispositivo aparece como `/dev/sdb1`
+    ```
+    sudo mount /dev/sdb1 /media/usb-drive
+    ```
+  </div>
+
+---
+## Directorios del Sistema
+
+* **`/run` y `/var/run`**: Directorio para archivos temporales creados al inicio o por los servicios.
+* **`/etc/default/`**: Directorio que contiene archivos de configuración para las variables utilizadas por los scripts de inicialización (`init.d`).
+* **Reinicio necesario**: Se crea un archivo de señalización `/run/reboot-required` cuando el sistema necesita un reinicio.

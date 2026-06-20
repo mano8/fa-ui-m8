@@ -1,0 +1,94 @@
+---
+title: Package Management
+description: Linux Package Management Cheatsheet (APT, dpkg, Sources)
+---
+
+On Linux, especially in Debian-based distributions like Ubuntu, software management primarily relies on **packages**. A package is an archive containing all the necessary files (programs, libraries, documentation, etc.) to install an application or a system component, along with instructions for its installation. Package management tools automate the installation, updating, configuration, and removal of this software, intelligently handling their dependencies.
+
+---
+
+## APT: The High-Level Tool
+
+**APT** (Advanced Package Tool) is the premier high-level package management system for Debian and its derivatives (Ubuntu, Mint, etc.). It greatly simplifies software management by interfacing with lower-level tools like `dpkg` and automatically resolving package dependencies. Most daily software management operations are performed with `apt` (newer and more user-friendly) or `apt-get` (historically the most used) commands.
+
+### APT Operations (apt / apt-get)
+
+| Command                                   | Description                                                                                                                                                                                                                                                                        |
+| :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sudo apt update`                         | Updates the index of available packages from configured repositories. **Essential** before any installation or upgrade.                                                                                                                                                              |
+| `sudo apt-get update`                     | (Historical APT version) Updates the index of available packages, similar to `apt update`.                                                                                                                                                                                         |
+| `sudo apt install <package1> [<package2> ...]` | Installs one or more packages, including all necessary dependencies for their proper functioning.                                                                                                                                                                                  |
+| `sudo apt-get install <package1> [<package2> ...]` | (Historical APT version) Installs one or more packages and their dependencies.                                                                                                                                                                                                     |
+| `sudo apt remove <package1> [<package2> ...]` | Uninstalls one or more packages from the system, keeping their configuration files.                                                                                                                                                                                                |
+| `sudo apt-get remove <package1> [<package2> ...]` | (Historical APT version) Uninstalls one or more packages.                                                                                                                                                                                                                         |
+| `sudo apt upgrade`                        | Upgrades all already installed packages to their latest available versions in the repositories, without removing or adding new packages.                                                                                                                                               |
+| `sudo apt-get upgrade`                    | (Historical APT version) Upgrades installed packages.                                                                                                                                                                                                                              |
+| `sudo apt-get dist-upgrade`               | Performs a full system upgrade, handling dependency changes (adding, removing, or modifying packages) and allowing major version or kernel upgrades.                                                                                                                                 |
+| `sudo apt clean`                          | Deletes downloaded installation files (`.deb`) stored in the system cache (`/var/cache/apt/archives/`) that are no longer needed. Frees up disk space without uninstalling software.                                                                                               |
+| `sudo apt-get clean`                      | (Historical APT version) Deletes `.deb` files from the cache.                                                                                                                                                                                                                      |
+
+**Associated Man Pages:**
+
+* `apt`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/apt.8.html)
+* `apt-get`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/apt-get.8.html)
+
+**Common and Specific Options (for `apt` and `apt-get`):**
+
+| Option                | Description                                                                                                                              |
+| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `-y` or `--assume-yes` | Automatically answers "yes" to all confirmation prompts. Use with caution.                                                              |
+| `-s` or `--simulate`  | Performs a simulation of actions without modifying the system. Useful for visualizing a command's impact before actually executing it.     |
+| `-u` or `--show-upgraded` | Displays the list of packages that will be upgraded (used with `upgrade`).                                                           |
+| `-f`                  | Attempts to fix a system with broken package dependencies (used with `install` or `remove`).                                             |
+| `--purge`             | Used with `remove`, deletes the package **along with all its configuration files** (except those in the user's home directory, `/home`). |
+| `--reinstall`         | Used with `apt install` or `apt-get install`, forces reinstallation of a package even if it's already at its latest version.             |
+
+---
+
+### apt-cache: Querying the APT Cache
+
+The `apt-cache` command allows you to query and manipulate the cache used by APT. It's particularly useful for searching for detailed information about available packages.
+
+| Command                      | Description                                                                                             |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `apt-cache search <expression>` | Searches a regular expression (a word or phrase) within the names and descriptions of all available packages in the repositories. |
+| `apt-cache show <package>`   | Displays detailed information about a specific package (full description, dependencies, available versions, etc.). |
+| `apt-cache depends <package>` | Displays the packages that the specified package depends on (what it needs to function).                 |
+| `apt-cache rdepends <package>` | Displays the packages that depend on the specified package (those that need it to function).      |
+| `apt-cache madison <package>` | Indicates which repository (package source) provides the specified package and the versions available from that repository. |
+
+**Associated Man Page:**
+
+* `apt-cache`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/apt-cache.8.html)
+
+**Specific `apt-cache search` Options:**
+
+| Option        | Description                           |
+| :------------ | :------------------------------------ |
+| `-n` or `--names-only` | Searches only within package names. |
+
+---
+
+## dpkg: The Low-Level Tool
+
+`dpkg` is the foundational package management tool for Debian and Ubuntu systems. APT uses it to perform package installation, configuration, upgrade, and removal operations. However, `dpkg` doesn't automatically handle package dependencies, making it less convenient for direct daily use by users.
+
+| Command                  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dpkg -i <file.deb>`     | Installs a package directly from a locally downloaded `.deb` file (`-i` stands for `--install`). **Warning**: `dpkg` won't attempt to resolve missing dependencies. If dependencies are broken after installation, you'll likely need to use `sudo apt install -f` or `sudo apt-get install -f` afterward to fix dependency issues. |
+
+**Associated Man Page:**
+
+* `dpkg`: [View man page](https://manpages.ubuntu.com/manpages/latest/man8/dpkg.8.html)
+
+---
+
+## Installation from Source
+
+In addition to installing via package managers, it's also possible to install software directly from its source code. This method is more complex and is generally preferred if the software isn't available in repositories, if a specific version is required, or for development and customization purposes.
+
+| Step                     | Command                                                                                                 | Description                                                                                                                                    |
+| :----------------------- | :------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Configuration** | `./configure`                                                                                           | This script checks the system environment to ensure all compilation dependencies are present and configures the build process by creating the necessary Makefiles. |
+| **2. Compilation** | `make`                                                                                                  | This command initiates the compilation process of the source code to create the program's executable binaries and libraries.                   |
+| **3. Installation** | `sudo make install`                                                                                     | This command installs the compiled files (binaries, libraries, etc.) into standard system directories (e.g., `/usr/local/bin`, `/usr/local/lib`). Using `sudo` is often required as this step modifies system directories. |

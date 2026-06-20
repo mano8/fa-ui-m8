@@ -1,0 +1,213 @@
+export default {
+  auth: {
+    login: {
+      title: "Bienvenido de nuevo",
+      description:
+        "Inicia sesión para gestionar tu cuenta y credenciales de seguridad",
+
+      username: "Correo electrónico",
+      usernamePlaceholder: "tu@correo.com",
+
+      password: "Contraseña",
+
+      submit: "Iniciar sesión",
+      signingIn: "Iniciando sesión...",
+
+      google: "Continuar con Google",
+
+      invalidCredentials:
+        "Credenciales inválidas. Verifica tu correo electrónico y contraseña.",
+
+      or: "o",
+
+      createAccount: "Crear una cuenta",
+      newUser: "¿Nuevo en la plataforma?",
+      registered: "Registro completado. Inicia sesión abajo.",
+      googleUnavailable: "El inicio de sesión con Google no está disponible.",
+    },
+    signup: {
+      title: "Crear una cuenta",
+      pageTitle: "Registro | Unirse al sistema",
+      description: "Empieza configurando las credenciales de tu perfil",
+      fullName: "Nombre completo",
+      fullNamePlaceholder: "Alex Morgan",
+      email: "Correo electrónico",
+      emailPlaceholder: "tu@correo.com",
+      password: "Contraseña",
+      submit: "Registrar cuenta",
+      submitting: "Creando cuenta...",
+      alreadyHaveAccount: "¿Ya tienes una cuenta?",
+      signIn: "Iniciar sesión",
+      failed: "El registro falló. Es posible que la cuenta ya exista.",
+    },
+
+    dashboard: {
+      title: "Gestión de identidad",
+      authenticatedUser: "Usuario autenticado",
+      signOut: "Cerrar sesión",
+    },
+
+    profile: {
+      title: "Detalles del perfil",
+      description: "Actualiza los metadatos públicos de tu perfil.",
+      saved: "Perfil guardado.",
+      failed: "No se pudo actualizar el perfil.",
+      email: "Correo electrónico",
+      fullName: "Nombre completo",
+      avatar: "URL del avatar",
+      avatarPlaceholder: "https://example.com/avatar.png",
+      saving: "Guardando...",
+      submit: "Actualizar detalles",
+      passwordTitle: "Gestión de contraseña",
+      passwordDescription:
+        "Renueva tus credenciales de autenticación de forma segura.",
+      googlePasswordDisabled:
+        "Tu cuenta está integrada mediante Google SSO. El cambio de contraseña está desactivado.",
+      credentialsRotated: "Credenciales renovadas.",
+      passwordFailed: "No se pudieron modificar las credenciales de seguridad.",
+      currentPassword: "Contraseña actual",
+      newPassword: "Nueva contraseña",
+      changePassword: "Cambiar contraseña",
+      emailReadOnly: "El correo lo gestiona el servicio de autenticación y no se puede cambiar aquí.",
+      incorrectPasswordError: "La contraseña actual que ingresaste es incorrecta.",
+      samePasswordError: "La nueva contraseña debe ser distinta de la actual.",
+    },
+
+    apiKeys: {
+      createTitle: "Crear token API",
+      createDescription:
+        "Provisiona identificadores de cliente programáticos para servicios de integración remotos.",
+      name: "Nombre del token",
+      namePlaceholder: "p. ej. servidor de despliegue CI/CD",
+      ttl: "Validez",
+      ttlUnit: "Unidad",
+      unitHours: "Horas",
+      unitDays: "Días",
+      unitWeeks: "Semanas",
+      defaultName: "Clave predeterminada",
+      generating: "Generando...",
+      mint: "Crear nueva clave",
+      securityNotice:
+        "Aviso de seguridad: copia esta clave API ahora. No se volverá a mostrar.",
+      copied: "Copiado",
+      copy: "Copiar",
+      activeTitle: "Perfiles de credenciales activos",
+      loading: "Cargando tokens API...",
+      empty: "No se encontraron tokens API activos.",
+      active: "Activo",
+      revoked: "Revocado",
+      expires: "Caduca",
+      lastUsed: "Último uso",
+      notUsed: "Nunca usado",
+      notAvailable: "n/d",
+      revoke: "Revocar token",
+    },
+
+    adminUsers: {
+      title: "Usuarios admin",
+      description: "Gestión de usuarios solo para superusuarios.",
+      updateScope: "La actualización de usuarios admite correo, nombre completo, avatar, contraseña y rol. El proveedor, el estado de la cuenta y la verificación los gestiona el servicio de autenticación.",
+      invalidCreate: "Datos de usuario inválidos.",
+      invalidUpdate: "Datos de actualización inválidos.",
+      created: "Usuario creado.",
+      updated: "Usuario actualizado.",
+      createFailed: "No se pudo crear el usuario.",
+      updateFailed: "No se pudo actualizar el usuario.",
+      email: "Correo",
+      fullName: "Nombre completo",
+      avatar: "URL del avatar",
+      avatarPlaceholder: "https://example.com/avatar.png",
+      password: "Contraseña",
+      passwordPlaceholder: "Déjalo en blanco para conservar la contraseña actual",
+      passwordUnsupported: "Contraseña desactivada para usuarios de Google",
+      create: "Crear",
+      role: "Rol",
+      oauthUserId: "ID de usuario OAuth",
+      oauthNotApplicable: "No aplica a usuarios con contraseña",
+      emailVerified: "Correo verificado",
+      superuser: "Superusuario",
+      users: "usuarios",
+      refresh: "Actualizar",
+      loading: "Cargando usuarios...",
+      user: "Usuario",
+      provider: "Proveedor",
+      providerPassword: "Contraseña",
+      providerGoogle: "Google",
+      actions: "Acciones",
+      active: "Activo",
+      inactive: "Inactivo",
+      save: "Guardar",
+      delete: "Eliminar",
+    },
+
+    sessions: {
+      notAvailable: "n/d",
+      logins: "Inicios de sesión",
+      registrations: "Registros",
+      users: "Usuarios",
+      title: "Sesión",
+      description: "Sesión de autenticación actual y actividad de la cuenta.",
+      provider: "Proveedor",
+      jwtExpires: "Caducidad del JWT",
+      refreshExpires: "Caducidad de renovación",
+      notLoaded: "Los detalles de la sesión no están cargados.",
+      yourActivity: "Tu actividad",
+      refresh: "Actualizar",
+      adminTitle: "Sesiones admin",
+      adminDescription: "Vista de sesiones solo para superusuarios.",
+      allActivity: "Toda la actividad",
+      loading: "Cargando sesiones...",
+      empty: "No se devolvieron sesiones.",
+      expires: "Caduca",
+      revoke: "Revocar",
+    },
+
+    logout: {
+      clearing: "Borrando cookies y sesiones seguras...",
+    },
+
+    callback: {
+      payloadFailed: "Falló la validación de la respuesta OAuth.",
+      missingCode:
+        "Falta el código de autorización en los parámetros de respuesta.",
+      failureTitle: "Error de autenticación",
+      returnToLogin: "Volver a la pantalla de inicio de sesión segura",
+      finalizing: "Finalizando el intercambio criptográfico seguro...",
+    },
+  },
+
+  media: {
+    title: "Estudio multimedia",
+    description: "Sube, explora y gestiona objetos multimedia.",
+    signInPrompt: "Inicia sesión para acceder a la biblioteca multimedia.",
+    tabs: {
+      library: "Biblioteca",
+      upload: "Subir",
+      presets: "Preajustes",
+      admin: "Administración",
+    },
+    object: {
+      title: "Objeto multimedia",
+      missingId: "Ningún objeto multimedia seleccionado.",
+      back: "Volver a la biblioteca",
+    },
+  },
+
+  nav: {
+    account: "Cuenta",
+    media: "Multimedia",
+  },
+
+  pages: {
+    loginTitle: "Iniciar sesión",
+    logoutTitle: "Cerrando sesión...",
+    callbackTitle: "Finalizando autenticación...",
+    accountTitle: "Configuración de cuenta",
+    mediaTitle: "Estudio multimedia",
+    mediaObjectTitle: "Objeto multimedia",
+    portfolioTitle: "Página personalizada",
+    portfolioIntro: "Esta es una página personalizada con un componente personalizado:",
+    portfolioHeading: "Más información",
+    portfolioLink: "Consultar la documentación de Starlight",
+  },
+} as const;

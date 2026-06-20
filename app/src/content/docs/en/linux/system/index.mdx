@@ -1,0 +1,451 @@
+---
+title: System
+description: System Commands Cheatsheet Linux
+---
+
+## Environment Variables
+
+| Command | Description |
+|---------|-------------|
+| `printenv` | Displays the value of all environment variables. |
+| `printenv VARIABLE` | Displays the value of a specific variable. |
+| `cat /proc/self/environ` | Displays the value of all environment variables. |
+| `echo $VARIABLE` | Displays the value of an environment variable. |
+
+---
+
+## Keyboard Shortcuts (Terminal)
+
+| Shortcut | Description |
+|---------|-------------|
+| **`Ctrl+Alt+T`**| Opens a new terminal.
+| **`Ctrl+C`**| Interrupts the current process (`SIGINT`, "polite" stop). |
+| **`Ctrl+Z`**| Suspends the current process (`SIGTSTP`, can be resumed with `fg` or `bg`). |
+| **`Ctrl+D`**| Signals the end of input (equivalent to `exit` if the terminal is empty). |
+| **`Ctrl+L`**| Clears the screen (equivalent to `clear`). |
+| **`Ctrl+W`**| Deletes the word before the cursor. |
+| **`Ctrl+U`**| Deletes the entire line before the cursor. |
+| **`Ctrl+R`**| Searches through the command history. |
+| **`!!`**| Repeats the last command. |
+| **Command History**| Use the Up/Down arrows to navigate through previous commands. |
+
+---
+
+## System Information
+
+To obtain information about the system, hardware, OS, etc.:
+
+### Sytem / Os / kernel
+
+| Command | Description |
+|---------|-------------|
+| `uname -a` | To display all information about the system and kernel. |
+| `hostnamectl` | Displays hostname information |
+| `lsb_release -a` | To display all information Linux distribution |
+| `hostname` | To display system hostname. |
+| `hostname -i` | To display system IP address |
+| `uptime` | Indicates how long the system has been running. |
+| `last reboot` | List system reboot history. |
+| `dmesg` | Show bootup messages. |
+
+---
+
+* **`uname`** : Displays information about the system and kernel.
+
+  | Option | Description |
+  |---------|-------------|
+  | `-a` | To display all information |
+  | `-r` | To display the kernel version |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/uname.1posix.html)
+
+* **`hostnamectl`**: Alternative to obtain and control information about the system's `hostname`.
+
+  | Command | Description |
+  |---------|-------------|
+  | `hostnamectl` | Displays hostname information |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/focal/man1/hostnamectl.1.html)
+
+* **`lsb_release`**: Displays information about the Linux Standard Base (LSB) distribution, including the distribution ID and version.
+
+  | Option | Description |
+  |--------|-------------|
+  | `-d` | To display the distribution description |
+  | `-r` | To display the release number |
+  | `-c` | To display the distribution codename |
+  | `-a` | To display all |
+  | `-s` | To display a summary |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/man1/lsb_release.1.html)
+
+* **`/etc/*-release`**: Files containing information about the distribution.
+
+  | Command | Description |
+  |---------|-------------|
+  | `cat /etc/os-release` | To display the contents of `/etc/os-release` |
+
+---
+
+### Users
+
+| Command | Description |
+|---------|-------------|
+| `w` | List logged-in users. |
+| `whoami` | See which user you are using. |
+| `finger [user_name]` | Show information about a particular user. |
+
+---
+
+### Network
+
+| Command | Description |
+|---------|-------------|
+| `hostnamectl` | Displays hostname information |
+| `hostname` | To display system hostname. |
+| `hostname -i` | To display system IP address |
+| `ip a` | List IP addresses and network interfaces. |
+| `ping [remote_host]` | Ping remote host. |
+| `netstat -tulpn` | See active ports. |
+| `netstat -tulpn | grep LISTEN` | See active listening ports. |
+| `netstat -tulpn | grep ':443'` | See active listening services on port 443. |
+| `netstat -tuln` | Show TCP and UDP ports and their programs. |
+| `sudo ss -tulw` | See active listening ports. |
+| `sudo ss -tulpn` | See active listening ports. |
+| `sudo ss -tulpn | grep LISTEN` | See active listening ports. |
+| `sudo lsof -i -U` | To list all open Internet, x.25 (HP-UX), and UNIX domain files. |
+| `sudo lsof -i 4 -U` | To list all open IPv4 network files. |
+| `sudo lsof -i 6 -U` | To list all open IPv6 network files. |
+| `sudo lsof -i -P -n` | See active ports. |
+| `sudo lsof -i -P -n | grep LISTEN` | See active listening ports. |
+| `whois [domain_name]` | Display more information about a domain. |
+| `dig [domain_name]` | 	Show DNS information about a domain. |
+| `dig -x [domain_name]` | Do a reverse DNS lookup on the domain. |
+| `dig -x [IP_address]` | Do a reverse DNS lookup of an IP address. |
+| `host [domain_name]` | Perform an IP lookup for a domain. |
+| `nslookup [domain_name]` | Receive information about a domain. |
+
+---
+
+* **`netstat`**:
+
+  | Option | Description |
+  |--------|-------------|
+  | `-t` | Select all TCP ports |
+  | `-u` | Select all UDP ports |
+  | `-l` | Show listening server sockets (open TCP and UDP ports in listing state) |
+  | `-p` | Display PID/Program name for sockets. In other words, this option tells who opened the TCP or UDP port. For example, on my system, Nginx opened TCP port 80/443, so I will /usr/sbin/nginx or its PID. |
+  | `-n` | Don’t resolve name (avoid dns lookup, this speed up the netstat on busy Linux/Unix servers) |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man8/netstat.8.html)
+  
+  > The netstat is mostly obsolete.  Replacement for netstat is `ss`.
+
+* **`ss`**:
+
+  | Option | Description |
+  |--------|-------------|
+  | `-t` | Show only TCP sockets |
+  | `-u` | Display only UDP sockets |
+  | `-l` | Show listening sockets. For example, TCP port 22 is opened by SSHD server. |
+  | `-w` | Display RAW sockets. |
+  | `-p` | Show process using socket. |
+  | `-n` | Don’t resolve service names i.e. don’t use DNS. |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man8/ss.8.html)
+
+* **`lsof`**:
+
+  | Option | Description |
+  |--------|-------------|
+  | `-i` | Selects the listing of all network files (If no Ip specified) |
+  | `-P` | Inhibits the conversion of port numbers to port names for network files |
+  | `-n` | Inhibits the conversion of network numbers to host names for network files. |
+  | `-U` | Selects the listing of UNIX domain socket files. |
+
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man8/lsof.8.html)
+
+---
+
+### Hardware
+
+| Command | Description |
+|---------|-------------|
+| `lspci -tv` | Lists PCI devices, show detailed information in a tree-like diagram. |
+| `lsusb -tv` | Lists USB devices, show detailed information in a tree-like diagram. |
+| `lshw` | To display CPU information |
+| `lscpu` | To display detailed CPU information. |
+| `cat /proc/cpuinfo` | To display detailed CPU information. |
+| `free -th` | Displays available and used memory (RAM and swap). |
+| `cat /proc/meminfo` | To display detailed memory information. |
+
+---
+
+* **`free`**: Displays available and used memory (RAM and swap).
+
+  | Option | Description |
+  |--------|-------------|
+  | `-g` | To display memory in gigabytes |
+  | `-h` | To display memory in human-readable units |
+  | `-t` | To display memory with totals |
+
+    - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/free.1.html)
+
+* **`lspci`** and **`lsusb`**:
+
+  | Option | Description |
+  |---------|-------------|
+  | `-t` | Display a tree-like diagram |
+  | `-v` | show detailed information. |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/man8/lspci.8.html)
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man8/lsusb.8.html)
+
+* **`lshw`**: Lists hardware.
+
+  | Command | Description |
+  |---------|-------------|
+  | `sudo lshw -class network` | Lists network interfaces |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/lshw.1.html)
+
+---
+
+### Disk and Filesystem
+
+| Command | Description |
+|---------|-------------|
+| `lsblk` | To display block devices information. |
+| `cat /proc/mounts` | To display mounted file systems. |
+| `mount` | To display mounted file systems. |
+| `hdparm -i /dev/[device_name]` | To display disk data information. |
+| `hdparm -tT /dev/[device_name]` | Conduct a read speed test on the device/disk. |
+| `badblocks -s /dev/[device_name]` | Test for unreadable blocks on the device/disk. |
+| `df -h` | Displays disk space in human-readable units |
+| `df -Th` | Displays disk space and filesystem type |
+| `du -h /path/to/directory` | Displays the size of a directory |
+| `du -sh /path/to/directory` | Displays the total size of a directory |
+
+* **`df`**: Displays disk space used by filesystems.
+
+  | Option | Description |
+  |--------|-------------|
+  | `df -h` | Displays free disk space on filesystems in human-readable units |
+  | `df -T` | Displays filesystem type |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/df.1.html)
+
+* **`du`**: Displays disk space used by files or directories.
+
+  | Option | Description |
+  |--------|-------------|
+  | `du -h [directory]` | To display the size of a directory in human-readable units |
+  | `du -s [directory]` | Displays the total size of a directory or specified files |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man1/du.1.html)
+
+---
+
+### Process Information
+
+| Command | Description |
+|---------|-------------|
+| `top` | Displays ongoing processes, CPU usage, memory usage, etc. |
+| `htop` | A more complete and colorful alternative. |
+| `ps aux` | To display all system processes. |
+| `pstree` | Show processes in a tree-like diagram. |
+| `pmap` | Display a memory usage map of processes. |
+| `prgrep [keyword]` | List processes based on the provided keyword. |
+| `pidof [process_name]` | Show the PID of a process. |
+| `lsof` | List files opened by running processes with lsof command. |
+
+- -> [`top` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/top.1.html)
+- -> [`htop` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/htop.1.html)
+- -> [`ps` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/ps.1posix.html)
+
+---
+
+### Logging (Logs)
+
+General system logs are found in files such as `/var/log/syslog`, `/var/log/messages`, `/var/log/kern.log`.
+
+* **`journalctl`**: Displays logs from the systemd journal.
+
+  | Option | Description |
+  |--------|-------------|
+  | `-u service.service` | Displays logs for a specific service |
+  | `--since "YYYY-MM-DD HH:MM:SS"` | Displays logs from a specific date/time |
+  | `-f` | Follows new journal entries |
+
+---
+
+### Cron Jobs
+
+Manages scheduled tasks (cron jobs) for a user.
+
+#### Directories
+
+  Cron jobs are located in the spool directories, in tables called crontabs.  
+  Their location varies across different distributions, here we focus in Debian/Ubuntu systems.
+
+  | Location | Description |
+  |---------|-------------|
+  | `/etc/crontab` | Cron jobs location for `root` user  |
+  | `/var/spool/cron/crontabs` | Cron jobs location for other users  |
+
+#### Listing Cron Jobs
+
+  | Command | Description |
+  |---------|-------------|
+  | `sudo cat /etc/crontab` | List of Cron jobs for `root` user |
+  | `sudo cat /var/spool/cron/crontabs` | List of Cron jobs for other users |
+  | `crontab -l` | List All Active Cron Jobs for the current user |
+  | `sudo crontab -u [username] -l` | List All Active Cron Jobs by user |
+  | `sudo crontab -u [username] -l` | List All Active Cron Jobs by user |
+  | `ls -la /etc/cron.hourly` | List Hourly Cron Jobs for the current user |
+  | `ls -la /etc/cron.daily` | List Daily Cron Jobs for the current user |
+  | `ls -la /etc/cron.weekly` | List Weekly Cron Jobs for the current user |
+  | `ls -la /etc/cron.monthly` | List Monthly Cron Jobs for the current user |
+  | `ls -l /etc/cron.d` | View Software-Specific Cron Jobs |
+
+---
+
+## System Management
+
+### Process Management
+
+To manage, and stop ongoing processes:
+
+| Command | Description |
+|---------|-------------|
+| `kill 5678` | To stop a process gracefully by its ID (PID). |
+| `kill -9 5678` | To force stop a process by its ID (PID). |
+| `killall firefox` | To stop all 'firefox' processes |
+| `sudo pkill -u username` | To stop all processes of a user |
+| `bg` | List and resume stopped jobs in the background. |
+| `fg` | Brings the last backgrounded process to the foreground. |
+| `fg [job]` | Bring a particular job to the foreground. |
+| `wait` | Pause the terminal or a Bash script until a running process is completed. |
+| `nohup [command] &` | Run a Linux process in the background. |
+
+---
+
+### Package Management
+
+To install, remove, and manage software (packages):
+
+* **`apt` / `apt-get`**: Package management tool for Debian-based distributions (like Ubuntu).
+
+  | Command | Description |
+  |---------|-------------|
+  | `sudo apt update` | To update the list of available packages |
+  | `sudo apt upgrade` | To upgrade all installed packages |
+  | `sudo apt install package_name` | To install a package |
+  | `sudo apt-get install -y package_name ` | To install a package, assume "yes" as answer to all prompts and run non-interactively |
+  | `sudo apt-get install -s package_name ` | Perform a simulation of events that would occur based on the current system state. |
+  | `sudo apt-get install -f package_name ` | Attempt to correct a system with broken dependencies in place. |
+  | `sudo apt-get install --no-install-recommends package_name ` | Do not consider recommended packages as a dependency for installing. |
+  | `sudo apt remove package_name` | To remove a package |
+  | `sudo apt --purge remove package_name` | To remove a package and its configuration files |
+  | `sudo apt purge package_name` | To remove a package and its configuration files |
+  | `sudo apt clean` | Clean deb package cache from system. |
+  | `sudo apt list` | List packages installed with APT. |
+  | `sudo apt show [package_name]` | Show information about a package. |
+
+  - -> [`apt` man page](https://https://manpages.ubuntu.com/manpages/questing/en/man8/apt.8.html)
+  - -> [`apt-get` man page](https://manpages.ubuntu.com/manpages/questing/en/man8/apt-get.8.html)
+
+* **`apt-cache`**: Tool to query the APT package cache.
+
+  | Command | Description |
+  |---------|-------------|
+  | `apt-cache search keyword` | To search for a package by name or description |
+  | `apt-cache show package_name` | To display detailed information about a package |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man8/apt-cache.8.html)
+
+---
+
+### Service Management
+
+System services are managed by an initialization system (`init system`), often `systemd` on Ubuntu.
+
+* **`systemctl`**: Used to control and query the state of system services under `systemd`.
+
+| Command | Description |
+|---------|-------------|
+| `sudo systemctl reboot` | To reboot the server |
+| `sudo systemctl poweroff` | To power off the server |
+| `sudo systemctl rescue` | Rescue mode |
+| `sudo systemctl start {servicename}` | To start a service |
+| `sudo systemctl restart {servicename}` | To restart a service |
+| `sudo systemctl stop {servicename}` | To stop a service |
+| `sudo systemctl status {servicename}` | To display the status of a service |
+| `sudo systemctl is-active {servicename}` | To check if a service is active |
+| `sudo systemctl is-enabled {servicename}` | To check if a service is enabled (at startup) |
+| `sudo systemctl list-units --type=service` | To display the status of all services |
+| `sudo systemctl list-units --type=service --state=active` | To display the status of all active services |
+| `sudo systemctl enable {servicename}` | To enable a service to start at boot |
+| `sudo systemctl disable {servicename}` | To disable a service |
+| `sudo systemctl mask {servicename}` | To prevent a service from starting |
+| `sudo systemctl kill {servicename}` | To stop a service |
+| `sudo systemctl kill -s 9 {servicename}` | To force stop a service |
+| `sudo systemd-analyze` | Analyze |
+| `sudo systemd-analyze blame` | System boot time |
+
+  - -> [`systemctl` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/systemctl.1.html)
+  - -> [`systemd-analyze` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/systemd-analyze.1.html)
+
+---
+
+### Mount disks
+
+| Command | Description |
+|---------|-------------|
+| `mount` | Displays mounted filesystems. |
+| `mount device mount_point` | Mounts a filesystem |
+| `umount mount_point` | Unmounts a filesystem by mount_point |
+| `umount device` | Unmounts a filesystem by device |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man8/mount.8.html)
+
+* **`umount`**:
+
+  | Option | Description |
+  |--------|-------------|
+  | `-f` | Forces unmount (dangerous) |
+
+  - -> [man page](https://manpages.ubuntu.com/manpages/questing/en/man2/umount.2.html)
+
+#### Example
+
+  <div className='fd-steps [&_h3]:fd-step'>
+    1. Create mount point directory
+    ```
+    mkdir /media/usb-drive
+    ```
+  </div>
+
+  <div className='fd-steps [&_h3]:fd-step'>
+    2. Find the USB device and file system type. Run:
+    ```
+    fdisk -l
+    ```
+  </div>
+
+  <div className='fd-steps [&_h3]:fd-step'>
+    3. Using the device identifier from fdisk output run:
+    > for example, if the device is listed as `/dev/sdb1`
+    ```
+    sudo mount /dev/sdb1 /media/usb-drive
+    ```
+  </div>
+
+---
+
+### System Directories
+
+* **`/run` and `/var/run`**: Directory for temporary files created at boot or by services.
+* **`/etc/default/`**: Directory containing configuration files for variables used by initialization scripts (`init.d`).
+* **Reboot required**: A signaling file `/run/reboot-required` is created when the system requires a reboot.

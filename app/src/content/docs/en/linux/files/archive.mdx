@@ -1,0 +1,76 @@
+---
+title: Archive and Compression
+description: Cheatsheet - Archive and Compression
+---
+
+# Archive and Compression
+
+---
+
+## Using `tar`
+
+`tar` is a powerful command-line utility used for **archiving** files. It bundles multiple files and directories into a single `.tar` archive file. Often, `tar` is combined with compression tools like `gzip` or `bzip2` to create compressed archives such as `.tar.gz` (or `.tgz`) or `.tar.bz2` (or `.tbz2`).
+
+### `tar` Commands
+
+| Command                                                    | Description                                                                                             |
+| :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| `tar -cvf archive.tar /path/to/directory_or_file`          | **Creates** an uncompressed `.tar` archive from the contents of `/path/to/directory_or_file`.           |
+| `tar -xvf archive.tar`                                     | **Extracts** an uncompressed `.tar` archive into the current directory.                                 |
+| `tar -czvf archive.tar.gz /path/to/directory_or_file`      | **Creates** a compressed `.tar.gz` archive from the contents of `/path/to/directory_or_file`.           |
+| `tar -xzvf archive.tar.gz`                                 | **Extracts** a `.tar.gz` archive into the current directory.                                            |
+| `tar -xzvf archive.tar.gz -C /path/to/destination_directory/` | **Extracts** a `.tar.gz` archive into a specific destination directory.                                 |
+| `tar -cjvf archive.tar.bz2 /path/to/source`                | **Creates** a compressed `.tar.bz2` archive from the contents of `/path/to/directory_or_file`.          |
+| `tar -xjvf archive.tar.bz2`                                | **Extracts** a `.tar.bz2` archive into the current directory.                                           |
+| `tar -tvf archive.tar.gz`                                  | **Lists** the contents of a `.tar.gz` archive without extracting them.                                  |
+
+### `tar` Options
+
+| Option | Description                                      |
+| :----- | :----------------------------------------------- |
+| `-c`   | **Create** a new archive.                        |
+| `-x`   | **Extract** files from an archive.               |
+| `-t`   | **List** the contents of an archive.             |
+| `-v`   | **Verbose** mode, displays processed files.      |
+| `-f`   | Specifies the **filename** of the archive.       |
+| `-z`   | Uses `gzip` compression (for `.gz` files).       |
+| `-j`   | Uses `bzip2` compression (for `.bz2` files).     |
+| `-J`   | Uses `xz` compression (for `.xz` files).         |
+| `-C`   | Specifies the **destination directory** for extraction. |
+
+- -> [man page](https://manpages.ubuntu.com/manpages/latest/man1/tar.1.html)
+
+---
+
+## Using `zip` and `unzip`
+
+`zip` and `unzip` are common utilities for **compressing and decompressing** files and directories. They create `.zip` archives, which are widely used across different operating systems.
+
+### `zip` / `unzip` Commands
+
+| Command                                    | Description                                                                 |
+| :----------------------------------------- | :-------------------------------------------------------------------------- |
+| `zip archive.zip file1 file2 directory/`   | **Creates** a new `.zip` archive containing specified files and directories. |
+| `zip -r archive.zip directory/`            | **Creates** a new `.zip` archive recursively including all contents of a directory. |
+| `zip -u archive.zip file_to_update.txt`    | **Updates** an existing `.zip` archive with a new or modified file.         |
+| `zip -d archive.zip file_to_delete.txt`    | **Deletes** a file from an existing `.zip` archive.                         |
+| `unzip archive.zip`                        | **Extracts** all files from `archive.zip` into the current directory.       |
+| `unzip archive.zip -d /path/to/destination/` | **Extracts** all files from `archive.zip` into a specified directory.       |
+| `unzip -l archive.zip`                     | **Lists** the contents of `archive.zip` without extracting them.            |
+| `unzip -v archive.zip`                     | **Verbose list** of the contents of `archive.zip`.                          |
+
+### `zip` / `unzip` Options
+
+| Option | Description                                      |
+| :----- | :----------------------------------------------- |
+| `-r`   | **Recurse** into directories (for `zip`).        |
+| `-u`   | **Update** existing entries in a `.zip` archive. |
+| `-d`   | **Delete** entries from a `.zip` archive.        |
+| `-l`   | **List** archive contents (for `unzip`).         |
+| `-v`   | **Verbose** mode, displays detailed information. |
+| `-q`   | **Quiet** mode, suppresses most output.          |
+| `-x`   | **Exclude** specified files when zipping.        |
+| `-P`   | **Password** for encryption.                     |
+
+- -> [`zip` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/zip.1.html)
+- -> [`unzip` man page](https://manpages.ubuntu.com/manpages/questing/en/man1/unzip.1.html)
