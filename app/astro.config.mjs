@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from '@astrojs/react';
 import faAuth from '@fa-m8/astro-auth-m8';
 import faMedia from '@fa-m8/astro-media-m8';
+import { buildSecurityConfig } from './src/lib/csp.ts';
 
 const upstreamMarkdownWarning =
 	"[astro] `markdown.remarkPlugins`, `markdown.rehypePlugins`, and `markdown.remarkRehype` are deprecated. Pass them to `unified({...})` from `@astrojs/markdown-remark` directly instead.";
@@ -17,6 +18,9 @@ console.warn = (...args) => {
 // https://astro.build/config
 export default defineConfig({
 	site: process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321',
+	// Production CSP for the static UI (plan item 8.1). Build-time only — a no-op
+	// under `astro dev`; takes effect in `build`/`preview`. See src/lib/csp.ts.
+	security: buildSecurityConfig(),
 	vite: {
 		plugins: [tailwindcss()],
 		optimizeDeps: {

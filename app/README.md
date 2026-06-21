@@ -131,6 +131,42 @@ are not permitted`. The UI therefore hides Google login by default for HTTP(S) r
 be enabled with `PUBLIC_AUTH_GOOGLE_ENABLED=true` when the running stack/backend permits those
 redirect targets.
 
+## Content-Security-Policy (production)
+
+The static UI ships a production Content-Security-Policy as a `<meta http-equiv="content-security-policy">`
+tag baked into every page at build time (plan item 8.1). Because the site is a static build
+(`output: static`) there is no UI runtime to set response headers, so the meta tag is the authoritative
+control and the policy travels with `dist/` regardless of which host serves it. CSP is a **no-op under
+`astro dev`** (a Vite limitation) — it only takes effect in `npm run build` / `npm run preview` and in
+production, so local development is unaffected.
+
+Where it lives:
+
+- [`src/lib/csp.ts`](src/lib/csp.ts) — the policy (directives + helpers), fully unit-tested.
+- [`astro.config.mjs`](astro.config.mjs) — enables `security.csp` (Astro hashes inline scripts).
+- [`src/middleware.ts`](src/middleware.ts) — relaxes the emitted `style-src` at build time.
+
+Policy shape and the React/Tailwind trade-off:
+
+- **Scripts are strict.** `script-src` is `'self'` plus the per-build hashes Astro computes for
+  Starlight's inline theme/init scripts and island bootstraps — **no `'unsafe-inline'`** (the real XSS
+  vector stays shut). `'wasm-unsafe-eval'` is added only so Starlight's Pagefind search (compiled
+  WebAssembly) keeps working.
+- **Styles are relaxed.** React, Radix/shadcn, and Starlight rely on runtime inline styles and
+  `style="…"` attributes that hash-based CSP cannot cover (browsers silently void `'unsafe-inline'`
+  when a hash shares the directive). The build therefore rewrites `style-src` to a hash-free
+  `style-src 'self' 'unsafe-inline'`. Style injection is a far weaker vector than script injection.
+- Everything else (`default-src`, `base-uri`, `object-src`, `frame-ancestors`, `form-action`,
+  `img/font/connect/worker-src`) is locked to a minimal `'self'` baseline. `connect-src` defaults to
+  `'self'` (the UI calls same-origin `/user` and `/media`); if you point the UI at absolute API origins
+  via `PUBLIC_AUTH_API_BASE` / `PUBLIC_MEDIA_API_BASE` / `PUBLIC_MEDIA_V1_BASE` / `PUBLIC_SITE_URL`,
+  those origins are added to `connect-src` automatically at build time.
+
+This is the **UI-layer** CSP and is separate from the JSON-API CSP that Traefik emits for the
+auth/media services (just `frame-ancestors 'none'`). Validate with `npm run build` and confirm the meta
+tag in `dist/**/index.html`; then load the build (`npm run preview`) and check the browser console shows
+no CSP violations on login, refresh, media upload, search, and static-asset loads.
+
 ## Required tools
 
 - 1. Zod
