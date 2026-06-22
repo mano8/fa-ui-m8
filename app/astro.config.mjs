@@ -4,7 +4,6 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from "@tailwindcss/vite";
 import react from '@astrojs/react';
 import faAuth from '@fa-m8/astro-auth-m8';
-import faMedia from '@fa-m8/astro-media-m8';
 import { buildSecurityConfig } from './src/lib/csp.ts';
 
 const upstreamMarkdownWarning =
@@ -14,6 +13,32 @@ console.warn = (...args) => {
 	if (args[0] === upstreamMarkdownWarning) return;
 	warn(...args);
 };
+
+// Deployment contract: `astro-auth-m8` is the one required plugin; every other
+// plugin is opt-in per *deployment* = (package installed) + (its PUBLIC_* env
+// set). Media is therefore wired only when PUBLIC_MEDIA_API_BASE is present, and
+// loaded via dynamic import so the build never requires the package when media
+// is disabled (a static `import` would break any auth-only configuration). The
+// canonical operator-facing prefix is PUBLIC_MEDIA_* (see app/.env.example); the
+// integration re-exposes those internally as PUBLIC_FA_MEDIA_* at build time.
+//
+// Media plugin is wired AFTER faAuth (below): its auth adapter is backed by
+// fa-auth-m8 tokens. Headless to match the auth setup — Starlight owns routing,
+// so media UI is mounted through React islands wrapped in MediaProvider.
+const mediaIntegrations = [];
+if (process.env.PUBLIC_MEDIA_API_BASE) {
+	const { default: faMedia } = await import('@fa-m8/astro-media-m8');
+	mediaIntegrations.push(
+		faMedia({
+			apiBase: process.env.PUBLIC_MEDIA_API_BASE,
+			v1Base: process.env.PUBLIC_MEDIA_V1_BASE ?? '/v1',
+			mode: 'headless',
+			auth: { provider: 'fa-auth-astro' },
+			locales: ['en', 'es', 'fr'],
+			defaultLocale: 'en',
+		}),
+	);
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -203,16 +228,8 @@ export default defineConfig({
 			locales: ['en', 'es', 'fr'],
 			defaultLocale: 'en',
 		}),
-		// media plugin must be listed AFTER faAuth: its auth adapter is backed by
-		// fa-auth-m8 tokens. Headless to match the auth setup — Starlight owns routing,
-		// so media UI is mounted through React islands wrapped in MediaProvider.
-		faMedia({
-			apiBase: process.env.PUBLIC_MEDIA_API_BASE ?? '/media',
-			v1Base: process.env.PUBLIC_MEDIA_V1_BASE ?? '/v1',
-			mode: 'headless',
-			auth: { provider: 'fa-auth-astro' },
-			locales: ['en', 'es', 'fr'],
-			defaultLocale: 'en',
-		})
+		// Opt-in media plugin: empty unless PUBLIC_MEDIA_API_BASE is set (see the
+		// mediaIntegrations block above). Stays last so it wires after faAuth.
+		...mediaIntegrations,
 	],
 });

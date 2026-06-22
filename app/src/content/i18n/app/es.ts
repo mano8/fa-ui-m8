@@ -45,6 +45,19 @@ export default {
       title: "Gestión de identidad",
       authenticatedUser: "Usuario autenticado",
       signOut: "Cerrar sesión",
+      overview: {
+        navLabel: "Panel",
+        title: "Resumen",
+        subtitle: "Actividad de la cuenta de un vistazo.",
+        users: "Usuarios",
+        totalAdded: "Total añadido",
+        totalUpdated: "Total actualizado",
+        activityTitle: "Actividad por modelo",
+        added: "Añadido",
+        updated: "Actualizado",
+        empty: "Aún no hay actividad registrada.",
+        error: "No se pudo cargar la actividad del panel.",
+      },
     },
 
     profile: {

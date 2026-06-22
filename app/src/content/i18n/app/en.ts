@@ -45,6 +45,19 @@ export default {
       title: "Identity Management",
       authenticatedUser: "Authenticated user",
       signOut: "Sign out",
+      overview: {
+        navLabel: "Dashboard",
+        title: "Overview",
+        subtitle: "Account activity at a glance.",
+        users: "Users",
+        totalAdded: "Total added",
+        totalUpdated: "Total updated",
+        activityTitle: "Activity by model",
+        added: "Added",
+        updated: "Updated",
+        empty: "No activity recorded yet.",
+        error: "Could not load dashboard activity.",
+      },
     },
 
     profile: {

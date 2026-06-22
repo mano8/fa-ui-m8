@@ -131,6 +131,76 @@ are not permitted`. The UI therefore hides Google login by default for HTTP(S) r
 be enabled with `PUBLIC_AUTH_GOOGLE_ENABLED=true` when the running stack/backend permits those
 redirect targets.
 
+## Auth account dashboard (shadcn registry)
+
+The account page's landing tab is an **activity dashboard** whose skin comes from the
+`@fa-m8/astro-auth-m8` shadcn registry, while the logic stays a live dependency
+(`useDashboard` from the package). Only the skin is copied in — it adopts radix-nova
+tokens and is editable here.
+
+What was added from the registry (run from `app/`):
+
+```bash
+npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/dashboard-overview.json
+# pulls: src/components/fa-auth/{dashboard-overview,activity-bar-chart}.tsx
+#        + shadcn primitives card/skeleton/chart, + recharts
+```
+
+`components.json` declares the registry namespace (`@fa-m8-auth`) for documentation;
+local installs use the direct `.json` path above (shadcn resolves namespaced registries
+over HTTP, file paths from disk). [src/components/auth/AccountApp.tsx](src/components/auth/AccountApp.tsx)
+mounts `DashboardOverview` as the **default** nav item and passes locale labels from
+`t.auth.dashboard.overview` (en/es/fr). To re-pull after a plugin upgrade, re-run the
+`shadcn add` command with `--overwrite`.
+
+See the plugin's "shadcn views" README for the full item list (incl. `data-table` and the
+`account-dashboard` shell used by other configurations).
+
+## Deployment contract (plugins + env = a configuration)
+
+fa-ui-m8 is a **single deployable app**. Its backend microservices are composable
+Astro plugins published as independent npm packages — never as branches or
+per-config repos. A *configuration* is defined entirely by two things:
+
+1. **Which plugins are installed** (npm packages present in `node_modules`).
+2. **Which `PUBLIC_*` env vars are set** (per the canonical names below).
+
+There are no per-deployment branches and no duplicated config across repos. The
+same `astro.config.mjs` serves every configuration.
+
+| Plugin | Package | Required? | Enabled when |
+| :-- | :-- | :-- | :-- |
+| Auth | `@fa-m8/astro-auth-m8` | **Required** (the one mandatory peer) | always |
+| Media | `@fa-m8/astro-media-m8` | Opt-in (`optionalDependencies`) | package installed **and** `PUBLIC_MEDIA_API_BASE` set |
+
+How the media gate works: [`astro.config.mjs`](astro.config.mjs) reads
+`PUBLIC_MEDIA_API_BASE` and, only when it is set, `await import()`s the media
+package and wires it after auth. With the var unset the package is never imported,
+so an auth-only deployment builds even with the media package absent. Because the
+UI is a **static build** (`output: static`), this gate is evaluated at **build
+time** — the env var must be present when `astro build` runs (e.g. via the compose
+service's `environment:` block), not merely at runtime.
+
+Canonical env names (operator-facing — set these):
+
+| Var | Plugin | Purpose |
+| :-- | :-- | :-- |
+| `PUBLIC_AUTH_API_BASE` | auth | backend auth base path |
+| `PUBLIC_MEDIA_API_BASE` | media | backend media base path **and** the media on/off gate |
+| `PUBLIC_MEDIA_V1_BASE` | media | versioned media routes sub-prefix |
+
+The media integration re-exposes the `PUBLIC_MEDIA_*` values internally as
+`PUBLIC_FA_MEDIA_*` at build time; those are an implementation detail and must not
+be set directly.
+
+> Note: fa-ui-m8's own `src/` still contains hand-maintained media components that
+> import `@fa-m8/astro-media-m8/react` directly, which is why the package is kept
+> installed as an `optionalDependencies` rather than fully removed. Decoupling those
+> source imports (so a true auth-only checkout needs no media package at all) is
+> tracked by the registry/reconciliation work in the fa-ui-m8 plan (Steps 5–6).
+> Likewise, the `file:` dependency paths are local dev links; published
+> configurations will pin registry-versioned ranges once the plugins are published.
+
 ## Content-Security-Policy (production)
 
 The static UI ships a production Content-Security-Policy as a `<meta http-equiv="content-security-policy">`

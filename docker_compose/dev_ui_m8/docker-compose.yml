@@ -408,6 +408,11 @@ services:
       NODE_ENV: development
       FA_AUTH_PLUGIN_DIR: /astro-auth-m8
       FA_MEDIA_PLUGIN_DIR: /astro-media-m8
+      # This is a media-enabled configuration: PUBLIC_MEDIA_API_BASE is the on/off
+      # gate read by astro.config.mjs. Unset it (and drop the media package) for an
+      # auth-only deployment. Canonical operator-facing prefix is PUBLIC_MEDIA_*.
+      PUBLIC_MEDIA_API_BASE: /media
+      PUBLIC_MEDIA_V1_BASE: /v1
 
     networks:
       - app_net

@@ -45,6 +45,19 @@ export default {
       title: "Gestion de l'identité",
       authenticatedUser: "Utilisateur authentifié",
       signOut: "Se déconnecter",
+      overview: {
+        navLabel: "Tableau de bord",
+        title: "Aperçu",
+        subtitle: "L'activité du compte en un coup d'œil.",
+        users: "Utilisateurs",
+        totalAdded: "Total ajouté",
+        totalUpdated: "Total mis à jour",
+        activityTitle: "Activité par modèle",
+        added: "Ajouté",
+        updated: "Mis à jour",
+        empty: "Aucune activité enregistrée pour le moment.",
+        error: "Impossible de charger l'activité du tableau de bord.",
+      },
     },
 
     profile: {

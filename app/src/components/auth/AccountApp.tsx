@@ -1,6 +1,6 @@
 // src/components/auth/AccountApp.tsx
 import { useMemo, useState } from "react";
-import { KeyRound, LogOut, Shield, UserRound, Activity } from "lucide-react";
+import { KeyRound, LayoutDashboard, LogOut, Shield, UserRound, Activity } from "lucide-react";
 import { AuthProvider } from "../../components/auth/AuthProvider";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
@@ -9,12 +9,15 @@ import { ProfilePanel } from "./ProfilePanel";
 import { ApiKeysPanel } from "./ApiKeysPanel";
 import { AdminUsersPanel } from "./AdminUsersPanel";
 import { SessionInfo } from "./SessionInfo";
+// Dashboard skin from the @fa-m8-auth registry (logic stays the live package dep
+// via its useDashboard hook); copied in with `shadcn add` — see app README.
+import { DashboardOverview } from "@/components/fa-auth/dashboard-overview";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
 
-type AccountView = "profile" | "sessions" | "apiKeys" | "admin";
+type AccountView = "dashboard" | "profile" | "sessions" | "apiKeys" | "admin";
 
 function LoadingState() {
   return (
@@ -27,12 +30,13 @@ function LoadingState() {
 function AppShellContent() {
   const { status, logout, user } = useAuth();
   const { isSuperuser } = useUser();
-  const [activeView, setActiveView] = useState<AccountView>("profile");
+  const [activeView, setActiveView] = useState<AccountView>("dashboard");
   const locale = typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname);
   const t = getTranslations(locale);
 
   const navItems = useMemo(() => {
     const items = [
+      { id: "dashboard" as const, label: t.auth.dashboard.overview.navLabel, icon: LayoutDashboard },
       { id: "profile" as const, label: t.auth.profile.title, icon: UserRound },
       { id: "sessions" as const, label: t.auth.sessions.title, icon: Activity },
       { id: "apiKeys" as const, label: t.auth.apiKeys.activeTitle, icon: KeyRound },
@@ -105,6 +109,7 @@ function AppShellContent() {
         </CardContent>
       </Card>
 
+      {activeView === "dashboard" ? <DashboardOverview labels={t.auth.dashboard.overview} /> : null}
       {activeView === "profile" ? <ProfilePanel t={t.auth.profile} /> : null}
       {activeView === "sessions" ? <SessionInfo t={t.auth.sessions} /> : null}
       {activeView === "apiKeys" ? <ApiKeysPanel t={t.auth.apiKeys} /> : null}
