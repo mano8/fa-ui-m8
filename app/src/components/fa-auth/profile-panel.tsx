@@ -1,22 +1,82 @@
-// src/components/auth/ProfilePanel.tsx
-import { useState, type FormEvent } from "react";
-import { useUser } from "../../hooks/auth/useUser";
-import { useProfile } from "../../hooks/auth/useProfile";
-import { UserUpdateMeSchema, UpdatePasswordSchema } from "@fa-m8/astro-auth-m8/schemas";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import type { AppTranslations } from "../../content/i18n/app";
+"use client";
 
-type ProfileTranslations = AppTranslations["auth"]["profile"];
+// fa-auth profile panel: edit public profile metadata + rotate password.
+// Headless logic stays a live dependency — `useAuth` (@fa-m8/astro-auth-m8/react)
+// supplies the signed-in user + reload, `useProfile` (@fa-m8/astro-auth-m8/hooks)
+// performs the writes, and the package Zod schemas validate the form. This file
+// is only the shadcn skin and is copied into the consumer via the @fa-m8-auth
+// registry — edit (and translate via `labels`) freely per app.
+import * as React from "react";
+import { useAuth } from "@fa-m8/astro-auth-m8/react";
+import { useProfile } from "@fa-m8/astro-auth-m8/hooks";
+import { UserUpdateMeSchema, UpdatePasswordSchema } from "@fa-m8/astro-auth-m8/schemas";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export interface ProfilePanelLabels {
+  title: string;
+  description: string;
+  saved: string;
+  failed: string;
+  email: string;
+  emailReadOnly: string;
+  fullName: string;
+  avatar: string;
+  avatarPlaceholder: string;
+  saving: string;
+  submit: string;
+  passwordTitle: string;
+  passwordDescription: string;
+  googlePasswordDisabled: string;
+  credentialsRotated: string;
+  passwordFailed: string;
+  currentPassword: string;
+  newPassword: string;
+  changePassword: string;
+  incorrectPasswordError: string;
+  samePasswordError: string;
+}
+
+const DEFAULT_LABELS: ProfilePanelLabels = {
+  title: "Profile details",
+  description: "Update your public profile metadata.",
+  saved: "Profile saved.",
+  failed: "Failed to update profile.",
+  email: "Email address",
+  emailReadOnly: "Email is managed by the auth service and cannot be changed here.",
+  fullName: "Full name",
+  avatar: "Avatar URL",
+  avatarPlaceholder: "https://example.com/avatar.png",
+  saving: "Saving...",
+  submit: "Update details",
+  passwordTitle: "Password management",
+  passwordDescription: "Rotate your authentication credentials securely.",
+  googlePasswordDisabled:
+    "Your account is integrated via Google SSO. Password changes are disabled.",
+  credentialsRotated: "Credentials rotated.",
+  passwordFailed: "Failed to alter security credentials.",
+  currentPassword: "Current password",
+  newPassword: "New password",
+  changePassword: "Change password",
+  incorrectPasswordError: "The current password you entered is incorrect.",
+  samePasswordError: "The new password must be different from your current one.",
+};
 
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error && err.message ? err.message : fallback;
 }
 
 /** Map known backend (English) auth messages to the active locale, falling back to the raw message. */
-function translatePasswordError(err: unknown, t: ProfileTranslations): string {
+function translatePasswordError(err: unknown, t: ProfilePanelLabels): string {
   const raw = errorMessage(err, t.passwordFailed);
   const known: Record<string, string> = {
     "Incorrect password": t.incorrectPasswordError,
@@ -25,15 +85,17 @@ function translatePasswordError(err: unknown, t: ProfileTranslations): string {
   return known[raw] ?? raw;
 }
 
-export function ProfilePanel({ t }: { t: ProfileTranslations }) {
-  const { user } = useUser();
-  const { updateMe, isUpdating, changePassword } = useProfile();
+export function ProfilePanel({ labels }: { labels?: Partial<ProfilePanelLabels> }) {
+  const t = { ...DEFAULT_LABELS, ...labels };
+  const { user, reload } = useAuth();
+  const { save, changePassword } = useProfile(false);
 
-  const [profileSuccess, setProfileSuccess] = useState(false);
-  const [passSuccess, setPassSuccess] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const [profileSuccess, setProfileSuccess] = React.useState(false);
+  const [passSuccess, setPassSuccess] = React.useState(false);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
 
-  const handleUpdateProfile = async (e: FormEvent<HTMLFormElement>) => {
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setProfileSuccess(false);
@@ -50,20 +112,25 @@ export function ProfilePanel({ t }: { t: ProfileTranslations }) {
       return;
     }
 
+    setIsUpdating(true);
     try {
-      await updateMe(result.data);
+      await save(result.data);
+      await reload();
       setProfileSuccess(true);
     } catch (err) {
       setErrors({ profileApi: errorMessage(err, t.failed) });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  const handleChangePassword = async (e: FormEvent<HTMLFormElement>) => {
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setPassSuccess(false);
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const rawData = Object.fromEntries(formData);
 
     const result = UpdatePasswordSchema.safeParse(rawData);
@@ -75,7 +142,7 @@ export function ProfilePanel({ t }: { t: ProfileTranslations }) {
     try {
       await changePassword(result.data);
       setPassSuccess(true);
-      e.currentTarget.reset();
+      form.reset();
     } catch (err) {
       setErrors({ passApi: translatePasswordError(err, t) });
     }
@@ -85,7 +152,7 @@ export function ProfilePanel({ t }: { t: ProfileTranslations }) {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {/* Profile Info Form */}
+      {/* Profile metadata form */}
       <Card>
         <CardHeader>
           <CardTitle>{t.title}</CardTitle>
@@ -95,7 +162,7 @@ export function ProfilePanel({ t }: { t: ProfileTranslations }) {
           <form onSubmit={handleUpdateProfile} className="space-y-4">
             {profileSuccess && <div className="p-2 text-sm text-emerald-600 bg-emerald-50 rounded">{t.saved}</div>}
             {errors.profileApi && <div className="p-2 text-sm text-destructive bg-destructive/10 rounded">{errors.profileApi}</div>}
-            
+
             <div className="space-y-1">
               <Label htmlFor="email">{t.email}</Label>
               <Input id="email" value={user.email} type="email" readOnly disabled aria-readonly="true" />
@@ -126,7 +193,7 @@ export function ProfilePanel({ t }: { t: ProfileTranslations }) {
         </CardContent>
       </Card>
 
-      {/* Password Adjuster (Only shown if provider is password based) */}
+      {/* Password rotation (hidden for OAuth-provisioned accounts) */}
       <Card>
         <CardHeader>
           <CardTitle>{t.passwordTitle}</CardTitle>

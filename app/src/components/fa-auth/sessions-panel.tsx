@@ -1,14 +1,69 @@
-import { useEffect } from "react";
-import { RefreshCw, Trash2 } from "lucide-react";
-import { useDashboard } from "../../hooks/auth/useDashboard";
-import { useSessions } from "../../hooks/auth/useSessions";
-import { useUser } from "../../hooks/auth/useUser";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import type { UsersActivity } from "@fa-m8/astro-auth-m8/schemas";
-import type { AppTranslations } from "../../content/i18n/app";
+"use client";
 
-type SessionsTranslations = AppTranslations["auth"]["sessions"];
+// fa-auth sessions panel: current session details + your/all activity summaries,
+// with superuser-only session revocation. Headless logic stays a live dependency
+// — `useAuth` (@fa-m8/astro-auth-m8/react) supplies the user, `useSessions` and
+// `useDashboard` (@fa-m8/astro-auth-m8/hooks) supply the data. This file is only
+// the shadcn skin, copied into the consumer via the @fa-m8-auth registry — edit
+// (and translate via `labels`) freely per app.
+import * as React from "react";
+import { RefreshCw, Trash2 } from "lucide-react";
+import { useAuth } from "@fa-m8/astro-auth-m8/react";
+import { useSessions, useDashboard } from "@fa-m8/astro-auth-m8/hooks";
+import type { UsersActivity } from "@fa-m8/astro-auth-m8/schemas";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export interface SessionsPanelLabels {
+  notAvailable: string;
+  logins: string;
+  registrations: string;
+  users: string;
+  title: string;
+  description: string;
+  provider: string;
+  jwtExpires: string;
+  refreshExpires: string;
+  notLoaded: string;
+  yourActivity: string;
+  refresh: string;
+  adminTitle: string;
+  adminDescription: string;
+  allActivity: string;
+  loading: string;
+  empty: string;
+  expires: string;
+  revoke: string;
+}
+
+const DEFAULT_LABELS: SessionsPanelLabels = {
+  notAvailable: "n/a",
+  logins: "Logins",
+  registrations: "Registrations",
+  users: "Users",
+  title: "Session",
+  description: "Current authentication session and account activity.",
+  provider: "Provider",
+  jwtExpires: "JWT expires",
+  refreshExpires: "Refresh expires",
+  notLoaded: "Session details are not loaded.",
+  yourActivity: "Your activity",
+  refresh: "Refresh",
+  adminTitle: "Admin sessions",
+  adminDescription: "Superuser-only session overview.",
+  allActivity: "All activity",
+  loading: "Loading sessions...",
+  empty: "No sessions returned.",
+  expires: "Expires",
+  revoke: "Revoke",
+};
 
 function formatDate(value: string | null | undefined, fallback: string): string {
   if (!value) return fallback;
@@ -27,7 +82,7 @@ function ActivitySummary({
   totalLogins?: number;
   totalRegistrations?: number;
   totalUsers?: number;
-  t: SessionsTranslations;
+  t: SessionsPanelLabels;
 }) {
   return (
     <div className="rounded-md border p-3">
@@ -54,29 +109,23 @@ function activityAdded(stats: UsersActivity | null, model: string): number | und
   return stats?.activity.activity.find((entry) => entry.model === model)?.added;
 }
 
-export function SessionInfo({ t }: { t: SessionsTranslations }) {
-  const { isSuperuser } = useUser();
-  const {
-    current,
-    reloadCurrent,
-    sessions,
-    list,
-    remove,
-    loading,
-  } = useSessions();
-  const {
-    mine,
-    reloadMine,
-    all,
-    reloadAll,
-  } = useDashboard();
+export function SessionsPanel({ labels }: { labels?: Partial<SessionsPanelLabels> }) {
+  const t = { ...DEFAULT_LABELS, ...labels };
+  const { user } = useAuth();
+  const isSuperuser = user?.is_superuser ?? false;
 
-  useEffect(() => {
+  const { current, reloadCurrent, sessions, reload: list, revoke, loading } = useSessions(false);
+  const { activity: mine, reload: reloadMine } = useDashboard("me", false);
+  const { activity: all, reload: reloadAll } = useDashboard("global", false);
+
+  const rows = sessions?.data ?? [];
+
+  React.useEffect(() => {
     reloadCurrent().catch(() => {});
     reloadMine().catch(() => {});
   }, [reloadCurrent, reloadMine]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isSuperuser) return;
     list().catch(() => {});
     reloadAll().catch(() => {});
@@ -139,13 +188,13 @@ export function SessionInfo({ t }: { t: SessionsTranslations }) {
               t={t}
             />
 
-            {sessions.length === 0 ? (
+            {rows.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {loading ? t.loading : t.empty}
               </p>
             ) : (
               <div className="divide-y rounded-md border">
-                {sessions.map((session) => (
+                {rows.map((session) => (
                   <div key={session.id} className="flex items-center justify-between gap-3 p-3">
                     <div className="min-w-0 text-sm">
                       <p className="truncate font-medium">{session.id}</p>
@@ -156,7 +205,7 @@ export function SessionInfo({ t }: { t: SessionsTranslations }) {
                       size="sm"
                       variant="destructive"
                       onClick={async () => {
-                        await remove(session.id);
+                        await revoke(session.id);
                         await list();
                       }}
                     >

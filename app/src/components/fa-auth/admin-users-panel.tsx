@@ -1,29 +1,116 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { RefreshCw, Trash2 } from "lucide-react";
-import { useUsers } from "../../hooks/auth/useUsers";
-import { RoleTypeSchema, UserCreateSchema, UserUpdateSchema } from "@fa-m8/astro-auth-m8/schemas";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import type { AppTranslations } from "../../content/i18n/app";
+"use client";
 
-type AdminUsersTranslations = AppTranslations["auth"]["adminUsers"];
+// fa-auth admin users panel: superuser-only user management (create / update /
+// delete). Headless logic stays a live dependency — `useUsers`
+// (@fa-m8/astro-auth-m8/hooks) owns the API calls, the package Zod schemas
+// validate the forms, and the package's `RequireRole superuser` gates the whole
+// panel. This file is only the shadcn skin, copied into the consumer via the
+// @fa-m8-auth registry — edit (and translate via `labels`) freely per app.
+import * as React from "react";
+import { RefreshCw, Trash2 } from "lucide-react";
+import { RequireRole } from "@fa-m8/astro-auth-m8/react";
+import { useUsers } from "@fa-m8/astro-auth-m8/hooks";
+import { RoleTypeSchema, UserCreateSchema, UserUpdateSchema } from "@fa-m8/astro-auth-m8/schemas";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export interface AdminUsersPanelLabels {
+  title: string;
+  description: string;
+  updateScope: string;
+  invalidCreate: string;
+  invalidUpdate: string;
+  created: string;
+  updated: string;
+  createFailed: string;
+  updateFailed: string;
+  email: string;
+  fullName: string;
+  avatar: string;
+  avatarPlaceholder: string;
+  password: string;
+  passwordPlaceholder: string;
+  passwordUnsupported: string;
+  create: string;
+  role: string;
+  emailVerified: string;
+  superuser: string;
+  users: string;
+  refresh: string;
+  loading: string;
+  user: string;
+  provider: string;
+  providerPassword: string;
+  providerGoogle: string;
+  actions: string;
+  active: string;
+  inactive: string;
+  save: string;
+  delete: string;
+}
+
+const DEFAULT_LABELS: AdminUsersPanelLabels = {
+  title: "Admin users",
+  description: "Superuser-only user management.",
+  updateScope:
+    "User updates support email, full name, avatar, password, and role. Provider, account status, and verification flags are managed by the auth service.",
+  invalidCreate: "Invalid user payload.",
+  invalidUpdate: "Invalid update payload.",
+  created: "User created.",
+  updated: "User updated.",
+  createFailed: "Failed to create user.",
+  updateFailed: "Failed to update user.",
+  email: "Email",
+  fullName: "Full name",
+  avatar: "Avatar URL",
+  avatarPlaceholder: "https://example.com/avatar.png",
+  password: "Password",
+  passwordPlaceholder: "Leave blank to keep current password",
+  passwordUnsupported: "Password disabled for Google users",
+  create: "Create",
+  role: "Role",
+  emailVerified: "Email verified",
+  superuser: "Superuser",
+  users: "users",
+  refresh: "Refresh",
+  loading: "Loading users...",
+  user: "User",
+  provider: "Provider",
+  providerPassword: "Password",
+  providerGoogle: "Google",
+  actions: "Actions",
+  active: "Active",
+  inactive: "Inactive",
+  save: "Save",
+  delete: "Delete",
+};
 
 function formString(formData: FormData, key: string): string | undefined {
   const value = formData.get(key);
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-export function AdminUsersPanel({ t }: { t: AdminUsersTranslations }) {
-  const { users, count, reload, create, update, remove, loading, error } = useUsers();
-  const [message, setMessage] = useState<string | null>(null);
+function AdminUsersPanelInner({ t }: { t: AdminUsersPanelLabels }) {
+  const { users: usersData, loading, error, reload, create, update, remove } = useUsers(false);
+  const users = usersData?.data ?? [];
+  const count = usersData?.count ?? 0;
+  const errorText = error instanceof Error ? error.message : error ? String(error) : null;
+  const [message, setMessage] = React.useState<string | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     reload().catch(() => {});
   }, [reload]);
 
-  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage(null);
 
@@ -58,7 +145,7 @@ export function AdminUsersPanel({ t }: { t: AdminUsersTranslations }) {
     }
   };
 
-  const handleUpdate = async (event: FormEvent<HTMLFormElement>, id: string) => {
+  const handleUpdate = async (event: React.FormEvent<HTMLFormElement>, id: string) => {
     event.preventDefault();
     setMessage(null);
 
@@ -138,8 +225,8 @@ export function AdminUsersPanel({ t }: { t: AdminUsersTranslations }) {
           </Button>
         </div>
 
-        {(message || error) && (
-          <p className="rounded-md border p-3 text-sm">{message ?? error}</p>
+        {(message || errorText) && (
+          <p className="rounded-md border p-3 text-sm">{message ?? errorText}</p>
         )}
 
         {loading && users.length === 0 ? (
@@ -211,5 +298,17 @@ export function AdminUsersPanel({ t }: { t: AdminUsersTranslations }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+export function AdminUsersPanel({ labels }: { labels?: Partial<AdminUsersPanelLabels> }) {
+  const t = { ...DEFAULT_LABELS, ...labels };
+  // Superuser-only: gate the whole panel via the package's RequireRole so the
+  // privileged API calls never mount for non-superusers, even if a consumer
+  // renders it unconditionally.
+  return (
+    <RequireRole superuser>
+      <AdminUsersPanelInner t={t} />
+    </RequireRole>
   );
 }

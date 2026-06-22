@@ -5,13 +5,15 @@ import { AuthProvider } from "../../components/auth/AuthProvider";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
 import { LoginForm } from "./LoginForm";
-import { ProfilePanel } from "./ProfilePanel";
-import { ApiKeysPanel } from "./ApiKeysPanel";
-import { AdminUsersPanel } from "./AdminUsersPanel";
-import { SessionInfo } from "./SessionInfo";
-// Dashboard skin from the @fa-m8-auth registry (logic stays the live package dep
-// via its useDashboard hook); copied in with `shadcn add` — see app README.
+// Account skins from the @fa-m8-auth registry (logic stays the live package dep
+// via its useAuth/useProfile/useSessions/useApiKeys/useUsers hooks); copied in
+// with `shadcn add` — see app README. Locale stays owned by the app: each panel
+// takes its strings via `labels`.
 import { DashboardOverview } from "@/components/fa-auth/dashboard-overview";
+import { ProfilePanel } from "@/components/fa-auth/profile-panel";
+import { SessionsPanel } from "@/components/fa-auth/sessions-panel";
+import { ApiKeysPanel } from "@/components/fa-auth/api-keys-panel";
+import { AdminUsersPanel } from "@/components/fa-auth/admin-users-panel";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { getTranslations } from "../../content/i18n/app";
@@ -110,10 +112,10 @@ function AppShellContent() {
       </Card>
 
       {activeView === "dashboard" ? <DashboardOverview labels={t.auth.dashboard.overview} /> : null}
-      {activeView === "profile" ? <ProfilePanel t={t.auth.profile} /> : null}
-      {activeView === "sessions" ? <SessionInfo t={t.auth.sessions} /> : null}
-      {activeView === "apiKeys" ? <ApiKeysPanel t={t.auth.apiKeys} /> : null}
-      {activeView === "admin" && isSuperuser ? <AdminUsersPanel t={t.auth.adminUsers} /> : null}
+      {activeView === "profile" ? <ProfilePanel labels={t.auth.profile} /> : null}
+      {activeView === "sessions" ? <SessionsPanel labels={t.auth.sessions} /> : null}
+      {activeView === "apiKeys" ? <ApiKeysPanel labels={t.auth.apiKeys} /> : null}
+      {activeView === "admin" && isSuperuser ? <AdminUsersPanel labels={t.auth.adminUsers} /> : null}
     </div>
   );
 }

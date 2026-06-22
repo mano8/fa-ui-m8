@@ -133,25 +133,33 @@ redirect targets.
 
 ## Auth account dashboard (shadcn registry)
 
-The account page's landing tab is an **activity dashboard** whose skin comes from the
-`@fa-m8/astro-auth-m8` shadcn registry, while the logic stays a live dependency
-(`useDashboard` from the package). Only the skin is copied in — it adopts radix-nova
-tokens and is editable here.
+The account page's landing tab is an **activity dashboard**, and every other tab
+(profile, sessions, API keys, admin users) is also a registry skin from the
+`@fa-m8/astro-auth-m8` shadcn registry. The logic stays a live dependency
+(`useAuth`/`useProfile`/`useSessions`/`useApiKeys`/`useUsers`/`useDashboard` from the
+package) — only the skin is copied in, adopting radix-nova tokens and editable here.
 
 What was added from the registry (run from `app/`):
 
 ```bash
 npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/dashboard-overview.json
-# pulls: src/components/fa-auth/{dashboard-overview,activity-bar-chart}.tsx
-#        + shadcn primitives card/skeleton/chart, + recharts
+npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/profile-panel.json
+npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/sessions-panel.json
+npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/api-keys-panel.json
+npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/admin-users-panel.json
+# pulls: src/components/fa-auth/{dashboard-overview,activity-bar-chart,profile-panel,
+#        sessions-panel,api-keys-panel,admin-users-panel}.tsx + shadcn primitives
 ```
 
 `components.json` declares the registry namespace (`@fa-m8-auth`) for documentation;
 local installs use the direct `.json` path above (shadcn resolves namespaced registries
 over HTTP, file paths from disk). [src/components/auth/AccountApp.tsx](src/components/auth/AccountApp.tsx)
-mounts `DashboardOverview` as the **default** nav item and passes locale labels from
-`t.auth.dashboard.overview` (en/es/fr). To re-pull after a plugin upgrade, re-run the
-`shadcn add` command with `--overwrite`.
+mounts `DashboardOverview` as the **default** nav item and the four panels as secondary
+tabs, passing locale labels from `t.auth.*` (en/es/fr) to each. The previous local copies
+(`src/components/auth/{ProfilePanel,SessionInfo,ApiKeysPanel,AdminUsersPanel}.tsx` and the
+`src/hooks/auth/{useProfile,useSessions,useApiKeys,useUsers,useDashboard}.ts` adapters)
+were removed — the registry is now the single source of truth for the skin. To re-pull
+after a plugin upgrade, re-run the `shadcn add` commands with `--overwrite`.
 
 See the plugin's "shadcn views" README for the full item list (incl. `data-table` and the
 `account-dashboard` shell used by other configurations).

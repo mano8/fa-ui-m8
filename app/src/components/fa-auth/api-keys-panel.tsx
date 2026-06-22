@@ -1,31 +1,100 @@
-// src/components/auth/ApiKeysPanel.tsx
-import { useEffect, useState, type FormEvent } from "react";
-import { useApiKeys } from "../../hooks/auth/useApiKeys";
-import { ApiKeyCreateSchema } from "@fa-m8/astro-auth-m8/schemas";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
-import type { AppTranslations } from "../../content/i18n/app";
+"use client";
 
-type ApiKeysTranslations = AppTranslations["auth"]["apiKeys"];
+// fa-auth API keys panel: mint and revoke programmatic API tokens. Headless
+// logic stays a live dependency — `useApiKeys` (@fa-m8/astro-auth-m8/hooks) owns
+// the list/create/revoke calls and the package Zod schema validates the form.
+// This file is only the shadcn skin, copied into the consumer via the
+// @fa-m8-auth registry — edit (and translate via `labels`) freely per app.
+import * as React from "react";
+import { useApiKeys } from "@fa-m8/astro-auth-m8/hooks";
+import { ApiKeyCreateSchema } from "@fa-m8/astro-auth-m8/schemas";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export interface ApiKeysPanelLabels {
+  createTitle: string;
+  createDescription: string;
+  name: string;
+  namePlaceholder: string;
+  ttl: string;
+  ttlUnit: string;
+  unitHours: string;
+  unitDays: string;
+  unitWeeks: string;
+  defaultName: string;
+  generating: string;
+  mint: string;
+  securityNotice: string;
+  copied: string;
+  copy: string;
+  activeTitle: string;
+  loading: string;
+  empty: string;
+  active: string;
+  revoked: string;
+  expires: string;
+  lastUsed: string;
+  notUsed: string;
+  notAvailable: string;
+  revoke: string;
+}
+
+const DEFAULT_LABELS: ApiKeysPanelLabels = {
+  createTitle: "Create API token",
+  createDescription: "Provision programmatic client identifiers for remote integrations.",
+  name: "Token name",
+  namePlaceholder: "e.g. CI/CD deployment server",
+  ttl: "Validity",
+  ttlUnit: "Unit",
+  unitHours: "Hours",
+  unitDays: "Days",
+  unitWeeks: "Weeks",
+  defaultName: "Default key",
+  generating: "Generating...",
+  mint: "Mint new key",
+  securityNotice: "Security notice: copy this API key now. It will not be shown again.",
+  copied: "Copied",
+  copy: "Copy",
+  activeTitle: "Active credentials",
+  loading: "Loading API tokens...",
+  empty: "No active API tokens found.",
+  active: "Active",
+  revoked: "Revoked",
+  expires: "Expires",
+  lastUsed: "Last used",
+  notUsed: "Never used",
+  notAvailable: "n/a",
+  revoke: "Revoke token",
+};
 
 // Backend currently accepts whole-hour TTLs only; sub-hour units need an auth-API change.
 const TTL_UNIT_HOURS = { hours: 1, days: 24, weeks: 168 } as const;
 type TtlUnit = keyof typeof TTL_UNIT_HOURS;
 
-export function ApiKeysPanel({ t }: { t: ApiKeysTranslations }) {
-  const { keys, loading, reload, create, isCreating, lastCreated, revoke } = useApiKeys();
-  const [copied, setCopied] = useState(false);
+export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> }) {
+  const t = { ...DEFAULT_LABELS, ...labels };
+  const { apiKeys: keys, loading, reload, create, createdKey: lastCreated, revoke } = useApiKeys(false);
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     reload().catch(() => {});
   }, [reload]);
 
-  const handleCreateToken = async (e: FormEvent<HTMLFormElement>) => {
+  const handleCreateToken = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCopied(false);
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
     const amount = Number(formData.get("ttl_amount")) || 1;
     const unit = (formData.get("ttl_unit")?.toString() as TtlUnit) || "days";
@@ -36,9 +105,13 @@ export function ApiKeysPanel({ t }: { t: ApiKeysTranslations }) {
       ttl_hours,
     });
 
-    await create(parsedData);
-    await reload();
-    e.currentTarget.reset();
+    setIsCreating(true);
+    try {
+      await create(parsedData);
+      form.reset();
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleCopy = (text: string) => {
@@ -125,10 +198,7 @@ export function ApiKeysPanel({ t }: { t: ApiKeysTranslations }) {
                     size="sm"
                     variant="destructive"
                     disabled={key.revoked}
-                    onClick={async () => {
-                      await revoke(key.id);
-                      await reload();
-                    }}
+                    onClick={() => revoke(key.id)}
                   >
                     {t.revoke}
                   </Button>
