@@ -182,3 +182,26 @@ def test_redis_user_env_matches_scoped_acl(
         f"{stack}/{env_file}: must set {expected} to authenticate as the scoped ACL user"
     )
     assert f"{var}=appuser" not in text, f"{stack}/{env_file}: stale {var}=appuser"
+
+
+# ── the media ARQ worker needs INFO despite the dangerous strip ──────────────
+
+
+@pytest.mark.parametrize("stack", _STACKS)
+def test_media_acl_grants_info_after_dangerous_strip(stack: str) -> None:
+    """ARQ issues ``INFO server`` on startup to read the Redis version.
+
+    ``INFO`` lives in the ``@dangerous`` category, which the media user strips,
+    so ``+info`` must be re-granted *after* ``-@dangerous`` — Redis ACL rules
+    apply left-to-right, so the order is load-bearing. Without it the worker
+    dies with ``NoPermissionError`` running 'info'.
+    """
+    line = _setuser_line(_redis_command(stack, "media_redis_cache"), "media")
+    info = re.search(r"\+info\b", line)
+    dangerous = re.search(r"-@dangerous\b", line)
+    assert info, f"{stack}: media user must grant +info for ARQ's INFO command"
+    assert dangerous, f"{stack}: media user must still strip -@dangerous"
+    assert info.start() > dangerous.start(), (
+        f"{stack}: +info must come after -@dangerous or it stays stripped "
+        "(Redis ACL rules apply left-to-right)"
+    )
