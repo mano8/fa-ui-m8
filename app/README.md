@@ -164,6 +164,34 @@ after a plugin upgrade, re-run the `shadcn add` commands with `--overwrite`.
 See the plugin's "shadcn views" README for the full item list (incl. `data-table` and the
 `account-dashboard` shell used by other configurations).
 
+## Media admin dashboard (shadcn registry)
+
+When media is enabled (`PUBLIC_MEDIA_API_BASE` set), the Media Studio's superuser
+**Admin** tab landing view is a **storage dashboard**, and the destructive operations
+live behind confirmations in a separate **Maintenance** tab — both registry skins from
+the `@fa-m8/astro-media-m8` registry. The logic stays a live dependency (`useMediaAdmin`
+from the package) — only the skin is copied in, adopting radix-nova tokens and editable
+here.
+
+What was added from the registry (run from `app/`):
+
+```bash
+npx shadcn add ./node_modules/@fa-m8/astro-media-m8/registry/r/media-dashboard-overview.json
+npx shadcn add ./node_modules/@fa-m8/astro-media-m8/registry/r/media-maintenance-panel.json
+# pulls: src/components/fa-media/{media-dashboard-overview,media-storage-chart,
+#        data-table,media-maintenance-panel}.tsx + shadcn primitives (table, alert-dialog)
+```
+
+`components.json` declares the registry namespace (`@fa-m8-media`) for documentation;
+local installs use the direct `.json` path above.
+[src/components/media/MediaApp.tsx](src/components/media/MediaApp.tsx) mounts
+`MediaDashboardOverview` as the admin landing view and `MediaMaintenancePanel` as a
+superuser-only Maintenance tab, passing locale labels from `t.media.admin.*` (en/es/fr)
+to each. The app keeps its own media chrome + `MediaProvider` (fa-auth-backed adapter),
+so it consumes the two panel items rather than the registry's `admin-media-dashboard`
+shell. To re-pull after a plugin upgrade, re-run the `shadcn add` commands with
+`--overwrite`.
+
 ## Deployment contract (plugins + env = a configuration)
 
 fa-ui-m8 is a **single deployable app**. Its backend microservices are composable

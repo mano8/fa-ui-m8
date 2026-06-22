@@ -4,12 +4,11 @@
 // built from the @fa-m8/astro-media-m8 React components. Admin is superuser-only.
 import "../../styles/media.css";
 import { useMemo, useState } from "react";
-import { Images, UploadCloud, SlidersHorizontal, ShieldCheck } from "lucide-react";
+import { Images, UploadCloud, SlidersHorizontal, ShieldCheck, Wrench } from "lucide-react";
 import {
   MediaLibrary,
   MediaUploadDropzone,
   PresetEditor,
-  AdminMediaPanel,
 } from "@fa-m8/astro-media-m8/react";
 import { AuthProvider } from "../auth/AuthProvider";
 import { LoginForm } from "../auth/LoginForm";
@@ -20,8 +19,15 @@ import { Card, CardContent } from "../ui/card";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
 import { MediaProvider } from "./MediaProvider";
+// Admin skins from the @fa-m8-media registry (logic stays the live package dep
+// via its useMediaAdmin hook); copied in with `shadcn add` — see app README.
+// The admin landing view is the storage dashboard; destructive ops live behind
+// confirmations in the superuser-only Maintenance tab. Locale stays app-owned:
+// each panel takes its strings via `labels`.
+import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-overview";
+import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
 
-type MediaView = "library" | "upload" | "presets" | "admin";
+type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
 
 function LoadingState() {
   return (
@@ -44,7 +50,10 @@ function MediaShell() {
       { id: "upload" as const, label: t.media.tabs.upload, icon: UploadCloud },
       { id: "presets" as const, label: t.media.tabs.presets, icon: SlidersHorizontal },
     ];
-    if (isSuperuser) items.push({ id: "admin" as const, label: t.media.tabs.admin, icon: ShieldCheck });
+    if (isSuperuser) {
+      items.push({ id: "admin" as const, label: t.media.tabs.admin, icon: ShieldCheck });
+      items.push({ id: "maintenance" as const, label: t.media.tabs.maintenance, icon: Wrench });
+    }
     return items;
   }, [isSuperuser, t]);
 
@@ -84,7 +93,7 @@ function MediaShell() {
 
       <Card className="border-muted/80 shadow-none">
         <CardContent className="p-2">
-          <div className="grid grid-cols-2 gap-1 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-5">
             {navItems.map((item) => {
               const Icon = item.icon;
               const selected = activeView === item.id;
@@ -110,7 +119,12 @@ function MediaShell() {
         <MediaUploadDropzone onUploaded={() => setActiveView("library")} />
       ) : null}
       {activeView === "presets" ? <PresetEditor /> : null}
-      {activeView === "admin" && isSuperuser ? <AdminMediaPanel /> : null}
+      {activeView === "admin" && isSuperuser ? (
+        <MediaDashboardOverview labels={t.media.admin.overview} />
+      ) : null}
+      {activeView === "maintenance" && isSuperuser ? (
+        <MediaMaintenancePanel labels={t.media.admin.maintenance} />
+      ) : null}
     </div>
   );
 }

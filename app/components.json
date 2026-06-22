@@ -22,6 +22,7 @@
   "menuColor": "default",
   "menuAccent": "subtle",
   "registries": {
-    "@fa-m8-auth": "./node_modules/@fa-m8/astro-auth-m8/registry/r/{name}.json"
+    "@fa-m8-auth": "./node_modules/@fa-m8/astro-auth-m8/registry/r/{name}.json",
+    "@fa-m8-media": "./node_modules/@fa-m8/astro-media-m8/registry/r/{name}.json"
   }
 }
