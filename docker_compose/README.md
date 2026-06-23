@@ -206,6 +206,22 @@ Port `9000` is the one you'll use most in development — all API requests go th
 
 ---
 
+## Browser-direct media uploads/downloads
+
+When using `media-service-m8` with browser-direct presigned URLs (Option A —
+uploads/downloads bypass the media service), you must configure:
+
+1. **`MINIO_PUBLIC_ENDPOINT`** in `media.env` — the URL the browser uses to
+   reach MinIO's data path (e.g. `http://127.0.0.1:9005` in dev, `https://storage.example.com` in prod).
+2. **Storage ingress** — The hardened stacks expose MinIO via a dedicated
+   Traefik router. See your stack's `hardened_ui_m8/README.md` or
+   [hardened_media_m8/README.md](../media-service-m8/docker_compose/hardened_media_m8/README.md)
+   for TLS + CORS setup.
+
+For proxy-through deployments (bytes transit the media service), omit `MINIO_PUBLIC_ENDPOINT`.
+
+---
+
 ## Live testing
 
 Every stack ships a `test.env.example` wired for [`security-tests-m8`](https://github.com/mano8/security-tests-m8) — a reusable live security suite that attacks the *running* stack (auth bypass, token forgery, `alg=none`, JWKS/algorithm confusion, privilege escalation, OWASP API Top 10). These flaws only surface end-to-end against a fully wired deployment — here, the `fa-auth-m8` issuer plus the `media-service-m8` consumer behind Traefik — not in unit tests. Run it after `docker compose up` and after any auth/token/network/image change.
