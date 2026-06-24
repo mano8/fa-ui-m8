@@ -148,7 +148,7 @@ services:
       - data_net
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
     container_name: minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -173,7 +173,7 @@ services:
   # Reads MinIO root creds from .env and the media service creds from media.env.
   # media_service waits for this to complete successfully before starting.
   minio-init:
-    image: quay.io/minio/mc:RELEASE.2025-04-03T17-07-38Z
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
     depends_on:
       minio:
         condition: service_healthy
@@ -233,7 +233,7 @@ services:
     restart: unless-stopped
 
   auth_user_service:
-    image: tepochtli/fa-auth-m8:0.9.8
+    image: tepochtli/fa-auth-m8:0.9.9
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -309,7 +309,7 @@ services:
   # repo, not under this stack). Only the .env file is mounted, matching the
   # media_service pattern.
   media_worker:
-    image: tepochtli/media-worker-m8:0.0.1
+    image: tepochtli/media-worker-m8:0.2.0
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -353,7 +353,7 @@ services:
       - scan_net
 
   media_service:
-    image: tepochtli/media-service-m8:0.0.8
+    image: tepochtli/media-service-m8:0.0.9
     security_opt:
       - no-new-privileges:true
     cap_drop:

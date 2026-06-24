@@ -7,13 +7,16 @@ Policy (both stacks):
   - No mutable :latest tags in any service.
   - Previously-bare images now resolve to their expected pinned prefixes.
 
-Previously unpinned images and their required pins:
+Previously unpinned images and their required pins (both stacks):
   alpine              → alpine:3.21.3
-  quay.io/minio/minio → quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
-  minio/mc            → quay.io/minio/mc:RELEASE.2025-04-03T17-07-38Z
-  tepochtli/fa-auth-m8          → tepochtli/fa-auth-m8:0.9.8
-  tepochtli/media-service-m8    → tepochtli/media-service-m8:0.0.8
-  tepochtli/media-worker-m8     → tepochtli/media-worker-m8:0.0.1
+  quay.io/minio/minio → quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
+  minio/mc            → quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+
+Previously :latest service images now carry explicit version pins (both stacks
+track the same fleet versions):
+  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:0.9.9
+  tepochtli/media-service-m8 → tepochtli/media-service-m8:0.0.9
+  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:0.2.0
 """
 
 from __future__ import annotations
@@ -31,13 +34,13 @@ _DEV = _COMPOSE_DIR / "dev_ui_m8" / "docker-compose.yml"
 # Use prefix matching so release-tag formats (RELEASE.…) don't need to be re-asserted char-by-char.
 _PREVIOUSLY_BARE = {
     "alpine": "alpine:3.21.3",
-    "quay.io/minio/minio": "quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z",
-    "quay.io/minio/mc": "quay.io/minio/mc:RELEASE.2025-04-03T17-07-38Z",
+    "quay.io/minio/minio": "quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772",
+    "quay.io/minio/mc": "quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z",
 }
 _PREVIOUSLY_LATEST = {
-    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:0.9.8",
-    "tepochtli/media-service-m8": "tepochtli/media-service-m8:0.0.8",
-    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.0.1",
+    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:0.9.9",
+    "tepochtli/media-service-m8": "tepochtli/media-service-m8:0.0.9",
+    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.2.0",
 }
 
 
