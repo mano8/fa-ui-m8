@@ -2,39 +2,46 @@
 
 These tests parse the YAML files directly — no running Docker required.
 
-Policy:
-  hardened_ui_m8 — Traefik must NOT mount /var/run/docker.sock and must route via
-                   the **file provider only** (no `docker` provider, no per-service
-                   `traefik.*` discovery labels). Backends are declared statically
-                   in dynamic_conf.yml and resolve over Docker DNS by container
-                   name, so routes still resolve without the socket. Mounting the
-                   socket — even read-only — grants the Docker API, which is
-                   equivalent to host root.
-  dev_ui_m8      — the Docker provider + socket stay as a developer convenience
-                   (auto-discovery on a trusted local host).
+Policy (decision 2026-06-24 — file provider everywhere):
+  Every stack — hardened *and* dev — must NOT mount /var/run/docker.sock and must
+  route via the **file provider only** (no `docker` provider, no per-service
+  `traefik.*` discovery labels). Backends are declared statically in
+  dynamic_conf.yml and resolve over Docker DNS by container name, so routes still
+  resolve without the socket. Mounting the socket — even read-only — grants the
+  Docker API, which is equivalent to host root, so it is never a default (not even
+  the dev convenience of label auto-discovery is worth a root-equivalent mount).
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 _COMPOSE_DIR = Path(__file__).parent.parent
-_HARDENED = _COMPOSE_DIR / "hardened_ui_m8" / "docker-compose.yml"
-_HARDENED_TRAEFIK = _COMPOSE_DIR / "hardened_ui_m8" / "traefik" / "traefik.yml"
-_HARDENED_DYNAMIC = _COMPOSE_DIR / "hardened_ui_m8" / "traefik" / "dynamic_conf.yml"
-_DEV = _COMPOSE_DIR / "dev_ui_m8" / "docker-compose.yml"
-_DEV_TRAEFIK = _COMPOSE_DIR / "dev_ui_m8" / "traefik" / "traefik.yml"
+_STACKS = ("hardened_ui_m8", "dev_ui_m8")
 
 _SOCKET = "/var/run/docker.sock"
 
-# Container-DNS backends expected in the hardened file-provider config; each must
+# Container-DNS backends expected in every stack's file-provider config; each must
 # be a compose service so file-provider routing resolves without the Docker socket.
 _EXPECTED_BACKENDS = {
     "auth-service": "http://auth_user_service:8000",
     "media-service": "http://media_service:8000",
 }
+
+
+def _compose(stack: str) -> Path:
+    return _COMPOSE_DIR / stack / "docker-compose.yml"
+
+
+def _traefik(stack: str) -> Path:
+    return _COMPOSE_DIR / stack / "traefik" / "traefik.yml"
+
+
+def _dynamic(stack: str) -> Path:
+    return _COMPOSE_DIR / stack / "traefik" / "dynamic_conf.yml"
 
 
 def _load(path: Path) -> dict:
@@ -47,49 +54,53 @@ def _service_volumes(service: dict) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# hardened_ui_m8 — socketless, file-provider only
+# Socketless, file-provider only — every stack
 # ---------------------------------------------------------------------------
 
 
-class TestHardenedSocketless:
-    """The hardened stack must never mount the Docker socket."""
+class TestSocketless:
+    """No stack — hardened or dev — may mount the Docker socket."""
 
-    def test_no_service_mounts_docker_socket(self):
-        services = _load(_HARDENED)["services"]
+    @pytest.mark.parametrize("stack", _STACKS)
+    def test_no_service_mounts_docker_socket(self, stack: str):
+        services = _load(_compose(stack))["services"]
         for name, service in services.items():
             for mount in _service_volumes(service):
                 assert _SOCKET not in mount, (
-                    f"hardened_ui_m8:{name} mounts the Docker socket ({mount}) — "
+                    f"{stack}:{name} mounts the Docker socket ({mount}) — "
                     "the Docker API is equivalent to host root. Route via the "
                     "Traefik file provider instead."
                 )
 
-    def test_traefik_uses_file_provider_only(self):
-        providers = _load(_HARDENED_TRAEFIK)["providers"]
+    @pytest.mark.parametrize("stack", _STACKS)
+    def test_traefik_uses_file_provider_only(self, stack: str):
+        providers = _load(_traefik(stack))["providers"]
         assert "file" in providers, providers
         assert "docker" not in providers, (
-            "hardened_ui_m8: Traefik must not enable the `docker` provider — "
+            f"{stack}: Traefik must not enable the `docker` provider — "
             "it requires the host root-equivalent Docker socket."
         )
 
-    def test_no_traefik_discovery_labels(self):
+    @pytest.mark.parametrize("stack", _STACKS)
+    def test_no_traefik_discovery_labels(self, stack: str):
         # File-provider routing needs no per-container `traefik.*` labels; their
         # presence would imply (and invite re-enabling) the Docker provider.
-        services = _load(_HARDENED)["services"]
+        services = _load(_compose(stack))["services"]
         for name, service in services.items():
             labels = service.get("labels") or []
             keys = labels.keys() if isinstance(labels, dict) else labels
             assert not any(str(k).startswith("traefik") for k in keys), (
-                f"hardened_ui_m8:{name} declares a traefik discovery label — "
+                f"{stack}:{name} declares a traefik discovery label — "
                 "the file provider makes it unnecessary."
             )
 
 
-class TestHardenedRoutesStillResolve:
+class TestRoutesStillResolve:
     """Routes must still resolve via the file provider after the socket is gone."""
 
-    def test_routers_resolve_to_defined_services(self):
-        conf = _load(_HARDENED_DYNAMIC)["http"]
+    @pytest.mark.parametrize("stack", _STACKS)
+    def test_routers_resolve_to_defined_services(self, stack: str):
+        conf = _load(_dynamic(stack))["http"]
         defined = set(conf["services"])
         for name, router in conf["routers"].items():
             service = router["service"]
@@ -97,37 +108,17 @@ class TestHardenedRoutesStillResolve:
             if service == "api@internal":
                 continue
             assert service in defined, (
-                f"router {name} targets undeclared service {service}"
+                f"{stack}: router {name} targets undeclared service {service}"
             )
 
-    def test_backends_use_container_dns(self):
-        conf = _load(_HARDENED_DYNAMIC)["http"]
-        compose_services = set(_load(_HARDENED)["services"])
+    @pytest.mark.parametrize("stack", _STACKS)
+    def test_backends_use_container_dns(self, stack: str):
+        conf = _load(_dynamic(stack))["http"]
+        compose_services = set(_load(_compose(stack))["services"])
         for name, expected_url in _EXPECTED_BACKENDS.items():
             servers = conf["services"][name]["loadBalancer"]["servers"]
             urls = [s["url"] for s in servers]
-            assert urls == [expected_url], (name, urls)
+            assert urls == [expected_url], (stack, name, urls)
             # The DNS name must be a real compose service so it resolves on app_net.
             host = expected_url.removeprefix("http://").split(":", 1)[0]
-            assert host in compose_services, f"{host} is not a compose service"
-
-
-# ---------------------------------------------------------------------------
-# dev_ui_m8 — Docker provider kept as a local-only convenience
-# ---------------------------------------------------------------------------
-
-
-class TestDevKeepsDockerProvider:
-    """The dev stack intentionally keeps the Docker provider + socket."""
-
-    def test_dev_traefik_mounts_socket(self):
-        traefik = _load(_DEV)["services"]["traefik"]
-        assert any(_SOCKET in v for v in _service_volumes(traefik)), (
-            "dev_ui_m8: expected the Docker socket mount (dev-only auto-discovery)."
-        )
-
-    def test_dev_traefik_uses_docker_provider(self):
-        providers = _load(_DEV_TRAEFIK)["providers"]
-        assert "docker" in providers, (
-            "dev_ui_m8: expected the `docker` provider for local auto-discovery."
-        )
+            assert host in compose_services, f"{stack}: {host} is not a compose service"
