@@ -192,6 +192,7 @@ export function DataTableApi<TData, TValue>({
     manualFiltering: true,
     manualPagination: true,
     manualSorting: true,
+    sortDescFirst: false,
     onPaginationChange: handlePaginationChange,
     onSortingChange: handleSortingChange,
     pageCount,

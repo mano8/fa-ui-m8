@@ -74,8 +74,12 @@ export interface MediaLibraryProps {
   labels?: Partial<MediaLibraryLabels>;
 }
 
-function normalizeSort(value: string): SortField {
+function normalizeSort(value: string | undefined): SortField {
   return SORT_FIELDS.includes(value as SortField) ? (value as SortField) : "created_at";
+}
+
+function normalizeCategory(value: string): MediaCategory | "" {
+  return CATEGORIES.includes(value as MediaCategory) ? (value as MediaCategory) : "";
 }
 
 function formatDate(value: string) {
@@ -199,6 +203,7 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
         loading={loading}
         page={page}
         pageSize={pageSize}
+        pageSizeOptions={[10, 25, 50]}
         onPageChange={handlePageChange}
         onPageSizeChange={(nextPageSize) => {
           setPageSize(nextPageSize);
@@ -208,7 +213,7 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
         sortDir={sortDir}
         onSortChange={(nextSort, nextOrder) => {
           setSortBy(normalizeSort(nextSort));
-          setSortDir(nextOrder);
+          setSortDir(nextOrder ?? "desc");
           resetPage();
         }}
         q={q}
@@ -217,9 +222,8 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
           resetPage();
         }}
         filterValue={category}
-        filterOptions={CATEGORIES.map((value) => ({ value, label: t.categories[value] }))}
         onFilterChange={(nextCategory) => {
-          setCategory(nextCategory as MediaCategory | "");
+          setCategory(normalizeCategory(nextCategory));
           resetPage();
         }}
         labels={t.table}

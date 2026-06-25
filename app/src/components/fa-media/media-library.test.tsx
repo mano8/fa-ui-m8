@@ -66,7 +66,9 @@ describe("MediaLibrary", () => {
   it("updates hook params from search, category, page size, and sort controls", () => {
     const { rerender } = render(<MediaLibrary />);
 
-    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "avatar" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
+      target: { value: "avatar" },
+    });
     rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ q: "avatar" }),
@@ -78,13 +80,13 @@ describe("MediaLibrary", () => {
       expect.objectContaining({ category: "document", q: "avatar" }),
     );
 
-    fireEvent.change(screen.getByLabelText("Rows"), { target: { value: "25" } });
+    fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "25" } });
     rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ limit: 25 }),
     );
 
-    fireEvent.click(screen.getByText("Size"));
+    fireEvent.click(screen.getByRole("button", { name: /Size/ }));
     rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ sort_by: "size_bytes", order: "asc" }),
@@ -108,7 +110,7 @@ describe("MediaLibrary", () => {
     );
 
     render(<MediaLibrary />);
-    fireEvent.click(screen.getByText("Next"));
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
 
     await waitFor(() => expect(loadMore).toHaveBeenCalledOnce());
   });
