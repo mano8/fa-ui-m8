@@ -43,7 +43,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   filterColumn,
-  filterPlaceholder = "Filter…",
+  filterPlaceholder = "Filter...",
   pageSize = 10,
   emptyMessage = "No results.",
 }: DataTableProps<TData, TValue>) {

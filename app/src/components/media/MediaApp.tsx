@@ -7,7 +7,6 @@ import { useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Images, UploadCloud, SlidersHorizontal, ShieldCheck, Wrench } from "lucide-react";
 import {
-  MediaLibrary,
   MediaUploadDropzone,
   PresetEditor,
 } from "@fa-m8/astro-media-m8/react";
@@ -26,6 +25,7 @@ import { PluginProviders } from "../app/PluginProviders";
 // each panel takes its strings via `labels`.
 import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-overview";
 import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
+import { MediaLibrary } from "@/components/fa-media/media-library";
 
 type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
 type MediaNavItem = { id: MediaView; label: string; icon: LucideIcon };
@@ -115,7 +115,9 @@ function MediaShell() {
         </CardContent>
       </Card>
 
-      {activeView === "library" ? <MediaLibrary objectHref={objectHref} /> : null}
+      {activeView === "library" ? (
+        <MediaLibrary objectHref={objectHref} labels={t.media.library} />
+      ) : null}
       {activeView === "upload" ? (
         <MediaUploadDropzone onUploaded={() => setActiveView("library")} />
       ) : null}
