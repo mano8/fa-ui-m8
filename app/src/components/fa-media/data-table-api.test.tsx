@@ -4,89 +4,163 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DataTableApi } from "./data-table-api";
 
-type Row = { id: string; name: string; size_bytes: number };
+interface Row {
+  name: string;
+  role: string;
+}
 
 const columns: ColumnDef<Row>[] = [
   { accessorKey: "name", header: "Name" },
-  { accessorKey: "size_bytes", header: "Size" },
+  { accessorKey: "role", header: "Role" },
+];
+
+const rows: Row[] = [
+  { name: "Ada", role: "admin" },
+  { name: "Bea", role: "editor" },
 ];
 
 afterEach(() => cleanup());
 
 describe("DataTableApi", () => {
-  it("emits search, page size, page, and sort changes without fetching", () => {
+  it("renders controlled data, toolbar action, search, filter, and summaries", () => {
     const onSearchChange = vi.fn();
-    const onPageSizeChange = vi.fn();
-    const onPageChange = vi.fn();
-    const onSortChange = vi.fn();
+    const onFilterChange = vi.fn();
 
     render(
       <DataTableApi
         columns={columns}
-        data={[{ id: "r1", name: "One", size_bytes: 12 }]}
-        rowCount={30}
-        page={1}
-        pageSize={10}
-        sortBy="size_bytes"
-        sortDir="desc"
+        data={rows}
+        page={2}
+        pageSize={2}
+        rowCount={6}
+        q="ad"
+        filterValue="active"
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
         onSearchChange={onSearchChange}
+        onFilterChange={onFilterChange}
+        toolbarAction={<button type="button">Add object</button>}
+      />,
+    );
+
+    expect(screen.getByText("Ada")).toBeTruthy();
+    expect(screen.getByText("Bea")).toBeTruthy();
+    expect(screen.getByText("3-4 of 6")).toBeTruthy();
+    expect(screen.getByText("Page 2 of 3")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Add object" })).toBeTruthy();
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
+      target: { value: "bea" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: "Filter" }), {
+      target: { value: "archived" },
+    });
+
+    expect(onSearchChange).toHaveBeenCalledWith("bea");
+    expect(onFilterChange).toHaveBeenCalledWith("archived");
+  });
+
+  it("emits page and page-size changes without mutating data locally", () => {
+    const onPageChange = vi.fn();
+    const onPageSizeChange = vi.fn();
+
+    render(
+      <DataTableApi
+        columns={columns}
+        data={rows}
+        page={1}
+        pageSize={2}
+        rowCount={5}
+        pageSizeOptions={[1, 5]}
         onPageChange={onPageChange}
         onPageSizeChange={onPageSizeChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Rows per page" }), {
+      target: { value: "5" },
+    });
+
+    expect(onPageChange).toHaveBeenCalledWith(2);
+    expect(onPageSizeChange).toHaveBeenCalledWith(5);
+    expect(screen.getByText("Ada")).toBeTruthy();
+    expect(screen.getByText("Bea")).toBeTruthy();
+  });
+
+  it("emits controlled sorting changes and reflects the current sort direction", () => {
+    const onSortChange = vi.fn();
+    const { rerender } = render(
+      <DataTableApi
+        columns={columns}
+        data={rows}
+        page={1}
+        pageSize={10}
+        rowCount={2}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
         onSortChange={onSortChange}
       />,
     );
 
-    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "avatar" } });
-    fireEvent.change(screen.getByLabelText("Rows"), { target: { value: "25" } });
-    fireEvent.click(screen.getByText("Next"));
-    fireEvent.click(screen.getByText("Size"));
+    fireEvent.click(screen.getByRole("button", { name: /Name/ }));
+    expect(onSortChange).toHaveBeenLastCalledWith("name", "asc");
 
-    expect(onSearchChange).toHaveBeenCalledWith("avatar");
-    expect(onPageSizeChange).toHaveBeenCalledWith(25);
-    expect(onPageChange).toHaveBeenCalledWith(2);
-    expect(onSortChange).toHaveBeenCalledWith("size_bytes", "asc");
+    rerender(
+      <DataTableApi
+        columns={columns}
+        data={rows}
+        page={1}
+        pageSize={10}
+        rowCount={2}
+        sortBy="name"
+        sortDir="asc"
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+        onSortChange={onSortChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Name/ }));
+    expect(onSortChange).toHaveBeenLastCalledWith("name", "desc");
   });
 
-  it("renders loading, empty, filter, and localized labels", () => {
-    const onFilterChange = vi.fn();
+  it("renders loading and empty states from controlled inputs", () => {
     const { rerender } = render(
       <DataTableApi
         columns={columns}
         data={[]}
-        rowCount={0}
-        loading
         page={1}
         pageSize={10}
+        rowCount={0}
+        loading
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
-        filterValue=""
-        filterOptions={[{ value: "asset", label: "Asset" }]}
-        onFilterChange={onFilterChange}
-        labels={{
-          filterLabel: "Type",
-          allFilterOption: "All types",
-          loading: "Loading rows",
-          empty: "Nothing here",
-        }}
       />,
     );
 
-    expect(screen.getByText("Loading rows")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Type"), { target: { value: "asset" } });
-    expect(onFilterChange).toHaveBeenCalledWith("asset");
+    expect(screen.getByText("Loading...")).toBeTruthy();
+    expect(screen.getByText("0-0 of 0")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Previous page" }).hasAttribute("disabled"),
+    ).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Next page" }).hasAttribute("disabled"),
+    ).toBe(true);
 
     rerender(
       <DataTableApi
         columns={columns}
         data={[]}
-        rowCount={0}
         page={1}
         pageSize={10}
+        rowCount={0}
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
-        labels={{ empty: "Nothing here" }}
+        labels={{ emptyMessage: "Nothing found." }}
       />,
     );
-    expect(screen.getByText("Nothing here")).toBeTruthy();
+
+    expect(screen.getByText("Nothing found.")).toBeTruthy();
   });
 });
