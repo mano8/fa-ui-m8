@@ -3,6 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DataTableApi } from "./data-table-api";
+import { getDataTableApiLabels } from "./data-table-labels";
 
 interface Row {
   name: string;
@@ -173,6 +174,30 @@ describe("DataTableApi", () => {
     expect(screen.getByRole("checkbox", { name: "Basculer Name" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Page precedente" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Page suivante" })).toBeTruthy();
+  });
+
+  it("renders labels supplied from the app locale translation adapter", () => {
+    render(
+      <DataTableApi
+        columns={columns}
+        data={[]}
+        page={1}
+        pageSize={10}
+        rowCount={0}
+        q=""
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+        onSearchChange={vi.fn()}
+        labels={getDataTableApiLabels("es")}
+      />,
+    );
+
+    expect(screen.getByRole("textbox", { name: "Buscar" })).toBeTruthy();
+    expect(screen.getByText("Sin resultados.")).toBeTruthy();
+    expect(screen.getByText("Página 1 de 1")).toBeTruthy();
+    expect(screen.getByText("0-0 de 0")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Página anterior" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Página siguiente" })).toBeTruthy();
   });
 
   it("renders loading and empty states from controlled inputs", () => {
