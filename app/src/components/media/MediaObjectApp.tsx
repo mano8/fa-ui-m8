@@ -5,12 +5,11 @@
 import "../../styles/media.css";
 import { ArrowLeft } from "lucide-react";
 import { ObjectDetail } from "@fa-m8/astro-media-m8/react";
-import { AuthProvider } from "../auth/AuthProvider";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
-import { MediaProvider } from "./MediaProvider";
+import { PluginProviders } from "../app/PluginProviders";
 
 function LoadingState() {
   return (
@@ -78,10 +77,8 @@ function ObjectShell() {
 
 export default function MediaObjectApp() {
   return (
-    <AuthProvider>
-      <MediaProvider>
-        <ObjectShell />
-      </MediaProvider>
-    </AuthProvider>
+    <PluginProviders media>
+      <ObjectShell />
+    </PluginProviders>
   );
 }

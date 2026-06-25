@@ -49,6 +49,28 @@ export const CONNECT_ORIGIN_ENV_KEYS = [
 ] as const;
 
 type EnvLike = Record<string, string | undefined>;
+type CspDirective =
+  | `base-uri${string}`
+  | `child-src${string}`
+  | `connect-src${string}`
+  | `default-src${string}`
+  | `fenced-frame-src${string}`
+  | `font-src${string}`
+  | `form-action${string}`
+  | `frame-ancestors${string}`
+  | `frame-src${string}`
+  | `img-src${string}`
+  | `manifest-src${string}`
+  | `media-src${string}`
+  | `object-src${string}`
+  | `referrer${string}`
+  | `report-to${string}`
+  | `report-uri${string}`
+  | `require-trusted-types-for${string}`
+  | `sandbox${string}`
+  | `trusted-types${string}`
+  | `upgrade-insecure-requests${string}`
+  | `worker-src${string}`;
 
 /**
  * Resolve the `scheme://host[:port]` origin of a configured value.
@@ -92,10 +114,10 @@ export const STATIC_CSP_DIRECTIVES = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "worker-src 'self' blob:",
-] as const;
+] as const satisfies readonly CspDirective[];
 
 /** Full directive list (static lines + the env-derived `connect-src`). */
-export function cspDirectives(env: EnvLike = process.env): string[] {
+export function cspDirectives(env: EnvLike = process.env): CspDirective[] {
   return [...STATIC_CSP_DIRECTIVES, `connect-src ${connectSrc(env).join(' ')}`];
 }
 

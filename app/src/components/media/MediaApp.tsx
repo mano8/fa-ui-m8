@@ -4,13 +4,13 @@
 // built from the @fa-m8/astro-media-m8 React components. Admin is superuser-only.
 import "../../styles/media.css";
 import { useMemo, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { Images, UploadCloud, SlidersHorizontal, ShieldCheck, Wrench } from "lucide-react";
 import {
   MediaLibrary,
   MediaUploadDropzone,
   PresetEditor,
 } from "@fa-m8/astro-media-m8/react";
-import { AuthProvider } from "../auth/AuthProvider";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
@@ -18,7 +18,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
-import { MediaProvider } from "./MediaProvider";
+import { PluginProviders } from "../app/PluginProviders";
 // Admin skins from the @fa-m8-media registry (logic stays the live package dep
 // via its useMediaAdmin hook); copied in with `shadcn add` — see app README.
 // The admin landing view is the storage dashboard; destructive ops live behind
@@ -28,6 +28,7 @@ import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-ov
 import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
 
 type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
+type MediaNavItem = { id: MediaView; label: string; icon: LucideIcon };
 
 function LoadingState() {
   return (
@@ -45,7 +46,7 @@ function MediaShell() {
   const t = getTranslations(locale);
 
   const navItems = useMemo(() => {
-    const items = [
+    const items: MediaNavItem[] = [
       { id: "library" as const, label: t.media.tabs.library, icon: Images },
       { id: "upload" as const, label: t.media.tabs.upload, icon: UploadCloud },
       { id: "presets" as const, label: t.media.tabs.presets, icon: SlidersHorizontal },
@@ -131,10 +132,8 @@ function MediaShell() {
 
 export default function MediaApp() {
   return (
-    <AuthProvider>
-      <MediaProvider>
-        <MediaShell />
-      </MediaProvider>
-    </AuthProvider>
+    <PluginProviders media>
+      <MediaShell />
+    </PluginProviders>
   );
 }

@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests"
   },
@@ -17,6 +18,7 @@
     "@fa-m8/astro-auth-m8": "file:../../astro-auth-m8",
     "@fontsource-variable/geist": "^5.2.9",
     "@tailwindcss/vite": "^4.3.1",
+    "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-table": "^8.21.3",
     "astro": "^6.3.1",
     "class-variance-authority": "^0.7.1",
@@ -42,6 +44,7 @@
     "@vitest/coverage-v8": "^4.1.8",
     "happy-dom": "^20.10.2",
     "shadcn": "^4.10.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.8"
   },
   "overrides": {

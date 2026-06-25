@@ -1,10 +1,11 @@
 // src/components/auth/AccountApp.tsx
 import { useMemo, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { KeyRound, LayoutDashboard, LogOut, Shield, UserRound, Activity } from "lucide-react";
-import { AuthProvider } from "../../components/auth/AuthProvider";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
 import { LoginForm } from "./LoginForm";
+import { PluginProviders } from "../app/PluginProviders";
 // Account skins from the @fa-m8-auth registry (logic stays the live package dep
 // via its useAuth/useProfile/useSessions/useApiKeys/useUsers hooks); copied in
 // with `shadcn add` — see app README. Locale stays owned by the app: each panel
@@ -20,6 +21,7 @@ import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
 
 type AccountView = "dashboard" | "profile" | "sessions" | "apiKeys" | "admin";
+type AccountNavItem = { id: AccountView; label: string; icon: LucideIcon };
 
 function LoadingState() {
   return (
@@ -37,7 +39,7 @@ function AppShellContent() {
   const t = getTranslations(locale);
 
   const navItems = useMemo(() => {
-    const items = [
+    const items: AccountNavItem[] = [
       { id: "dashboard" as const, label: t.auth.dashboard.overview.navLabel, icon: LayoutDashboard },
       { id: "profile" as const, label: t.auth.profile.title, icon: UserRound },
       { id: "sessions" as const, label: t.auth.sessions.title, icon: Activity },
@@ -122,8 +124,8 @@ function AppShellContent() {
 
 export default function AccountApp() {
   return (
-    <AuthProvider>
+    <PluginProviders>
       <AppShellContent />
-    </AuthProvider>
+    </PluginProviders>
   );
 }

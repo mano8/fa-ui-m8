@@ -1,10 +1,11 @@
 export const languages = {
   en: 'English',
-  fr: 'Français',
-  es: 'Español',
+  fr: 'Fran\u00e7ais',
+  es: 'Espa\u00f1ol',
 };
 
 export const defaultLang = 'en';
+export const showDefaultLang = false;
 
 export const ui = {
   en: {
@@ -14,10 +15,12 @@ export const ui = {
   },
   fr: {
     'nav.home': 'Accueil',
-    'nav.about': 'À propos',
+    'nav.about': '\u00c0 propos',
+    'nav.twitter': 'Twitter',
   },
   es: {
     'nav.home': 'Inicio',
     'nav.about': 'Acerca de',
+    'nav.twitter': 'Twitter',
   },
 } as const;
