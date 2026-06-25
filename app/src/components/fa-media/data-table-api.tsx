@@ -2,16 +2,6 @@
 
 import * as React from "react";
 import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  SlidersHorizontal,
-  type LucideIcon,
-} from "lucide-react";
-import {
   type ColumnDef,
   type OnChangeFn,
   type PaginationState,
@@ -22,8 +12,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -33,6 +21,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+
+import { DataTableColumnHeader } from "./data-table-column-header";
+import { DataTablePagination } from "./data-table-pagination";
+import { DataTableToolbar } from "./data-table-toolbar";
 
 export type DataTableApiSortDirection = "asc" | "desc";
 
@@ -46,6 +38,8 @@ export interface DataTableApiLabels {
   pageSizeLabel: string;
   previousPage: string;
   nextPage: string;
+  columnsLabel: string;
+  columnVisibilityLabel: (column: string) => string;
   sortAscending: string;
   sortDescending: string;
   clearSort: string;
@@ -88,6 +82,8 @@ const defaultLabels: DataTableApiLabels = {
   pageSizeLabel: "Rows per page",
   previousPage: "Previous page",
   nextPage: "Next page",
+  columnsLabel: "Columns",
+  columnVisibilityLabel: (column) => `Toggle ${column}`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   clearSort: "Clear sorting",
@@ -108,43 +104,6 @@ function resolveUpdater<TValue>(
 
 function normalizePositiveInt(value: number, fallback: number): number {
   return Number.isFinite(value) && value > 0 ? Math.trunc(value) : fallback;
-}
-
-function SortIcon({
-  direction,
-  icon: Icon,
-}: {
-  direction: false | DataTableApiSortDirection;
-  icon?: LucideIcon;
-}) {
-  if (Icon) {
-    return <Icon aria-hidden="true" className="size-3.5" />;
-  }
-
-  if (direction === "asc") {
-    return <ArrowUp aria-hidden="true" className="size-3.5" />;
-  }
-
-  if (direction === "desc") {
-    return <ArrowDown aria-hidden="true" className="size-3.5" />;
-  }
-
-  return <ArrowUpDown aria-hidden="true" className="size-3.5" />;
-}
-
-function getSortAssistiveLabel(
-  direction: false | DataTableApiSortDirection,
-  labels: DataTableApiLabels,
-): string {
-  if (direction === "asc") {
-    return labels.sortDescending;
-  }
-
-  if (direction === "desc") {
-    return labels.clearSort;
-  }
-
-  return labels.sortAscending;
 }
 
 export function DataTableApi<TData, TValue>({
@@ -196,8 +155,6 @@ export function DataTableApi<TData, TValue>({
   );
   const fromRow = safeRowCount === 0 ? 0 : pagination.pageIndex * safePageSize + 1;
   const toRow = Math.min(safeRowCount, safePage * safePageSize);
-  const showSearch = q !== undefined || onSearchChange !== undefined;
-  const showFilter = filterValue !== undefined || onFilterChange !== undefined;
 
   const handlePaginationChange = React.useCallback<OnChangeFn<PaginationState>>(
     (updater) => {
@@ -244,49 +201,15 @@ export function DataTableApi<TData, TValue>({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-          {showSearch ? (
-            <label className="relative min-w-0 sm:max-w-xs sm:flex-1">
-              <span className="sr-only">{labels.searchLabel}</span>
-              <Search
-                aria-hidden="true"
-                className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                aria-label={labels.searchLabel}
-                className="pl-8"
-                value={q ?? ""}
-                onChange={(event) => onSearchChange?.(event.currentTarget.value)}
-                placeholder={labels.searchPlaceholder}
-              />
-            </label>
-          ) : null}
-
-          {showFilter ? (
-            <label className="relative min-w-0 sm:max-w-xs sm:flex-1">
-              <span className="sr-only">{labels.filterLabel}</span>
-              <SlidersHorizontal
-                aria-hidden="true"
-                className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                aria-label={labels.filterLabel}
-                className="pl-8"
-                value={filterValue ?? ""}
-                onChange={(event) => onFilterChange?.(event.currentTarget.value)}
-                placeholder={labels.filterPlaceholder}
-              />
-            </label>
-          ) : null}
-        </div>
-
-        {toolbarAction ? (
-          <div className="flex shrink-0 items-center justify-end gap-2">
-            {toolbarAction}
-          </div>
-        ) : null}
-      </div>
+      <DataTableToolbar
+        table={table}
+        labels={labels}
+        q={q}
+        onSearchChange={onSearchChange}
+        filterValue={filterValue}
+        onFilterChange={onFilterChange}
+        toolbarAction={toolbarAction}
+      />
 
       <div className="rounded-md border" aria-busy={loading}>
         <Table>
@@ -294,34 +217,15 @@ export function DataTableApi<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const direction = header.column.getIsSorted();
-
                   return (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="-ml-2 h-8 max-w-full px-2"
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          <span className="truncate">
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                          </span>
-                          <SortIcon direction={direction} />
-                          <span className="sr-only">
-                            {getSortAssistiveLabel(direction, labels)}
-                          </span>
-                        </Button>
-                      ) : (
-                        flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )
+                      {header.isPlaceholder ? null : (
+                        <DataTableColumnHeader column={header.column} labels={labels}>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        </DataTableColumnHeader>
                       )}
                     </TableHead>
                   );
@@ -351,61 +255,19 @@ export function DataTableApi<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <span>{labels.rowsSummary(fromRow, toRow, safeRowCount)}</span>
-          {loading && table.getRowModel().rows.length ? (
-            <span role="status">{labels.loadingMessage}</span>
-          ) : null}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <label className="flex items-center gap-2 whitespace-nowrap">
-            <span>{labels.pageSizeLabel}</span>
-            <select
-              aria-label={labels.pageSizeLabel}
-              className="h-8 rounded-lg border border-input bg-background px-2 text-sm text-foreground"
-              value={safePageSize}
-              onChange={(event) => {
-                table.setPageSize(Number(event.currentTarget.value));
-              }}
-            >
-              {normalizedPageSizes.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <span className="whitespace-nowrap">
-            {labels.pageSummary(safePage, pageCount)}
-          </span>
-
-          <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              aria-label={labels.previousPage}
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft aria-hidden="true" />
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              aria-label={labels.nextPage}
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DataTablePagination
+        table={table}
+        labels={labels}
+        loading={loading}
+        fromRow={fromRow}
+        toRow={toRow}
+        rowCount={safeRowCount}
+        page={safePage}
+        pageCount={pageCount}
+        pageSize={safePageSize}
+        pageSizeOptions={normalizedPageSizes}
+        hasRows={table.getRowModel().rows.length > 0}
+      />
     </div>
   );
 }

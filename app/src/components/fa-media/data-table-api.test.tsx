@@ -125,6 +125,56 @@ describe("DataTableApi", () => {
     expect(onSortChange).toHaveBeenLastCalledWith("name", "desc");
   });
 
+  it("toggles column visibility through the view options support block", () => {
+    render(
+      <DataTableApi
+        columns={columns}
+        data={rows}
+        page={1}
+        pageSize={10}
+        rowCount={2}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("columnheader", { name: /Role/ })).toBeTruthy();
+    expect(screen.getByText("admin")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Toggle Role" }));
+
+    expect(screen.queryByRole("columnheader", { name: /Role/ })).toBeNull();
+    expect(screen.queryByText("admin")).toBeNull();
+    expect(screen.getByText("Ada")).toBeTruthy();
+  });
+
+  it("uses label overrides for support block controls", () => {
+    render(
+      <DataTableApi
+        columns={columns}
+        data={rows}
+        page={1}
+        pageSize={10}
+        rowCount={2}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+        labels={{
+          columnsLabel: "Colonnes",
+          columnVisibilityLabel: (column) => `Basculer ${column}`,
+          previousPage: "Page precedente",
+          nextPage: "Page suivante",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Colonnes" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Colonnes" }));
+    expect(screen.getByRole("checkbox", { name: "Basculer Name" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Page precedente" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Page suivante" })).toBeTruthy();
+  });
+
   it("renders loading and empty states from controlled inputs", () => {
     const { rerender } = render(
       <DataTableApi
