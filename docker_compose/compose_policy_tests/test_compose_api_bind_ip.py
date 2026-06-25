@@ -166,3 +166,27 @@ class TestComposeLoaderToleratesMergeTags:
     def test_scalar_tag(self) -> None:
         doc = yaml.load("name: !reset value", Loader=_ComposeLoader)
         assert doc == {"name": "value"}
+
+
+class TestActiveApiBindIp:
+    """Unit tests for _active_api_bind_ip covering all branches."""
+
+    def test_returns_none_when_absent(self, tmp_path: Path) -> None:
+        f = tmp_path / "test.env.example"
+        f.write_text("DB_HOST=localhost\nREDIS_PASSWORD=changethis\n")
+        assert _active_api_bind_ip(f) is None
+
+    def test_returns_none_when_commented(self, tmp_path: Path) -> None:
+        f = tmp_path / "test.env.example"
+        f.write_text("# API_BIND_IP=0.0.0.0\n#API_BIND_IP=127.0.0.1\n")
+        assert _active_api_bind_ip(f) is None
+
+    def test_returns_value_when_active(self, tmp_path: Path) -> None:
+        f = tmp_path / "test.env.example"
+        f.write_text("API_BIND_IP=127.0.0.1\n")
+        assert _active_api_bind_ip(f) == "127.0.0.1"
+
+    def test_returns_value_trims_whitespace(self, tmp_path: Path) -> None:
+        f = tmp_path / "test.env.example"
+        f.write_text("API_BIND_IP=  127.0.0.1  \n")
+        assert _active_api_bind_ip(f) == "127.0.0.1"
