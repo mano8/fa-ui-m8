@@ -107,7 +107,7 @@ function DangerAction({
       </div>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" disabled={state.status === "running"}>
+          <Button variant="destructive" className="w-full sm:w-auto" disabled={state.status === "running"}>
             {state.status === "running" ? labels.running : labels.confirm}
           </Button>
         </AlertDialogTrigger>

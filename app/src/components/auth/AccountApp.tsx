@@ -80,7 +80,7 @@ function AppShellContent() {
             {t.auth.dashboard.title}
           </h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span className="truncate font-medium text-foreground">{user?.email}</span>
+            <span className="min-w-0 break-all font-medium text-foreground sm:break-normal sm:truncate">{user?.email}</span>
             <span className="rounded-md border px-2 py-0.5 text-xs uppercase tracking-normal">{user?.role}</span>
             {user?.provider ? <span>{user.provider}</span> : null}
           </div>
@@ -93,12 +93,13 @@ function AppShellContent() {
 
       <div className="space-y-4">
         <NavigationMenu viewport={false} className="w-full max-w-none justify-stretch">
-          <NavigationMenuList
-            className={cn(
-              "grid h-auto w-full grid-cols-1 items-stretch justify-stretch rounded-lg border border-border bg-muted/40 p-1 sm:grid-cols-2",
-              isSuperuser ? "lg:grid-cols-5" : "lg:grid-cols-4"
-            )}
-          >
+          <div className="-mx-1 overflow-x-auto px-1 pb-1">
+            <NavigationMenuList
+              className={cn(
+                "flex h-auto min-w-max items-stretch gap-1 rounded-lg border border-border bg-muted/40 p-1 md:grid md:min-w-0 md:w-full md:grid-cols-2 md:justify-stretch",
+                isSuperuser ? "lg:grid-cols-5" : "lg:grid-cols-4"
+              )}
+            >
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = activeView === item.id;
@@ -107,7 +108,7 @@ function AppShellContent() {
                   <button
                     type="button"
                     aria-current={active ? "page" : undefined}
-                    className="inline-flex h-9 w-full min-w-0 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none select-none hover:bg-background hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-xs"
+                    className="inline-flex h-9 w-full min-w-fit items-center justify-start gap-2 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none select-none hover:bg-background hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 md:min-w-0 md:justify-center data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-xs"
                     data-active={active}
                     onClick={() => setActiveView(item.id)}
                   >
@@ -117,7 +118,8 @@ function AppShellContent() {
                 </NavigationMenuItem>
               );
             })}
-          </NavigationMenuList>
+            </NavigationMenuList>
+          </div>
         </NavigationMenu>
 
         {activeView === "dashboard" ? (

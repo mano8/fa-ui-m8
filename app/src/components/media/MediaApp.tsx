@@ -18,6 +18,7 @@ import { Card, CardContent } from "../ui/card";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
 import { PluginProviders } from "../app/PluginProviders";
+import { cn } from "../../lib/utils";
 // Admin skins from the @fa-m8-media registry (logic stays the live package dep
 // via its useMediaAdmin hook); copied in with `shadcn add` — see app README.
 // The admin landing view is the storage dashboard; destructive ops live behind
@@ -94,7 +95,13 @@ function MediaShell() {
 
       <Card className="border-muted/80 shadow-none">
         <CardContent className="p-2">
-          <div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-5">
+          <div className="-mx-1 overflow-x-auto px-1 pb-1">
+            <div
+              className={cn(
+                "flex min-w-max gap-1 md:grid md:min-w-0 md:grid-cols-3 lg:grid-cols-5",
+                isSuperuser ? "lg:grid-cols-5" : "lg:grid-cols-3",
+              )}
+            >
             {navItems.map((item) => {
               const Icon = item.icon;
               const selected = activeView === item.id;
@@ -103,7 +110,7 @@ function MediaShell() {
                   key={item.id}
                   type="button"
                   variant={selected ? "default" : "ghost"}
-                  className="h-10 justify-start gap-2 px-3 text-sm"
+                  className="h-10 min-w-fit justify-start gap-2 px-3 text-sm md:min-w-0 md:w-full md:justify-center"
                   onClick={() => setActiveView(item.id)}
                 >
                   <Icon className="size-4 shrink-0" />
@@ -111,6 +118,7 @@ function MediaShell() {
                 </Button>
               );
             })}
+            </div>
           </div>
         </CardContent>
       </Card>

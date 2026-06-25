@@ -130,16 +130,16 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
           <CardDescription>{t.createDescription}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreateToken} className="flex flex-wrap items-end gap-4">
-            <div className="flex-1 min-w-[200px] space-y-1">
+          <form onSubmit={handleCreateToken} className="grid gap-3 md:grid-cols-[minmax(0,1fr)_7rem_9rem_auto] md:items-end">
+            <div className="min-w-0 space-y-1">
               <Label htmlFor="name" className="pb-2">{t.name}</Label>
               <Input id="name" name="name" placeholder={t.namePlaceholder} required />
             </div>
-            <div className="w-24 space-y-1">
+            <div className="space-y-1">
               <Label htmlFor="ttl_amount" className="pb-2">{t.ttl}</Label>
               <Input id="ttl_amount" name="ttl_amount" type="number" min={1} defaultValue="30" required />
             </div>
-            <div className="w-32 space-y-1">
+            <div className="space-y-1">
               <Label htmlFor="ttl_unit" className="pb-2">{t.ttlUnit}</Label>
               <select
                 id="ttl_unit"
@@ -152,7 +152,7 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
                 <option value="weeks">{t.unitWeeks}</option>
               </select>
             </div>
-            <Button type="submit" disabled={isCreating}>
+            <Button type="submit" disabled={isCreating} className="w-full md:w-auto">
               {isCreating ? t.generating : t.mint}
             </Button>
           </form>
@@ -183,7 +183,7 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
           ) : (
             <div className="divide-y divide-border">
               {keys.map((key) => (
-                <div key={key.id} className="flex items-center justify-between gap-3 py-3">
+                <div key={key.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <h4 className="text-sm font-semibold">{key.name}</h4>
                     <p className="text-xs text-muted-foreground">
@@ -200,6 +200,7 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
                     size="sm"
                     variant="destructive"
                     disabled={key.revoked}
+                    className="w-full sm:w-auto"
                     onClick={() => revoke(key.id)}
                   >
                     {t.revoke}

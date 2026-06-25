@@ -209,20 +209,20 @@ function AdminUsersPanelInner({ t }: { t: AdminUsersPanelLabels }) {
               {RoleTypeSchema.options.map((role) => <option key={role} value={role}>{role}</option>)}
             </select>
           </div>
-          <label className="flex items-center gap-2 pb-2 text-sm">
+          <label className="flex min-h-9 items-center gap-2 rounded-md border border-input px-3 py-2 text-sm">
             <input name="is_active" type="checkbox" defaultChecked className="size-4" />
             {t.active}
           </label>
-          <label className="flex items-center gap-2 pb-2 text-sm">
+          <label className="flex min-h-9 items-center gap-2 rounded-md border border-input px-3 py-2 text-sm">
             <input name="is_superuser" type="checkbox" className="size-4" />
             {t.superuser}
           </label>
-          <Button type="submit">{t.create}</Button>
+          <Button type="submit" className="w-full md:w-auto">{t.create}</Button>
         </form>
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">{count} {t.users}</p>
-          <Button type="button" size="sm" variant="outline" onClick={() => reload()}>
+          <Button type="button" size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => reload()}>
             <RefreshCw />
             {t.refresh}
           </Button>
@@ -235,8 +235,8 @@ function AdminUsersPanelInner({ t }: { t: AdminUsersPanelLabels }) {
         {loading && users.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t.loading}</p>
         ) : (
-          <div className="overflow-x-auto rounded-md border">
-            <table className="w-full min-w-[760px] text-left text-sm">
+          <div className="-mx-1 overflow-x-auto px-1">
+            <table className="w-full min-w-[760px] rounded-md border text-left text-sm">
               <thead className="border-b bg-muted/40 text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2 font-medium">{t.user}</th>
@@ -277,12 +277,13 @@ function AdminUsersPanelInner({ t }: { t: AdminUsersPanelLabels }) {
                       </p>
                     </td>
                     <td className="px-3 py-3 align-top">
-                      <div className="flex gap-2">
-                        <Button type="submit" form={`admin-user-${user.id}`} size="sm">{t.save}</Button>
+                      <div className="flex min-w-[8rem] flex-col gap-2 xl:flex-row">
+                        <Button type="submit" form={`admin-user-${user.id}`} size="sm" className="w-full xl:w-auto">{t.save}</Button>
                         <Button
                           type="button"
                           size="sm"
                           variant="destructive"
+                          className="w-full xl:w-auto"
                           onClick={async () => {
                             await remove(user.id);
                             await reload();
