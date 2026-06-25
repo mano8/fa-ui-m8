@@ -47,7 +47,10 @@ function hook(overrides = {}) {
 }
 
 afterEach(() => cleanup());
-beforeEach(() => useMediaObjectsMock.mockReset().mockReturnValue(hook()));
+beforeEach(() => {
+  window.history.replaceState({}, "", "/en/media");
+  useMediaObjectsMock.mockReset().mockReturnValue(hook());
+});
 
 describe("MediaLibrary", () => {
   it("renders plugin-hook media through the app controlled table", () => {
@@ -64,33 +67,34 @@ describe("MediaLibrary", () => {
   });
 
   it("updates hook params from search, category, page size, and sort controls", () => {
-    const { rerender } = render(<MediaLibrary />);
+    render(<MediaLibrary />);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
       target: { value: "avatar" },
     });
-    rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ q: "avatar" }),
     );
+    expect(window.location.search).toContain("q=avatar");
 
     fireEvent.change(screen.getByLabelText("Filter"), { target: { value: "document" } });
-    rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ category: "document", q: "avatar" }),
     );
+    expect(window.location.search).toContain("category=document");
 
     fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "25" } });
-    rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ limit: 25 }),
     );
+    expect(window.location.search).toContain("pageSize=25");
 
     fireEvent.click(screen.getByRole("button", { name: /Size/ }));
-    rerender(<MediaLibrary />);
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ sort_by: "size_bytes", order: "asc" }),
     );
+    expect(window.location.search).toContain("sort=size_bytes");
+    expect(window.location.search).toContain("order=asc");
   });
 
   it("loads the next cursor page before moving forward", async () => {
@@ -113,6 +117,60 @@ describe("MediaLibrary", () => {
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
 
     await waitFor(() => expect(loadMore).toHaveBeenCalledOnce());
+  });
+
+  it("hydrates from URL state and loads enough cursor pages for a deep link", async () => {
+    const loadMore = vi.fn().mockResolvedValue(undefined);
+    window.history.replaceState(
+      {},
+      "",
+      "/en/media?page=2&pageSize=25&q=hero+asset&sort=size_bytes&order=asc&category=document",
+    );
+    useMediaObjectsMock.mockReturnValue(
+      hook({
+        items: Array.from({ length: 25 }, (_, index) =>
+          mediaObject({
+            id: `${index}`.padStart(8, "0") + "-1111-4111-8111-111111111111",
+            original_filename: `file-${index}.png`,
+            category: "document",
+          }),
+        ),
+        count: 50,
+        hasMore: true,
+        loadMore,
+      }),
+    );
+
+    render(<MediaLibrary />);
+
+    expect(useMediaObjectsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        limit: 25,
+        q: "hero asset",
+        category: "document",
+        sort_by: "size_bytes",
+        order: "asc",
+      }),
+    );
+    await waitFor(() => expect(loadMore).toHaveBeenCalledOnce());
+  });
+
+  it("resyncs from browser navigation state", async () => {
+    render(<MediaLibrary />);
+
+    window.history.pushState({}, "", "/en/media?page=3&pageSize=50&q=receipt&sort=size_bytes&order=asc");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+
+    await waitFor(() =>
+      expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          limit: 50,
+          q: "receipt",
+          sort_by: "size_bytes",
+          order: "asc",
+        }),
+      ),
+    );
   });
 
   it("shows plugin hook errors without importing service clients", () => {

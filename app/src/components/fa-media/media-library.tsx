@@ -13,15 +13,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableApi, type DataTableApiLabels } from "@/components/fa-media/data-table-api";
 import { humanizeBytes } from "@/components/fa-media/media-storage-chart";
-
-const CATEGORIES: MediaCategory[] = [
-  "avatar",
-  "document",
-  "asset",
-  "chat_attachment",
-  "export",
-  "receipt",
-];
+import {
+  parseMediaLibraryCategory,
+  parseMediaLibraryUrlState,
+  stringifyMediaLibraryUrlState,
+} from "@/components/fa-media/media-library-url-state";
 
 const SORT_FIELDS: SortField[] = ["created_at", "size_bytes"];
 
@@ -78,10 +74,6 @@ function normalizeSort(value: string | undefined): SortField {
   return SORT_FIELDS.includes(value as SortField) ? (value as SortField) : "created_at";
 }
 
-function normalizeCategory(value: string): MediaCategory | "" {
-  return CATEGORIES.includes(value as MediaCategory) ? (value as MediaCategory) : "";
-}
-
 function formatDate(value: string) {
   try {
     return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
@@ -100,12 +92,45 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
     categories: { ...DEFAULT_LABELS.categories, ...labels?.categories },
     statuses: { ...DEFAULT_LABELS.statuses, ...labels?.statuses },
   };
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(initial.limit ?? 10);
-  const [q, setQ] = React.useState(initial.q ?? "");
-  const [category, setCategory] = React.useState<MediaCategory | "">(initial.category ?? "");
-  const [sortBy, setSortBy] = React.useState<SortField>(initial.sort_by ?? "created_at");
-  const [sortDir, setSortDir] = React.useState<SortOrder>(initial.order ?? "desc");
+  const [urlState, setUrlState] = React.useState(() =>
+    typeof window === "undefined"
+      ? parseMediaLibraryUrlState(new URLSearchParams(), initial)
+      : parseMediaLibraryUrlState(new URLSearchParams(window.location.search), initial),
+  );
+  const loadMoreRef = React.useRef(false);
+  const { page, pageSize, q, category, sort: sortBy, order: sortDir } = urlState;
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const syncFromLocation = () => {
+      setUrlState(parseMediaLibraryUrlState(new URLSearchParams(window.location.search), initial));
+    };
+
+    window.addEventListener("popstate", syncFromLocation);
+    return () => window.removeEventListener("popstate", syncFromLocation);
+  }, [initial]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const nextSearch = stringifyMediaLibraryUrlState(urlState);
+    const currentSearch = window.location.search.replace(/^\?/, "");
+
+    if (nextSearch === currentSearch) {
+      return;
+    }
+
+    const nextUrl = nextSearch
+      ? `${window.location.pathname}?${nextSearch}${window.location.hash}`
+      : `${window.location.pathname}${window.location.hash}`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [urlState]);
+
   const params = React.useMemo<ObjectListParams>(
     () => ({
       ...initial,
@@ -118,6 +143,28 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
     [category, initial, pageSize, q, sortBy, sortDir],
   );
   const { items, count, loading, error, hasMore, loadMore } = useMediaObjects(params);
+
+  React.useEffect(() => {
+    const pageCount = Math.max(1, Math.ceil(Math.max(count, items.length) / pageSize));
+
+    if (page > pageCount) {
+      setUrlState((current) => ({ ...current, page: pageCount }));
+    }
+  }, [count, items.length, page, pageSize]);
+
+  React.useEffect(() => {
+    const neededItems = page * pageSize;
+
+    if (loading || loadMoreRef.current || page <= 1 || items.length >= neededItems || !hasMore) {
+      return;
+    }
+
+    loadMoreRef.current = true;
+    void loadMore().finally(() => {
+      loadMoreRef.current = false;
+    });
+  }, [hasMore, items.length, loadMore, loading, page, pageSize]);
+
   const pageItems = React.useMemo(
     () => items.slice((page - 1) * pageSize, page * pageSize),
     [items, page, pageSize],
@@ -172,16 +219,17 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
     [objectHref, t],
   );
 
-  const resetPage = React.useCallback(() => setPage(1), []);
   const handlePageChange = React.useCallback(
     (nextPage: number) => {
       if (nextPage < 1 || nextPage === page) return;
       const needsMore = nextPage > page && nextPage * pageSize > items.length && hasMore;
       if (needsMore) {
-        void loadMore().then(() => setPage(nextPage));
+        void loadMore().then(() =>
+          setUrlState((current) => ({ ...current, page: nextPage })),
+        );
         return;
       }
-      setPage(nextPage);
+      setUrlState((current) => ({ ...current, page: nextPage }));
     },
     [hasMore, items.length, loadMore, page, pageSize],
   );
@@ -206,25 +254,29 @@ export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryP
         pageSizeOptions={[10, 25, 50]}
         onPageChange={handlePageChange}
         onPageSizeChange={(nextPageSize) => {
-          setPageSize(nextPageSize);
-          resetPage();
+          setUrlState((current) => ({ ...current, pageSize: nextPageSize, page: 1 }));
         }}
         sortBy={sortBy}
         sortDir={sortDir}
         onSortChange={(nextSort, nextOrder) => {
-          setSortBy(normalizeSort(nextSort));
-          setSortDir(nextOrder ?? "desc");
-          resetPage();
+          setUrlState((current) => ({
+            ...current,
+            sort: normalizeSort(nextSort),
+            order: nextOrder ?? "desc",
+            page: 1,
+          }));
         }}
         q={q}
         onSearchChange={(nextQ) => {
-          setQ(nextQ);
-          resetPage();
+          setUrlState((current) => ({ ...current, q: nextQ, page: 1 }));
         }}
         filterValue={category}
         onFilterChange={(nextCategory) => {
-          setCategory(normalizeCategory(nextCategory));
-          resetPage();
+          setUrlState((current) => ({
+            ...current,
+            category: parseMediaLibraryCategory(nextCategory),
+            page: 1,
+          }));
         }}
         labels={t.table}
       />
