@@ -40,8 +40,8 @@ export function DataTableToolbar<TData>({
   const showFilter = filterValue !== undefined || onFilterChange !== undefined;
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="grid gap-2 sm:flex sm:items-center sm:justify-between">
+      <div className="grid min-w-0 flex-1 gap-2 sm:flex sm:items-center">
         {showSearch ? (
           <label className="relative min-w-0 sm:max-w-xs sm:flex-1">
             <span className="sr-only">{labels.searchLabel}</span>
@@ -77,7 +77,7 @@ export function DataTableToolbar<TData>({
         ) : null}
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+      <div className="flex min-w-0 shrink-0 flex-wrap items-center justify-end gap-2 [&_button]:whitespace-nowrap">
         <DataTableViewOptions table={table} labels={labels} />
         {toolbarAction}
       </div>

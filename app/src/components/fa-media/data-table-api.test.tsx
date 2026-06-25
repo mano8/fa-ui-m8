@@ -176,6 +176,24 @@ describe("DataTableApi", () => {
     expect(screen.getByRole("button", { name: "Page suivante" })).toBeTruthy();
   });
 
+  it("renders icon-button tooltips for compact pagination and column controls", () => {
+    render(
+      <DataTableApi
+        columns={columns}
+        data={rows}
+        page={1}
+        pageSize={1}
+        rowCount={2}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("tooltip", { name: "Columns" })).toBeTruthy();
+    expect(screen.getByRole("tooltip", { name: "Previous page" })).toBeTruthy();
+    expect(screen.getByRole("tooltip", { name: "Next page" })).toBeTruthy();
+  });
+
   it("renders labels supplied from the app locale translation adapter", () => {
     render(
       <DataTableApi

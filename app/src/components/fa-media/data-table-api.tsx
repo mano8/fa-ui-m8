@@ -211,7 +211,7 @@ export function DataTableApi<TData, TValue>({
         toolbarAction={toolbarAction}
       />
 
-      <div className="rounded-md border" aria-busy={loading}>
+      <div className="overflow-hidden rounded-md border" aria-busy={loading}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

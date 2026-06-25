@@ -4,7 +4,7 @@ import * as React from "react";
 import { Columns3 } from "lucide-react";
 import type { Table as ReactTable } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
+import { DataTableIconButton } from "./data-table-icon-button";
 
 export interface DataTableViewOptionsLabels {
   columnsLabel: string;
@@ -37,19 +37,18 @@ export function DataTableViewOptions<TData>({
 
   return (
     <div className="relative">
-      <Button
+      <DataTableIconButton
         type="button"
         variant="outline"
         size="icon-sm"
-        aria-label={labels.columnsLabel}
-        title={labels.columnsLabel}
+        label={labels.columnsLabel}
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >
         <Columns3 aria-hidden="true" />
-      </Button>
+      </DataTableIconButton>
       <div
-        className="absolute right-0 z-20 mt-2 min-w-44 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+        className="absolute right-0 z-20 mt-2 max-w-[calc(100vw-2rem)] min-w-44 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
         hidden={!open}
       >
         {columns.map((column) => {
