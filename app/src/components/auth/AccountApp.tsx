@@ -16,9 +16,10 @@ import { SessionsPanel } from "@/components/fa-auth/sessions-panel";
 import { ApiKeysPanel } from "@/components/fa-auth/api-keys-panel";
 import { AdminUsersPanel } from "@/components/fa-auth/admin-users-panel";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
+import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "../../components/ui/navigation-menu";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
+import { cn } from "../../lib/utils";
 
 type AccountView = "dashboard" | "profile" | "sessions" | "apiKeys" | "admin";
 type AccountNavItem = { id: AccountView; label: string; icon: LucideIcon };
@@ -43,7 +44,7 @@ function AppShellContent() {
       { id: "dashboard" as const, label: t.auth.dashboard.overview.navLabel, icon: LayoutDashboard },
       { id: "profile" as const, label: t.auth.profile.title, icon: UserRound },
       { id: "sessions" as const, label: t.auth.sessions.title, icon: Activity },
-      { id: "apiKeys" as const, label: t.auth.apiKeys.activeTitle, icon: KeyRound },
+      { id: "apiKeys" as const, label: t.auth.apiKeys.navLabel, icon: KeyRound },
     ];
     if (isSuperuser) items.push({ id: "admin" as const, label: t.auth.adminUsers.title, icon: Shield });
     return items;
@@ -53,7 +54,7 @@ function AppShellContent() {
 
   if (status === "unauthenticated") {
     return (
-      <div className="py-10">
+      <div className="fa-auth-login-centered">
         <LoginForm
           errorMessage={t.auth.login.invalidCredentials}
           loginTitle={t.auth.login.title}
@@ -72,7 +73,7 @@ function AppShellContent() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
+    <div className="not-content mx-auto w-full max-w-6xl space-y-6">
       <div className="flex flex-col gap-4 border-b pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 space-y-2">
           <h1 className="text-2xl font-semibold tracking-normal text-foreground md:text-3xl">
@@ -90,34 +91,51 @@ function AppShellContent() {
         </Button>
       </div>
 
-      <Card className="border-muted/80 shadow-none">
-        <CardContent className="p-2">
-          <div className="grid grid-cols-2 gap-1 md:grid-cols-4">
+      <div className="space-y-4">
+        <NavigationMenu viewport={false} className="w-full max-w-none justify-stretch">
+          <NavigationMenuList
+            className={cn(
+              "grid h-auto w-full grid-cols-1 items-stretch justify-stretch rounded-lg border border-border bg-muted/40 p-1 sm:grid-cols-2",
+              isSuperuser ? "lg:grid-cols-5" : "lg:grid-cols-4"
+            )}
+          >
             {navItems.map((item) => {
               const Icon = item.icon;
-              const selected = activeView === item.id;
+              const active = activeView === item.id;
               return (
-                <Button
-                  key={item.id}
-                  type="button"
-                  variant={selected ? "default" : "ghost"}
-                  className="h-10 justify-start gap-2 px-3 text-sm"
-                  onClick={() => setActiveView(item.id)}
-                >
-                  <Icon className="size-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </Button>
+                <NavigationMenuItem key={item.id}>
+                  <button
+                    type="button"
+                    aria-current={active ? "page" : undefined}
+                    className="inline-flex h-9 w-full min-w-0 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none select-none hover:bg-background hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-xs"
+                    data-active={active}
+                    onClick={() => setActiveView(item.id)}
+                  >
+                    <Icon className="size-4 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                </NavigationMenuItem>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
+          </NavigationMenuList>
+        </NavigationMenu>
 
-      {activeView === "dashboard" ? <DashboardOverview labels={t.auth.dashboard.overview} /> : null}
-      {activeView === "profile" ? <ProfilePanel labels={t.auth.profile} /> : null}
-      {activeView === "sessions" ? <SessionsPanel labels={t.auth.sessions} /> : null}
-      {activeView === "apiKeys" ? <ApiKeysPanel labels={t.auth.apiKeys} /> : null}
-      {activeView === "admin" && isSuperuser ? <AdminUsersPanel labels={t.auth.adminUsers} /> : null}
+        {activeView === "dashboard" ? (
+          <DashboardOverview labels={t.auth.dashboard.overview} />
+        ) : null}
+        {activeView === "profile" ? (
+          <ProfilePanel labels={t.auth.profile} />
+        ) : null}
+        {activeView === "sessions" ? (
+          <SessionsPanel labels={t.auth.sessions} />
+        ) : null}
+        {activeView === "apiKeys" ? (
+          <ApiKeysPanel labels={t.auth.apiKeys} />
+        ) : null}
+        {isSuperuser && activeView === "admin" ? (
+          <AdminUsersPanel labels={t.auth.adminUsers} />
+        ) : null}
+      </div>
     </div>
   );
 }

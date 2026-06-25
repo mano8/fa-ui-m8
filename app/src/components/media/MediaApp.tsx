@@ -64,7 +64,7 @@ function MediaShell() {
 
   if (status === "unauthenticated") {
     return (
-      <div className="py-10">
+      <div className="fa-auth-login-centered">
         <p className="mb-6 text-center text-sm text-muted-foreground">{t.media.signInPrompt}</p>
         <LoginForm
           errorMessage={t.auth.login.invalidCredentials}
@@ -84,7 +84,7 @@ function MediaShell() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
+    <div className="not-content mx-auto w-full max-w-6xl space-y-6">
       <div className="space-y-2 border-b pb-5">
         <h1 className="text-2xl font-semibold tracking-normal text-foreground md:text-3xl">
           {t.media.title}

@@ -50,7 +50,7 @@ export function SignupForm({ locale }: { locale: Locale }) {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="not-content w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl text-center">{t.title}</CardTitle>
         <CardDescription className="text-center">
@@ -66,18 +66,18 @@ export function SignupForm({ locale }: { locale: Locale }) {
           )}
 
           <div className="space-y-1">
-            <Label htmlFor="full_name">{t.fullName}</Label>
+            <Label htmlFor="full_name" className="pb-2">{t.fullName}</Label>
             <Input id="full_name" name="full_name" placeholder={t.fullNamePlaceholder} />
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="email">{t.email}</Label>
+            <Label htmlFor="email" className="pb-2">{t.email}</Label>
             <Input id="email" name="email" type="email" placeholder={t.emailPlaceholder} required />
             {formErrors.email && <p className="text-xs text-destructive">{formErrors.email}</p>}
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="password">{t.password}</Label>
+            <Label htmlFor="password" className="pb-2">{t.password}</Label>
             <Input id="password" name="password" type="password" placeholder="********" required />
             {formErrors.password && <p className="text-xs text-destructive">{formErrors.password}</p>}
           </div>

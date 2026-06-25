@@ -31,7 +31,7 @@ function LoginShield({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="not-content fa-auth-login-centered space-y-4">
       {isSuccessBanner && (
         <div className="max-w-md mx-auto p-3 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md text-center font-medium">
           {t.auth.login.registered}

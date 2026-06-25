@@ -104,6 +104,7 @@ export default {
         "Avis de sécurité : copiez cette clé API maintenant. Elle ne sera plus affichée.",
       copied: "Copié",
       copy: "Copier",
+      navLabel: "Identifiants",
       activeTitle: "Profils d'identifiants actifs",
       loading: "Chargement des jetons API...",
       empty: "Aucun jeton API actif trouvé.",

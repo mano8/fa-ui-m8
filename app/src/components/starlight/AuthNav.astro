@@ -1,8 +1,8 @@
 ---
 // Overrides Starlight's SocialIcons slot to add app entry points to the top bar.
-// Renders the default social icons and prepends locale-aware "Media" and
-// "Account / Sign in" links. Each target page handles its own login state.
+// Renders the default social icons and prepends locale-aware app entry points.
 import Default from '@astrojs/starlight/components/SocialIcons.astro';
+import AccountNavMenu from './AccountNavMenu';
 import { getTranslations } from '@/content/i18n/app';
 import { localeFromPath } from '@/lib/locale';
 
@@ -10,10 +10,29 @@ const locale = localeFromPath(Astro.url.pathname);
 const t = getTranslations(locale);
 const mediaHref = `/${locale}/media`;
 const accountHref = `/${locale}/user/account`;
+const loginHref = `/${locale}/auth/login`;
+const logoutHref = `/${locale}/auth/logout`;
+const signupHref = `/${locale}/auth/signup`;
 ---
 
 <a class="fa-auth-navlink" href={mediaHref}>{t.nav.media}</a>
-<a class="fa-auth-navlink" href={accountHref}>{t.nav.account}</a>
+<AccountNavMenu
+  client:only="react"
+  accountHref={accountHref}
+  loginHref={loginHref}
+  logoutHref={logoutHref}
+  mediaHref={mediaHref}
+  signupHref={signupHref}
+  labels={{
+    account: t.nav.account,
+    accountSettings: t.pages.accountTitle,
+    createAccount: t.auth.login.createAccount,
+    media: t.nav.media,
+    signedIn: t.auth.dashboard.authenticatedUser,
+    signIn: t.auth.signup.signIn,
+    signOut: t.auth.dashboard.signOut,
+  }}
+/>
 <Default><slot /></Default>
 
 <style>

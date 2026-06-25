@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from "@tailwindcss/vite";
 import react from '@astrojs/react';
 import faAuth from '@fa-m8/astro-auth-m8';
+import { loadEnv } from 'vite';
 import { buildSecurityConfig } from './src/lib/csp.ts';
 
 const upstreamMarkdownWarning =
@@ -13,6 +14,8 @@ console.warn = (...args) => {
 	if (args[0] === upstreamMarkdownWarning) return;
 	warn(...args);
 };
+
+const env = loadEnv(process.env.NODE_ENV === 'production' ? 'production' : 'development', process.cwd(), '');
 
 // Deployment contract: `astro-auth-m8` is the one required plugin; every other
 // plugin is opt-in per *deployment* = (package installed) + (its PUBLIC_* env
@@ -26,12 +29,12 @@ console.warn = (...args) => {
 // fa-auth-m8 tokens. Headless to match the auth setup — Starlight owns routing,
 // so media UI is mounted through React islands wrapped in MediaProvider.
 const mediaIntegrations = [];
-if (process.env.PUBLIC_MEDIA_API_BASE) {
+if (env.PUBLIC_MEDIA_API_BASE) {
 	const { default: faMedia } = await import('@fa-m8/astro-media-m8');
 	mediaIntegrations.push(
 		faMedia({
-			apiBase: process.env.PUBLIC_MEDIA_API_BASE,
-			v1Base: process.env.PUBLIC_MEDIA_V1_BASE ?? '/v1',
+			apiBase: env.PUBLIC_MEDIA_API_BASE,
+			v1Base: env.PUBLIC_MEDIA_V1_BASE ?? '/v1',
 			mode: 'headless',
 			auth: { provider: 'fa-auth-astro' },
 			locales: ['en', 'es', 'fr'],
@@ -42,11 +45,12 @@ if (process.env.PUBLIC_MEDIA_API_BASE) {
 
 // https://astro.build/config
 export default defineConfig({
-	site: process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321',
+	site: env.PUBLIC_SITE_URL ?? 'http://localhost:4321',
 	// Production CSP for the static UI (plan item 8.1). Build-time only — a no-op
 	// under `astro dev`; takes effect in `build`/`preview`. See src/lib/csp.ts.
 	security: buildSecurityConfig(),
 	vite: {
+		cacheDir: process.env.VITE_CACHE_DIR ?? '.astro/vite',
 		plugins: [tailwindcss()],
 		optimizeDeps: {
 			include: [
@@ -223,7 +227,7 @@ export default defineConfig({
 		}),
 		react(),
 		faAuth({
-			apiBase: process.env.PUBLIC_AUTH_API_BASE ?? '/user',
+			apiBase: env.PUBLIC_AUTH_API_BASE ?? '/user',
 			mode: 'headless',
 			locales: ['en', 'es', 'fr'],
 			defaultLocale: 'en',

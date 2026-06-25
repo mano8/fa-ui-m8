@@ -103,6 +103,7 @@ export default {
         "Security notice: copy this API key now. It will not be shown again.",
       copied: "Copied",
       copy: "Copy",
+      navLabel: "Credentials",
       activeTitle: "Active credential profiles",
       loading: "Loading API tokens...",
       empty: "No active API tokens found.",

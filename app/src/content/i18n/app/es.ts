@@ -104,6 +104,7 @@ export default {
         "Aviso de seguridad: copia esta clave API ahora. No se volverá a mostrar.",
       copied: "Copiado",
       copy: "Copiar",
+      navLabel: "Credenciales",
       activeTitle: "Perfiles de credenciales activos",
       loading: "Cargando tokens API...",
       empty: "No se encontraron tokens API activos.",

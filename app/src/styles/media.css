@@ -31,12 +31,104 @@
   margin-bottom: 1rem;
 }
 
-.fa-media-panel label {
+.fa-media-panel fieldset {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 0.5rem);
+  background: var(--card);
+}
+
+.fa-media-panel legend {
+  padding: 0 0.25rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.fa-media-panel label:has(input[type="checkbox"]),
+.fa-media-panel label:has(input[type="radio"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fa-media-field-control {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.875rem;
+  min-width: 12rem;
+  max-width: 100%;
+}
+
+.fa-media-control {
+  box-sizing: border-box;
+  height: 2rem;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg, 0.5rem);
+  padding: 0.25rem 0.625rem;
+  font: inherit;
+}
+
+.fa-media-control::placeholder {
   color: var(--muted-foreground);
+}
+
+.fa-media-control option {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.fa-media-control::file-selector-button {
+  height: 1.5rem;
+  margin: -0.125rem 0.5rem -0.125rem -0.125rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.fa-media-control:focus-visible {
+  border-color: var(--ring);
+  outline: 3px solid color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+.fa-media-control:disabled {
+  cursor: not-allowed;
+  background: color-mix(in oklab, var(--input) 50%, transparent);
+  opacity: 0.5;
+}
+
+.fa-media-panel button {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg, 0.5rem);
+  background: var(--background);
+  padding: 0.25rem 0.75rem;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.fa-media-panel button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.fa-media-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .fa-media-table {

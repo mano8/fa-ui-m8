@@ -1,8 +1,8 @@
 """Initial m8 migration
 
-Revision ID: e3a8593dd387
+Revision ID: 806a45aab65f
 Revises: 
-Create Date: 2026-06-15 14:47:12.394575
+Create Date: 2026-06-22 19:50:47.666004
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 import media_service.core.db_models
 
 # revision identifiers, used by Alembic.
-revision: str = 'e3a8593dd387'
+revision: str = '806a45aab65f'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -92,6 +92,25 @@ def upgrade() -> None:
     op.create_index(op.f('ix_app_media_object_storage_bucket'), 'app_media_object', ['storage_bucket'], unique=False)
     op.create_index(op.f('ix_app_media_object_tenant_id'), 'app_media_object', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_app_media_object_visibility'), 'app_media_object', ['visibility'], unique=False)
+    op.create_table('app_outbox_event',
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('event_type', sa.String(length=64), nullable=False),
+    sa.Column('object_id', sa.Uuid(), nullable=False),
+    sa.Column('payload', sa.JSON(), nullable=False),
+    sa.Column('status', sa.String(length=16), nullable=False),
+    sa.Column('attempts', sa.Integer(), nullable=False),
+    sa.Column('next_attempt_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('delivered_at', sa.DateTime(timezone=True), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    mysql_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    op.create_index(op.f('ix_app_outbox_event_event_type'), 'app_outbox_event', ['event_type'], unique=False)
+    op.create_index(op.f('ix_app_outbox_event_id'), 'app_outbox_event', ['id'], unique=False)
+    op.create_index(op.f('ix_app_outbox_event_next_attempt_at'), 'app_outbox_event', ['next_attempt_at'], unique=False)
+    op.create_index(op.f('ix_app_outbox_event_object_id'), 'app_outbox_event', ['object_id'], unique=False)
+    op.create_index(op.f('ix_app_outbox_event_status'), 'app_outbox_event', ['status'], unique=False)
     op.create_table('app_storage_usage',
     sa.Column('owner_user_id', sa.Uuid(), nullable=False),
     sa.Column('tenant_id', sa.Uuid(), nullable=True),
@@ -110,6 +129,19 @@ def upgrade() -> None:
     op.create_index(op.f('ix_app_storage_usage_id'), 'app_storage_usage', ['id'], unique=False)
     op.create_index(op.f('ix_app_storage_usage_owner_user_id'), 'app_storage_usage', ['owner_user_id'], unique=False)
     op.create_index(op.f('ix_app_storage_usage_tenant_id'), 'app_storage_usage', ['tenant_id'], unique=False)
+    op.create_table('app_subscription',
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('url', sa.String(length=2048), nullable=False),
+    sa.Column('secret', sa.String(length=255), nullable=False),
+    sa.Column('event_types', sa.JSON(), nullable=False),
+    sa.Column('active', sa.Boolean(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    mysql_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    op.create_index(op.f('ix_app_subscription_active'), 'app_subscription', ['active'], unique=False)
+    op.create_index(op.f('ix_app_subscription_id'), 'app_subscription', ['id'], unique=False)
     op.create_table('app_upload_session',
     sa.Column('tenant_id', sa.Uuid(), nullable=True),
     sa.Column('owner_user_id', sa.Uuid(), nullable=False),
@@ -229,10 +261,19 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_app_upload_session_id'), table_name='app_upload_session')
     op.drop_index(op.f('ix_app_upload_session_category'), table_name='app_upload_session')
     op.drop_table('app_upload_session')
+    op.drop_index(op.f('ix_app_subscription_id'), table_name='app_subscription')
+    op.drop_index(op.f('ix_app_subscription_active'), table_name='app_subscription')
+    op.drop_table('app_subscription')
     op.drop_index(op.f('ix_app_storage_usage_tenant_id'), table_name='app_storage_usage')
     op.drop_index(op.f('ix_app_storage_usage_owner_user_id'), table_name='app_storage_usage')
     op.drop_index(op.f('ix_app_storage_usage_id'), table_name='app_storage_usage')
     op.drop_table('app_storage_usage')
+    op.drop_index(op.f('ix_app_outbox_event_status'), table_name='app_outbox_event')
+    op.drop_index(op.f('ix_app_outbox_event_object_id'), table_name='app_outbox_event')
+    op.drop_index(op.f('ix_app_outbox_event_next_attempt_at'), table_name='app_outbox_event')
+    op.drop_index(op.f('ix_app_outbox_event_id'), table_name='app_outbox_event')
+    op.drop_index(op.f('ix_app_outbox_event_event_type'), table_name='app_outbox_event')
+    op.drop_table('app_outbox_event')
     op.drop_index(op.f('ix_app_media_object_visibility'), table_name='app_media_object')
     op.drop_index(op.f('ix_app_media_object_tenant_id'), table_name='app_media_object')
     op.drop_index(op.f('ix_app_media_object_storage_bucket'), table_name='app_media_object')

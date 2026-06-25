@@ -1,23 +1,10 @@
-// src/components/auth/AuthProvider.tsx
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   AuthProvider as PluginAuthProvider,
   useAuth as usePluginAuth,
   type AuthContextValue as PluginAuthContextValue,
 } from "@fa-m8/astro-auth-m8/react";
-import type { LoginForm, UserPublic } from "@fa-m8/astro-auth-m8/schemas";
-
-type AuthStatus = "loading" | "authenticated" | "unauthenticated";
-
-interface AuthContextValue {
-  user: UserPublic | null;
-  status: AuthStatus;
-  login: (creds: LoginForm) => Promise<void>;
-  logout: () => Promise<void>;
-  refresh: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextValue | null>(null);
+import { AuthContext, type AuthContextValue } from "./authContext";
 
 function toLocalAuth(plugin: PluginAuthContextValue): AuthContextValue {
   return {

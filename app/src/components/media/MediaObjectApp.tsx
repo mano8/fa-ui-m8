@@ -33,7 +33,7 @@ function ObjectShell() {
 
   if (status === "unauthenticated") {
     return (
-      <div className="py-10">
+      <div className="fa-auth-login-centered">
         <p className="mb-6 text-center text-sm text-muted-foreground">{t.media.signInPrompt}</p>
         <LoginForm
           errorMessage={t.auth.login.invalidCredentials}
@@ -53,7 +53,7 @@ function ObjectShell() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4">
+    <div className="not-content mx-auto w-full max-w-4xl space-y-4">
       <a
         href={libraryHref}
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"

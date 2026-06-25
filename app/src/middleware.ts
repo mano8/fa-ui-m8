@@ -1,5 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import { hardenCspMeta } from '@/lib/csp';
+import { defaultLocaleRootRedirectUrl } from '@/lib/localeRedirect';
 
 /**
  * Post-processes Astro's CSP `<meta>` so inline styles work (plan item 8.1).
@@ -12,7 +13,10 @@ import { hardenCspMeta } from '@/lib/csp';
  * With `output: static` this runs at build time for every prerendered page, so
  * the relaxation is baked into `dist/`; there is no UI runtime in production.
  */
-export const onRequest = defineMiddleware(async (_context, next) => {
+export const onRequest = defineMiddleware(async (context, next) => {
+  const defaultLocaleRedirect = defaultLocaleRootRedirectUrl(context.url);
+  if (defaultLocaleRedirect) return Response.redirect(defaultLocaleRedirect, 307);
+
   const response = await next();
   const contentType = response.headers.get('content-type') ?? '';
   if (!contentType.includes('text/html')) return response;

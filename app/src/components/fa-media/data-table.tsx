@@ -2,7 +2,7 @@
 
 // Generic, pure-shadcn data table (sorting + filtering + pagination) built on
 // @tanstack/react-table and the shadcn `table` primitive. Copied into the
-// consumer via the @fa-m8-media registry; edit freely per app.
+// consumer via the @fa-m8/astro-media-m8 registry; edit freely per app.
 import * as React from "react";
 import {
   type ColumnDef,
@@ -48,7 +48,9 @@ export function DataTable<TData, TValue>({
   emptyMessage = "No results.",
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
 
   const table = useReactTable({
     data,
@@ -70,7 +72,10 @@ export function DataTable<TData, TValue>({
       {filterCol ? (
         <Input
           value={(filterCol.getFilterValue() as string) ?? ""}
-          onChange={(event) => filterCol.setFilterValue(event.target.value)}
+          onChange={(event) => {
+            filterCol.setFilterValue(event.target.value);
+            table.setPageIndex(0);
+          }}
           placeholder={filterPlaceholder}
           className="max-w-sm"
           aria-label={filterPlaceholder}

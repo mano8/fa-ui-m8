@@ -6,6 +6,39 @@
       "name": "Development server",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+        "name": "fa-ui-m8 Run Dev",
+        "request": "launch",
+        "cwd": "${workspaceRoot}\\app",
+        "runtimeArgs": [
+            "run-script",
+            "run astro dev"
+        ],
+        "runtimeExecutable": "npm",
+        "skipFiles": [
+            "<node_internals>/**"
+        ],
+        "type": "node"
+    },
+    {
+        "type": "chrome",
+        "request": "launch",
+        "name": "debug client-side",
+        "url": "http://localhost:8080",
+        "webRoot": "${workspaceFolder}"
+    },
+    {
+        "type": "chrome",
+        "request": "launch",
+        "name": "debug server-side",
+        "url": "http://localhost:8080",
+        "webRoot": "${workspaceFolder}",
+        "sourceMaps": true,
+        "trace": true,
+        "skipFiles": [
+            "<node_internals>/**"
+        ]
     }
   ]
 }

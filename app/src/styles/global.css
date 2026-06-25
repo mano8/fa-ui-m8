@@ -117,10 +117,36 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+.fa-auth-login-centered {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 2.5rem 1rem;
+}
+
+@media (min-width: 50em) {
+  .fa-auth-login-centered {
+    width: calc(100vw - var(--sl-content-inline-start, 0rem));
+    margin-inline-start: calc((100% - (100vw - var(--sl-content-inline-start, 0rem))) / 2);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
     }
+  select {
+    color-scheme: light;
+  }
+  :root[data-theme='dark'] select {
+    color-scheme: dark;
+  }
+  select option {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
   body {
     @apply bg-background text-foreground;
     }

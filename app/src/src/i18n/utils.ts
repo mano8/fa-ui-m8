@@ -1,7 +1,8 @@
 import { ui, defaultLang, showDefaultLang } from './ui';
 
-type TranslationKey = keyof typeof ui[typeof defaultLang];
-type SupportedLang = keyof typeof ui;
+type Ui = typeof ui;
+type Lang = keyof Ui;
+type TranslationKey = keyof Ui[typeof defaultLang];
 
 export function getLangFromUrl(url: URL) {
   const [, lang] = url.pathname.split('/');
@@ -9,14 +10,14 @@ export function getLangFromUrl(url: URL) {
   return defaultLang;
 }
 
-export function useTranslations(lang: SupportedLang) {
+export function useTranslations(lang: Lang) {
   return function t(key: TranslationKey) {
     return ui[lang]?.[key] || ui[defaultLang][key];
   }
 }
 
-export function useTranslatedPath(lang: SupportedLang) {
-  return function translatePath(path: string, l: SupportedLang = lang) {
+export function useTranslatedPath(lang: Lang) {
+  return function translatePath(path: string, l: Lang = lang) {
     return !showDefaultLang && l === defaultLang ? path : `/${l}${path}`
   }
 }
