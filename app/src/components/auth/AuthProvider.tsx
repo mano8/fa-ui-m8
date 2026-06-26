@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { useCallback, useMemo, type ReactNode } from "react";
 import {
   AuthProvider as PluginAuthProvider,
   useAuth as usePluginAuth,
@@ -6,23 +6,30 @@ import {
 } from "@fa-m8/astro-auth-m8/react";
 import { AuthContext, type AuthContextValue } from "./authContext";
 
-function toLocalAuth(plugin: PluginAuthContextValue): AuthContextValue {
-  return {
-    user: plugin.user,
-    status: plugin.loading ? "loading" : plugin.user ? "authenticated" : "unauthenticated",
-    login: async (creds) => {
-      await plugin.login(creds.username, creds.password);
-    },
-    logout: plugin.logout,
-    refresh: async () => {
-      await plugin.reload();
-    },
-  };
-}
-
 function AuthBridge({ children }: { children: ReactNode }) {
   const plugin = usePluginAuth();
-  const value = useMemo(() => toLocalAuth(plugin), [plugin]);
+  const login = useCallback<AuthContextValue["login"]>(
+    async (creds) => {
+      await plugin.login(creds.username, creds.password);
+    },
+    [plugin.login],
+  );
+  const refresh = useCallback<AuthContextValue["refresh"]>(
+    async () => {
+      await plugin.reload();
+    },
+    [plugin.reload],
+  );
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user: plugin.user,
+      status: plugin.loading ? "loading" : plugin.user ? "authenticated" : "unauthenticated",
+      login,
+      logout: plugin.logout,
+      refresh,
+    }),
+    [login, plugin.loading, plugin.logout, plugin.user, refresh],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
