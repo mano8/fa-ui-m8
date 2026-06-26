@@ -224,6 +224,7 @@ Canonical env names (operator-facing — set these):
 | `PUBLIC_AUTH_API_BASE` | auth | backend auth base path |
 | `PUBLIC_MEDIA_API_BASE` | media | backend media base path **and** the media on/off gate |
 | `PUBLIC_MEDIA_V1_BASE` | media | versioned media routes sub-prefix |
+| `PUBLIC_MEDIA_STORAGE_ORIGIN` | media | browser-direct storage origin for CSP `connect-src` (e.g. `https://storage.example.com`); unset for same-origin storage |
 
 The media integration re-exposes the `PUBLIC_MEDIA_*` values internally as
 `PUBLIC_FA_MEDIA_*` at build time; those are an implementation detail and must not
@@ -266,7 +267,10 @@ Policy shape and the React/Tailwind trade-off:
   `img/font/connect/worker-src`) is locked to a minimal `'self'` baseline. `connect-src` defaults to
   `'self'` (the UI calls same-origin `/user` and `/media`); if you point the UI at absolute API origins
   via `PUBLIC_AUTH_API_BASE` / `PUBLIC_MEDIA_API_BASE` / `PUBLIC_MEDIA_V1_BASE` / `PUBLIC_SITE_URL`,
-  those origins are added to `connect-src` automatically at build time.
+  those origins are added to `connect-src` automatically at build time. For deployments where the browser
+  POSTs presigned uploads directly to a separate MinIO/object-storage host, set
+  `PUBLIC_MEDIA_STORAGE_ORIGIN` to that host's `scheme://host[:port]` and it is included in `connect-src`
+  without needing to wildcard the directive.
 
 This is the **UI-layer** CSP and is separate from the JSON-API CSP that Traefik emits for the
 auth/media services (just `frame-ancestors 'none'`). Validate with `npm run build` and confirm the meta

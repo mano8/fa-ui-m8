@@ -71,6 +71,34 @@ describe('connectSrc', () => {
   it('scans the documented connect-origin keys', () => {
     expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_SITE_URL');
     expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_AUTH_API_BASE');
+    expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_MEDIA_STORAGE_ORIGIN');
+  });
+
+  it('appends storage origin when PUBLIC_MEDIA_STORAGE_ORIGIN is configured', () => {
+    expect(
+      connectSrc({
+        PUBLIC_AUTH_API_BASE: 'https://api.example.com/user',
+        PUBLIC_MEDIA_API_BASE: 'https://api.example.com/media',
+        PUBLIC_MEDIA_STORAGE_ORIGIN: 'https://storage.example.com',
+      }),
+    ).toEqual(["'self'", 'https://api.example.com', 'https://storage.example.com']);
+  });
+
+  it('ignores an empty storage origin safely', () => {
+    expect(connectSrc({ PUBLIC_MEDIA_STORAGE_ORIGIN: '' })).toEqual(["'self'"]);
+  });
+
+  it('ignores an invalid (non-http) storage origin', () => {
+    expect(connectSrc({ PUBLIC_MEDIA_STORAGE_ORIGIN: 'not-a-url' })).toEqual(["'self'"]);
+  });
+
+  it('deduplicates storage origin when it matches an API origin', () => {
+    expect(
+      connectSrc({
+        PUBLIC_MEDIA_API_BASE: 'https://api.example.com/media',
+        PUBLIC_MEDIA_STORAGE_ORIGIN: 'https://api.example.com',
+      }),
+    ).toEqual(["'self'", 'https://api.example.com']);
   });
 });
 
