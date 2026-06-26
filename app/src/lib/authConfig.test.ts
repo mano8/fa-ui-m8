@@ -4,6 +4,7 @@ import {
   getOAuthRedirectPrefixes,
   isGoogleLoginAvailable,
   isValidOAuthRedirect,
+  isValidOAuthRedirectOverride,
 } from '@/lib/authConfig';
 
 // ---------------------------------------------------------------------------
@@ -126,6 +127,64 @@ describe('isValidOAuthRedirect', () => {
 });
 
 // ---------------------------------------------------------------------------
+// isValidOAuthRedirectOverride
+// ---------------------------------------------------------------------------
+
+describe('isValidOAuthRedirectOverride', () => {
+  it('accepts an https URL that starts with an allowed prefix', () => {
+    expect(
+      isValidOAuthRedirectOverride('https://app.example.com/auth/callback', [
+        'https://app.example.com/',
+      ]),
+    ).toBe(true);
+  });
+
+  it('rejects an https URL when no prefixes are configured (fail-closed)', () => {
+    expect(isValidOAuthRedirectOverride('https://app.example.com/auth/callback', [])).toBe(false);
+  });
+
+  it('rejects an https URL when it does not match any configured prefix', () => {
+    expect(
+      isValidOAuthRedirectOverride('https://other.example.com/auth/callback', [
+        'https://app.example.com/',
+      ]),
+    ).toBe(false);
+  });
+
+  it('accepts http://localhost (dev-only allowance)', () => {
+    expect(isValidOAuthRedirectOverride('http://localhost:4321/en/auth/callback', [])).toBe(true);
+  });
+
+  it('accepts http://127.0.0.1 (dev-only allowance)', () => {
+    expect(isValidOAuthRedirectOverride('http://127.0.0.1:4321/en/auth/callback', [])).toBe(true);
+  });
+
+  it('rejects http for a non-localhost host', () => {
+    expect(isValidOAuthRedirectOverride('http://app.example.com/auth/callback', [])).toBe(false);
+  });
+
+  it('accepts a chrome-extension URL that starts with an allowed prefix', () => {
+    expect(
+      isValidOAuthRedirectOverride('chrome-extension://abc123/auth/callback', [
+        'chrome-extension://abc123/',
+      ]),
+    ).toBe(true);
+  });
+
+  it('rejects a chrome-extension URL with no allowed prefixes (fail-closed)', () => {
+    expect(isValidOAuthRedirectOverride('chrome-extension://abc123/auth/callback', [])).toBe(false);
+  });
+
+  it('rejects an invalid URL', () => {
+    expect(isValidOAuthRedirectOverride('not-a-url', [])).toBe(false);
+  });
+
+  it('rejects other protocols (ftp:)', () => {
+    expect(isValidOAuthRedirectOverride('ftp://files.example.com/callback', [])).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // isGoogleLoginAvailable
 // ---------------------------------------------------------------------------
 
@@ -136,7 +195,7 @@ describe('isGoogleLoginAvailable', () => {
     ).toBe(false);
   });
 
-  it('returns true when google is not disabled and window.location provides a valid redirect', () => {
+  it('returns true when google is not disabled and no override is configured (same-origin)', () => {
     expect(isGoogleLoginAvailable('en', {})).toBe(true);
   });
 
@@ -156,5 +215,39 @@ describe('isGoogleLoginAvailable', () => {
         PUBLIC_AUTH_OAUTH_ALLOWED_REDIRECT_PREFIXES: 'chrome-extension://abc123/',
       }),
     ).toBe(true);
+  });
+
+  it('returns true for an https override redirect that matches an allowed prefix', () => {
+    expect(
+      isGoogleLoginAvailable('en', {
+        PUBLIC_AUTH_OAUTH_REDIRECT: 'https://app.example.com/en/auth/callback',
+        PUBLIC_AUTH_OAUTH_ALLOWED_REDIRECT_PREFIXES: 'https://app.example.com/',
+      }),
+    ).toBe(true);
+  });
+
+  it('returns false for an https override redirect without a matching prefix', () => {
+    expect(
+      isGoogleLoginAvailable('en', {
+        PUBLIC_AUTH_OAUTH_REDIRECT: 'https://app.example.com/en/auth/callback',
+        // no prefix configured → fail-closed
+      }),
+    ).toBe(false);
+  });
+
+  it('returns true for an http localhost override redirect (dev case)', () => {
+    expect(
+      isGoogleLoginAvailable('en', {
+        PUBLIC_AUTH_OAUTH_REDIRECT: 'http://localhost:4321/en/auth/callback',
+      }),
+    ).toBe(true);
+  });
+
+  it('returns false for an http non-localhost override redirect', () => {
+    expect(
+      isGoogleLoginAvailable('en', {
+        PUBLIC_AUTH_OAUTH_REDIRECT: 'http://app.example.com/en/auth/callback',
+      }),
+    ).toBe(false);
   });
 });

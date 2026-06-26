@@ -88,11 +88,9 @@ Environment variables:
 
 ```bash
 PUBLIC_AUTH_API_BASE=/user
-# Optional Google OAuth.
-# Default UI behavior shows Google only for non-HTTP(S) native redirects.
-# If your running stack permits HTTP(S) redirect targets, set:
-# PUBLIC_AUTH_GOOGLE_ENABLED=true
-# PUBLIC_AUTH_OAUTH_REDIRECT=chrome-extension://your-extension-id/auth/callback
+# Same-origin callback (the default, no configuration needed).
+# For absolute override redirects, set PUBLIC_AUTH_OAUTH_REDIRECT and
+# PUBLIC_AUTH_OAUTH_ALLOWED_REDIRECT_PREFIXES (see .env.example for rules).
 PUBLIC_SITE_URL=http://localhost:4321
 ```
 
@@ -125,11 +123,13 @@ Before production, verify the live auth contract against the running backend:
 curl http://localhost:8000/user/openapi.json
 ```
 
-The currently probed `/user/google-api/login-url/` endpoint rejected
-`https://localhost:4430/en/auth/callback` with `400 redirect_target scheme not allowed: web origins
-are not permitted`. The UI therefore hides Google login by default for HTTP(S) redirects, but it can
-be enabled with `PUBLIC_AUTH_GOOGLE_ENABLED=true` when the running stack/backend permits those
-redirect targets.
+OAuth redirect validation: the UI applies an early-warning check that mirrors backend policy.
+Same-origin callbacks (no `PUBLIC_AUTH_OAUTH_REDIRECT` set) are always accepted.
+Absolute override redirects are validated before enabling the Google login button:
+`https://` overrides require a matching entry in `PUBLIC_AUTH_OAUTH_ALLOWED_REDIRECT_PREFIXES`;
+`http://` overrides are accepted only for `localhost` / `127.0.0.1` (dev-only);
+`chrome-extension://` overrides require a matching prefix (fail-closed).
+Backend validation remains authoritative — the UI check catches misconfiguration early.
 
 ## Auth account dashboard (shadcn registry)
 

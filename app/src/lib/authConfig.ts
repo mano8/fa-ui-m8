@@ -52,9 +52,49 @@ export function isValidOAuthRedirect(
   }
 }
 
+/**
+ * Validate an absolute `PUBLIC_AUTH_OAUTH_REDIRECT` override against the same
+ * policy the auth backend applies:
+ *
+ * - `https://`           → must start with an entry in `allowedPrefixes` (fail-closed)
+ * - `chrome-extension://`→ must start with an entry in `allowedPrefixes` (fail-closed)
+ * - `http://`            → localhost / 127.0.0.1 only (dev-only allowance)
+ * - anything else        → rejected
+ *
+ * This function is only called for explicit overrides.  Same-origin callbacks
+ * (the no-override default) are always accepted without a prefix check because
+ * they are generated from the current site's own origin.
+ *
+ * Backend validation remains the security authority; this is an early-warning
+ * gate so operators see unsafe config at build/startup time instead of at the
+ * backend rejection step.
+ */
+export function isValidOAuthRedirectOverride(
+  redirectTarget: string,
+  allowedPrefixes: string[],
+): boolean {
+  try {
+    const url = new URL(redirectTarget);
+    if (url.protocol === 'https:' || url.protocol === 'chrome-extension:') {
+      return allowedPrefixes.some((prefix) => redirectTarget.startsWith(prefix));
+    }
+    if (url.protocol === 'http:') {
+      return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function isGoogleLoginAvailable(locale: string, env: EnvLike = import.meta.env): boolean {
   if (env['PUBLIC_AUTH_GOOGLE_ENABLED'] === 'false') {
     return false;
   }
-  return isValidOAuthRedirect(getOAuthRedirect(locale, env), getOAuthRedirectPrefixes(env));
+  const override = env['PUBLIC_AUTH_OAUTH_REDIRECT'];
+  if (override) {
+    return isValidOAuthRedirectOverride(override, getOAuthRedirectPrefixes(env));
+  }
+  // Same-origin generated callback is always acceptable.
+  return true;
 }
