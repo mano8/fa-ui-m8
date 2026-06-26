@@ -38,7 +38,7 @@ _PREVIOUSLY_BARE = {
     "quay.io/minio/mc": "quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z",
 }
 _PREVIOUSLY_LATEST = {
-    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:0.9.9",
+    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:1.0.0",
     "tepochtli/media-service-m8": "tepochtli/media-service-m8:0.0.9",
     "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.2.0",
 }
