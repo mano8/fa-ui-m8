@@ -1,15 +1,44 @@
+# Build artifacts
 **/node_modules
 **/.astro
 **/dist
 **/coverage
 
+# Compose runtime secrets — must not enter any build context
+**/.env
+**/auth.env
+**/media.env
+**/worker.env
+**/test.env
+**/grafana.env
+**/keys/
+**/traefik/certs/
+**/*.pem
+**/*.key
+**/*.crt
+
+# Compose runtime data directories
 docker_compose/**/db_data
 docker_compose/**/grafana/data
 docker_compose/**/minio/data
 docker_compose/**/prometheus/data
 docker_compose/**/redis/redis_data
 docker_compose/**/media_redis/data
+**/shared_migrations/
 
+# Python tooling artifacts (compose test/tooling dirs)
+**/__pycache__/
+**/*.pyc
+**/.mypy_cache/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.coverage
+
+# Version control and IDE
 .git
 .github
 .vscode
+
+# Local-only developer config
+CLAUDE.md
+.claude/
