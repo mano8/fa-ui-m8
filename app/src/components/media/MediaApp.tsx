@@ -2,7 +2,7 @@
 // Route-driven media studio island. It mirrors AccountApp so all media pages
 // share the auth/media providers while Starlight owns the page routes.
 import { useEffect, useState } from "react";
-import { MediaUploadDropzone } from "@fa-m8/astro-media-m8/react";
+import { MediaLibrary, MediaUploadDropzone } from "@fa-m8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
@@ -11,7 +11,6 @@ import { localeFromPath } from "../../lib/locale";
 import { PluginProviders } from "../app/PluginProviders";
 import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-overview";
 import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
-import { MediaLibrary } from "@/components/fa-media/media-library";
 import { MediaPresets } from "@/components/fa-media/media-presets";
 
 export type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
@@ -77,7 +76,7 @@ function AppShellContent({ view }: { view: MediaView }) {
   }
 
   return (
-    <div className="not-content mx-auto w-full max-w-6xl space-y-6">
+    <div className="not-content w-full max-w-none space-y-6">
       <div className="space-y-2 border-b pb-3 mb-3">
         <h1 className="text-2xl font-semibold tracking-normal text-foreground md:text-3xl">
           {t.media.title}
@@ -87,7 +86,7 @@ function AppShellContent({ view }: { view: MediaView }) {
 
       <div className="space-y-4 pb-3">
         {activeView === "library" ? (
-          <MediaLibrary objectHref={objectHref} labels={t.media.library} />
+          <MediaLibrary objectHref={objectHref} />
         ) : null}
         {activeView === "upload" ? (
           <MediaUploadDropzone onUploaded={() => navigateMediaView("library")} />
