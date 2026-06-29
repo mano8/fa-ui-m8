@@ -133,6 +133,198 @@
   }
 }
 
+html:not([data-has-toc]) main > .content-panel > .sl-container {
+  max-width: none;
+  margin-inline: 0.75rem;
+}
+
+.fa-starlight-sidebar-shell {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: visible;
+  position: relative;
+}
+
+.fa-starlight-sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline-end: 0.25rem;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sl-color-gray-5) transparent;
+}
+
+#starlight__sidebar {
+  overflow: hidden;
+}
+
+.fa-account-sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--sl-color-gray-6);
+  padding: 0.75rem 0 0.25rem;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fa-account-sidebar-status,
+.fa-account-sidebar-link,
+.fa-account-sidebar-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fa-account-sidebar-trigger {
+  width: 100%;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--sl-color-white);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  justify-content: space-between;
+  line-height: 1.2;
+  padding: 0.35rem 0.5rem;
+  text-align: start;
+}
+
+.fa-account-sidebar-trigger:hover,
+.fa-account-sidebar-trigger:focus {
+  background: var(--sl-color-gray-6);
+}
+
+.fa-account-sidebar-trigger-text {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.fa-account-sidebar-trigger-text > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fa-account-sidebar-trigger-text > span + span {
+  color: var(--sl-color-gray-3);
+  font-size: var(--sl-text-xs);
+  font-weight: 400;
+}
+
+.fa-account-sidebar-caret {
+  flex: 0 0 auto;
+  transition: transform 160ms ease;
+}
+
+.fa-account-sidebar-caret[data-open='true'] {
+  transform: rotate(180deg);
+}
+
+.fa-account-sidebar-menu {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.35rem;
+  border: 1px solid var(--sl-color-gray-6);
+  border-radius: 0.5rem;
+  background: var(--sl-color-bg-nav);
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 35%);
+  position: fixed;
+  inset-block-end: calc(env(safe-area-inset-bottom, 0rem) + 4.75rem);
+  inset-inline: 0.75rem;
+  max-height: min(22rem, calc(100dvh - var(--sl-nav-height) - 6rem));
+  overflow-y: auto;
+  z-index: calc(var(--sl-z-index-menu) + 2);
+}
+
+.fa-account-sidebar-link {
+  border-radius: 0.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+  line-height: 1.4;
+  padding: 0.3rem 0.5rem;
+  text-decoration: none;
+}
+
+.fa-account-sidebar-link:hover,
+.fa-account-sidebar-link:focus {
+  color: var(--sl-color-white);
+}
+
+.fa-account-sidebar-link[aria-current='page'] {
+  background-color: var(--sl-color-text-accent);
+  color: var(--sl-color-text-invert);
+  font-weight: 600;
+}
+
+.fa-account-sidebar-primary {
+  color: var(--sl-color-white);
+  font-weight: 600;
+}
+
+.fa-account-sidebar-status {
+  color: var(--sl-color-gray-3);
+  font-size: var(--sl-text-sm);
+  padding: 0.3rem 0.5rem;
+}
+
+.fa-sidebar-toggle {
+  display: none;
+}
+
+@media (min-width: 50rem) {
+  .fa-account-sidebar-menu {
+    position: fixed;
+    inset-block-end: 1rem;
+    inset-inline-start: calc(var(--sl-sidebar-width) + 0.75rem);
+    inset-inline-end: auto;
+    width: min(18rem, calc(100vw - var(--sl-sidebar-width) - 2rem));
+  }
+
+  .fa-sidebar-toggle {
+    position: fixed;
+    z-index: calc(var(--sl-z-index-menu) + 1);
+    inset-block-start: calc(var(--sl-nav-height) + 0.75rem);
+    inset-inline-start: calc(var(--sl-sidebar-width) - 1rem);
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-white);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 25%);
+    transition:
+      inset-inline-start 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .fa-sidebar-toggle:hover {
+    background: var(--sl-color-gray-6);
+    border-color: var(--sl-color-gray-4);
+  }
+
+  html[data-sidebar-collapsed='true'][data-has-sidebar] {
+    --sl-content-inline-start: 0rem;
+  }
+
+  html[data-sidebar-collapsed='true'] #starlight__sidebar {
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(calc(-1 * var(--sl-sidebar-width)));
+  }
+
+  html[data-sidebar-collapsed='true'] .fa-sidebar-toggle {
+    inset-inline-start: 0.75rem;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

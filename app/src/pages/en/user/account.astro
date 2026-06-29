@@ -1,36 +1,5 @@
 ---
-// src/pages/en/user/account.astro
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import AccountApp from '@/components/auth/AccountApp';
-import { getTranslations } from '@/content/i18n/app';
-
-const t = getTranslations('en');
+import AccountPage from '@/components/auth/AccountPage.astro';
 ---
 
-<StarlightPage frontmatter={{
-  title: t.pages.accountTitle,
-  tableOfContents: false
-}}>
-  {/* React 19 Client-Side Authentication App Engine */}
-  <AccountApp client:only="react">
-    
-    {/* Native Astro Fallback Skeleton Slot: Runs instantly before JS hydration completes */}
-    <div slot="fallback" class="w-full space-y-6 py-6 animate-pulse">
-      <div class="flex items-center justify-between border-b pb-6">
-        <div class="space-y-2">
-          <div class="h-8 w-48 rounded bg-muted/60"></div>
-          <div class="h-4 w-72 rounded bg-muted/40"></div>
-        </div>
-        <div class="h-10 w-28 rounded bg-muted/60"></div>
-      </div>
-      
-      <div class="grid gap-6 md:grid-cols-2">
-        <div class="h-64 rounded-xl border bg-muted/20"></div>
-        <div class="h-64 rounded-xl border bg-muted/20"></div>
-      </div>
-      
-      <div class="h-48 rounded-xl border bg-muted/20"></div>
-    </div>
-
-  </AccountApp>
-</StarlightPage>
+<AccountPage locale="en" view="dashboard" />

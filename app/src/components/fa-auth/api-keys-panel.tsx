@@ -123,23 +123,23 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
   };
 
   return (
-    <div className="not-content space-y-6">
-      <Card>
-        <CardHeader>
+    <div className="not-content space-y-6 pb-3">
+      <Card className="pb-3">
+        <CardHeader className="pb-3">
           <CardTitle>{t.createTitle}</CardTitle>
           <CardDescription>{t.createDescription}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleCreateToken} className="grid gap-3 md:grid-cols-[minmax(0,1fr)_7rem_9rem_auto] md:items-end">
-            <div className="min-w-0 space-y-1">
+        <CardContent className="pb-3">
+          <form onSubmit={handleCreateToken} className="grid gap-3 pb-3 md:grid-cols-[minmax(0,1fr)_7rem_9rem_auto] md:items-end">
+            <div className="min-w-0 space-y-1 pb-3">
               <Label htmlFor="name" className="pb-2">{t.name}</Label>
               <Input id="name" name="name" placeholder={t.namePlaceholder} required />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 pb-3">
               <Label htmlFor="ttl_amount" className="pb-2">{t.ttl}</Label>
               <Input id="ttl_amount" name="ttl_amount" type="number" min={1} defaultValue="30" required />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 pb-3">
               <Label htmlFor="ttl_unit" className="pb-2">{t.ttlUnit}</Label>
               <select
                 id="ttl_unit"
@@ -158,9 +158,9 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
           </form>
 
           {lastCreated && (
-            <div className="mt-4 p-4 border border-amber-200 bg-amber-50 rounded-md text-amber-900 space-y-2">
+            <div className="mt-4 space-y-2 rounded-md border border-amber-200 bg-amber-50 p-4 pb-3 text-amber-900">
               <p className="text-sm font-bold">{t.securityNotice}</p>
-              <div className="flex items-center gap-2 bg-white p-2 rounded border font-mono text-xs overflow-x-auto">
+              <div className="flex items-center gap-2 overflow-x-auto rounded border bg-white p-2 pb-3 font-mono text-xs">
                 <span className="flex-1 select-all break-all">{lastCreated.plaintext}</span>
                 <Button size="sm" variant="ghost" onClick={() => handleCopy(lastCreated.plaintext)}>
                   {copied ? t.copied : t.copy}
@@ -171,20 +171,20 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="pb-3">
+        <CardHeader className="pb-3">
           <CardTitle>{t.activeTitle}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-3">
           {loading && keys.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-2 italic">{t.loading}</p>
+            <p className="py-2 pb-3 text-sm text-muted-foreground italic">{t.loading}</p>
           ) : keys.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-2 italic">{t.empty}</p>
+            <p className="py-2 pb-3 text-sm text-muted-foreground italic">{t.empty}</p>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-border pb-3">
               {keys.map((key) => (
-                <div key={key.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
+                <div key={key.id} className="flex flex-col gap-3 py-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 pb-3">
                     <h4 className="text-sm font-semibold">{key.name}</h4>
                     <p className="text-xs text-muted-foreground">
                       {t.expires}: {key.expires_at ? new Date(key.expires_at).toLocaleString() : t.notAvailable}

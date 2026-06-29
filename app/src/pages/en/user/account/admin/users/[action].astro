@@ -1,0 +1,11 @@
+---
+import AccountPage from '@/components/auth/AccountPage.astro';
+
+export function getStaticPaths() {
+  return ['new', 'edit', 'delete'].map((action) => ({
+    params: { action },
+  }));
+}
+---
+
+<AccountPage locale="en" view="admin" />

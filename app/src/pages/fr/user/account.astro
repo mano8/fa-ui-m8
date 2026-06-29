@@ -1,14 +1,5 @@
 ---
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import AccountApp from '@/components/auth/AccountApp';
-import { getTranslations } from '@/content/i18n/app';
-
-const t = getTranslations('fr');
+import AccountPage from '@/components/auth/AccountPage.astro';
 ---
 
-<StarlightPage frontmatter={{
-  title: t.pages.loginTitle,
-  tableOfContents: false
-}}>
-  <AccountApp client:only="react" />
-</StarlightPage>
+<AccountPage locale="fr" view="dashboard" />

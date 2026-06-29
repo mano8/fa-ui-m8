@@ -77,17 +77,19 @@ function ActivitySummary({
   totalRegistrations,
   totalUsers,
   t,
+  className,
 }: {
   title: string;
   totalLogins?: number;
   totalRegistrations?: number;
   totalUsers?: number;
   t: SessionsPanelLabels;
+  className?: string;
 }) {
   return (
-    <div className="rounded-md border p-3">
+    <div className={["rounded-md border p-3 pb-3", className].filter(Boolean).join(" ")}>
       <h4 className="text-sm font-semibold">{title}</h4>
-      <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">
+      <dl className="mt-3 grid grid-cols-3 gap-3 pb-3 text-sm">
         <div>
           <dt className="text-muted-foreground">{t.logins}</dt>
           <dd className="font-medium">{totalLogins ?? "-"}</dd>
@@ -132,24 +134,24 @@ export function SessionsPanel({ labels }: { labels?: Partial<SessionsPanelLabels
   }, [isSuperuser, list, reloadAll]);
 
   return (
-    <div className="not-content grid auto-rows-fr gap-6 lg:grid-cols-2">
-      <Card className="h-full">
-        <CardHeader>
+    <div className="not-content grid auto-rows-fr gap-6 pb-3 lg:grid-cols-2">
+      <Card className="h-full pb-3">
+        <CardHeader className="pb-3">
           <CardTitle>{t.title}</CardTitle>
           <CardDescription>{t.description}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pb-3">
           {current ? (
-            <dl className="grid gap-2 text-sm">
-              <div className="flex justify-between gap-3">
+            <dl className="grid gap-2 pb-3 text-sm">
+              <div className="flex justify-between gap-3 pb-3">
                 <dt className="text-muted-foreground">{t.provider}</dt>
                 <dd className="font-medium">{current.provider}</dd>
               </div>
-              <div className="flex justify-between gap-3">
+              <div className="flex justify-between gap-3 pb-3">
                 <dt className="text-muted-foreground">{t.jwtExpires}</dt>
                 <dd className="font-medium text-right">{formatDate(current.jwt_expires_at, t.notAvailable)}</dd>
               </div>
-              <div className="flex justify-between gap-3">
+              <div className="flex justify-between gap-3 pb-3">
                 <dt className="text-muted-foreground">{t.refreshExpires}</dt>
                 <dd className="font-medium text-right">{formatDate(current.refresh_expires_at, t.notAvailable)}</dd>
               </div>
@@ -166,7 +168,12 @@ export function SessionsPanel({ labels }: { labels?: Partial<SessionsPanelLabels
             t={t}
           />
 
-          <Button type="button" variant="outline" onClick={() => { reloadCurrent(); reloadMine(); }}>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-auto py-3"
+            onClick={() => { reloadCurrent(); reloadMine(); }}
+          >
             <RefreshCw />
             {t.refresh}
           </Button>
@@ -174,18 +181,19 @@ export function SessionsPanel({ labels }: { labels?: Partial<SessionsPanelLabels
       </Card>
 
       {isSuperuser && (
-        <Card className="h-full">
-          <CardHeader>
+        <Card className="h-full pb-3">
+          <CardHeader className="pb-3">
             <CardTitle>{t.adminTitle}</CardTitle>
             <CardDescription>{t.adminDescription}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-3">
             <ActivitySummary
               title={t.allActivity}
               totalLogins={activityAdded(all, "login")}
               totalRegistrations={activityAdded(all, "registration")}
               totalUsers={all?.nb_users}
               t={t}
+              className="mb-3"
             />
 
             {rows.length === 0 ? (
@@ -193,9 +201,9 @@ export function SessionsPanel({ labels }: { labels?: Partial<SessionsPanelLabels
                 {loading ? t.loading : t.empty}
               </p>
             ) : (
-              <div className="divide-y rounded-md border">
+              <div className="divide-y rounded-md border pb-3">
                 {rows.map((session) => (
-                  <div key={session.id} className="flex items-center justify-between gap-3 p-3">
+                  <div key={session.id} className="flex items-center justify-between gap-3 p-3 pb-3">
                     <div className="min-w-0 text-sm">
                       <p className="truncate font-medium">{session.id}</p>
                       <p className="text-muted-foreground">{t.expires} {formatDate(session.refresh_expires_at, t.notAvailable)}</p>

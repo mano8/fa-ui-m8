@@ -1,0 +1,42 @@
+---
+import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import AccountSidebarFooter from './AccountSidebarFooter';
+import { getTranslations } from '@/content/i18n/app';
+import { localeFromPath } from '@/lib/locale';
+
+const { sidebar } = Astro.locals.starlightRoute;
+const locale = localeFromPath(Astro.url.pathname);
+const t = getTranslations(locale);
+const accountHref = `/${locale}/user/account`;
+const loginHref = `/${locale}/auth/login`;
+---
+
+<div class="fa-starlight-sidebar-shell">
+  <div class="fa-starlight-sidebar-scroll">
+    <SidebarPersister>
+      <SidebarSublist sublist={sidebar} />
+    </SidebarPersister>
+  </div>
+
+  <AccountSidebarFooter
+    client:only="react"
+    accountHref={accountHref}
+    loginHref={loginHref}
+    labels={{
+      accountSettings: t.pages.accountTitle,
+      dashboard: t.auth.dashboard.overview.navLabel,
+      profile: t.auth.profile.title,
+      sessions: t.auth.sessions.title,
+      credentials: t.auth.apiKeys.navLabel,
+      adminUsers: t.auth.adminUsers.title,
+      signIn: t.auth.signup.signIn,
+      signedIn: t.auth.dashboard.authenticatedUser,
+    }}
+  />
+
+  <div class="md:sl-hidden">
+    <MobileMenuFooter />
+  </div>
+</div>

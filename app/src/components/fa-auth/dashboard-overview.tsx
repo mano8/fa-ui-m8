@@ -54,14 +54,14 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="h-full pb-3">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {label}
         </CardTitle>
         <Icon className="size-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-2 pb-3">
         <div className="text-2xl font-semibold tabular-nums">{value}</div>
       </CardContent>
     </Card>
@@ -108,13 +108,13 @@ export function DashboardOverview({
   }
 
   return (
-    <div className="not-content space-y-6">
-      <div className="space-y-1">
+    <div className="not-content space-y-6 pb-3">
+      <div className="space-y-1 pb-3">
         <h2 className="text-xl font-semibold tracking-tight">{t.title}</h2>
         <p className="text-sm text-muted-foreground">{t.subtitle}</p>
       </div>
 
-      <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid auto-rows-fr gap-4 pb-3 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label={t.users}
           value={(activity?.nb_users ?? 0).toLocaleString()}
@@ -132,11 +132,11 @@ export function DashboardOverview({
         />
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="pb-3">
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">{t.activityTitle}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-2 pb-3">
           {counters.length ? (
             <ActivityBarChart
               data={counters}

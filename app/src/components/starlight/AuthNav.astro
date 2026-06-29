@@ -2,53 +2,8 @@
 // Overrides Starlight's SocialIcons slot to add app entry points to the top bar.
 // Renders the default social icons and prepends locale-aware app entry points.
 import Default from '@astrojs/starlight/components/SocialIcons.astro';
-import AccountNavMenu from './AccountNavMenu';
-import { getTranslations } from '@/content/i18n/app';
-import { localeFromPath } from '@/lib/locale';
-
-const locale = localeFromPath(Astro.url.pathname);
-const t = getTranslations(locale);
-const mediaHref = `/${locale}/media`;
-const accountHref = `/${locale}/user/account`;
-const loginHref = `/${locale}/auth/login`;
-const logoutHref = `/${locale}/auth/logout`;
-const signupHref = `/${locale}/auth/signup`;
+import SidebarToggle from './SidebarToggle';
 ---
 
-<a class="fa-auth-navlink" href={mediaHref}>{t.nav.media}</a>
-<AccountNavMenu
-  client:only="react"
-  accountHref={accountHref}
-  loginHref={loginHref}
-  logoutHref={logoutHref}
-  mediaHref={mediaHref}
-  signupHref={signupHref}
-  labels={{
-    account: t.nav.account,
-    accountSettings: t.pages.accountTitle,
-    createAccount: t.auth.login.createAccount,
-    media: t.nav.media,
-    signedIn: t.auth.dashboard.authenticatedUser,
-    signIn: t.auth.signup.signIn,
-    signOut: t.auth.dashboard.signOut,
-  }}
-/>
+<SidebarToggle client:only="react" />
 <Default><slot /></Default>
-
-<style>
-  .fa-auth-navlink {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    font-size: var(--sl-text-sm);
-    font-weight: 600;
-    color: var(--sl-color-white);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .fa-auth-navlink:hover {
-    background: var(--sl-color-gray-6);
-  }
-</style>
