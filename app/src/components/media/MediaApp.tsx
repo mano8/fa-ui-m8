@@ -1,35 +1,36 @@
 // src/components/media/MediaApp.tsx
-// Media studio island, mirroring AccountApp: AuthProvider + MediaProvider, an
-// auth gate (the media service only accepts fa-auth tokens), and tabbed views
-// built from the @fa-m8/astro-media-m8 React components. Admin is superuser-only.
-import "../../styles/media.css";
-import { useMemo, useState } from "react";
-import type { LucideIcon } from "lucide-react";
-import { Images, UploadCloud, SlidersHorizontal, ShieldCheck, Wrench } from "lucide-react";
-import {
-  MediaUploadDropzone,
-  PresetEditor,
-} from "@fa-m8/astro-media-m8/react";
+// Route-driven media studio island. It mirrors AccountApp so all media pages
+// share the auth/media providers while Starlight owns the page routes.
+import { useEffect, useState } from "react";
+import { MediaUploadDropzone } from "@fa-m8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
 import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
 import { PluginProviders } from "../app/PluginProviders";
-import { cn } from "../../lib/utils";
-// Admin skins from the @fa-m8-media registry (logic stays the live package dep
-// via its useMediaAdmin hook); copied in with `shadcn add` — see app README.
-// The admin landing view is the storage dashboard; destructive ops live behind
-// confirmations in the superuser-only Maintenance tab. Locale stays app-owned:
-// each panel takes its strings via `labels`.
 import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-overview";
 import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
 import { MediaLibrary } from "@/components/fa-media/media-library";
+import { MediaPresets } from "@/components/fa-media/media-presets";
 
-type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
-type MediaNavItem = { id: MediaView; label: string; icon: LucideIcon };
+export type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
+const MEDIA_ROUTE_EVENT = "fa-ui-m8:media-route";
+
+function mediaViewFromPath(pathname: string): MediaView | null {
+  const path = pathname.replace(/\/$/, "");
+  if (/^\/(en|es|fr)\/media$/.test(path)) return "library";
+  if (/^\/(en|es|fr)\/media\/upload$/.test(path)) return "upload";
+  if (/^\/(en|es|fr)\/media\/presets$/.test(path)) return "presets";
+  if (/^\/(en|es|fr)\/media\/admin$/.test(path)) return "admin";
+  if (/^\/(en|es|fr)\/media\/maintenance$/.test(path)) return "maintenance";
+  return null;
+}
+
+function pathForMediaView(locale: string, view: MediaView): string {
+  if (view === "library") return `/${locale}/media`;
+  return `/${locale}/media/${view}`;
+}
 
 function LoadingState() {
   return (
@@ -39,27 +40,18 @@ function LoadingState() {
   );
 }
 
-function MediaShell() {
+function AppShellContent({ view }: { view: MediaView }) {
   const { status } = useAuth();
   const { isSuperuser } = useUser();
-  const [activeView, setActiveView] = useState<MediaView>("library");
   const locale = typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname);
   const t = getTranslations(locale);
-
-  const navItems = useMemo(() => {
-    const items: MediaNavItem[] = [
-      { id: "library" as const, label: t.media.tabs.library, icon: Images },
-      { id: "upload" as const, label: t.media.tabs.upload, icon: UploadCloud },
-      { id: "presets" as const, label: t.media.tabs.presets, icon: SlidersHorizontal },
-    ];
-    if (isSuperuser) {
-      items.push({ id: "admin" as const, label: t.media.tabs.admin, icon: ShieldCheck });
-      items.push({ id: "maintenance" as const, label: t.media.tabs.maintenance, icon: Wrench });
-    }
-    return items;
-  }, [isSuperuser, t]);
-
+  const activeView: MediaView =
+    !isSuperuser && (view === "admin" || view === "maintenance") ? "library" : view;
   const objectHref = (id: string) => `/${locale}/media/object?id=${encodeURIComponent(id)}`;
+
+  const navigateMediaView = (nextView: MediaView) => {
+    window.location.assign(pathForMediaView(locale, nextView));
+  };
 
   if (status === "loading") return <LoadingState />;
 
@@ -86,64 +78,61 @@ function MediaShell() {
 
   return (
     <div className="not-content mx-auto w-full max-w-6xl space-y-6">
-      <div className="space-y-2 border-b pb-5">
+      <div className="space-y-2 border-b pb-3 mb-3">
         <h1 className="text-2xl font-semibold tracking-normal text-foreground md:text-3xl">
           {t.media.title}
         </h1>
         <p className="text-sm text-muted-foreground">{t.media.description}</p>
       </div>
 
-      <Card className="border-muted/80 shadow-none">
-        <CardContent className="p-2">
-          <div className="-mx-1 overflow-x-auto px-1 pb-1">
-            <div
-              className={cn(
-                "flex min-w-max gap-1 md:grid md:min-w-0 md:grid-cols-3 lg:grid-cols-5",
-                isSuperuser ? "lg:grid-cols-5" : "lg:grid-cols-3",
-              )}
-            >
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const selected = activeView === item.id;
-              return (
-                <Button
-                  key={item.id}
-                  type="button"
-                  variant={selected ? "default" : "ghost"}
-                  className="h-10 min-w-fit justify-start gap-2 px-3 text-sm md:min-w-0 md:w-full md:justify-center"
-                  onClick={() => setActiveView(item.id)}
-                >
-                  <Icon className="size-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </Button>
-              );
-            })}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {activeView === "library" ? (
-        <MediaLibrary objectHref={objectHref} labels={t.media.library} />
-      ) : null}
-      {activeView === "upload" ? (
-        <MediaUploadDropzone onUploaded={() => setActiveView("library")} />
-      ) : null}
-      {activeView === "presets" ? <PresetEditor /> : null}
-      {activeView === "admin" && isSuperuser ? (
-        <MediaDashboardOverview labels={t.media.admin.overview} />
-      ) : null}
-      {activeView === "maintenance" && isSuperuser ? (
-        <MediaMaintenancePanel labels={t.media.admin.maintenance} />
-      ) : null}
+      <div className="space-y-4 pb-3">
+        {activeView === "library" ? (
+          <MediaLibrary objectHref={objectHref} labels={t.media.library} />
+        ) : null}
+        {activeView === "upload" ? (
+          <MediaUploadDropzone onUploaded={() => navigateMediaView("library")} />
+        ) : null}
+        {activeView === "presets" ? (
+          <MediaPresets baseHref={`/${locale}/media/presets`} labels={t.media.presets} />
+        ) : null}
+        {activeView === "admin" && isSuperuser ? (
+          <MediaDashboardOverview labels={t.media.admin.overview} />
+        ) : null}
+        {activeView === "maintenance" && isSuperuser ? (
+          <MediaMaintenancePanel labels={t.media.admin.maintenance} />
+        ) : null}
+      </div>
     </div>
   );
 }
 
-export default function MediaApp() {
+export default function MediaApp({ view = "library" }: { view?: MediaView }) {
+  const [currentView, setCurrentView] = useState<MediaView>(() =>
+    typeof window === "undefined" ? view : (mediaViewFromPath(window.location.pathname) ?? view),
+  );
+
+  useEffect(() => {
+    const syncFromLocation = () => {
+      const nextView = mediaViewFromPath(window.location.pathname);
+      if (nextView) setCurrentView(nextView);
+    };
+    const onMediaRoute = (event: Event) => {
+      const nextView = (event as CustomEvent<{ view?: MediaView }>).detail?.view;
+      if (nextView) setCurrentView(nextView);
+    };
+
+    window.addEventListener("popstate", syncFromLocation);
+    window.addEventListener(MEDIA_ROUTE_EVENT, onMediaRoute);
+    syncFromLocation();
+    return () => {
+      window.removeEventListener("popstate", syncFromLocation);
+      window.removeEventListener(MEDIA_ROUTE_EVENT, onMediaRoute);
+    };
+  }, []);
+
   return (
     <PluginProviders media>
-      <MediaShell />
+      <AppShellContent view={currentView} />
     </PluginProviders>
   );
 }

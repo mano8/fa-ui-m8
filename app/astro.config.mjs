@@ -1,4 +1,6 @@
 // @ts-check
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from "@tailwindcss/vite";
@@ -6,6 +8,7 @@ import react from '@astrojs/react';
 import faAuth from '@fa-m8/astro-auth-m8';
 import { loadEnv } from 'vite';
 import { buildSecurityConfig } from './src/lib/csp.ts';
+import { translations } from './src/content/i18n/app/index.ts';
 
 const upstreamMarkdownWarning =
 	"[astro] `markdown.remarkPlugins`, `markdown.rehypePlugins`, and `markdown.remarkRehype` are deprecated. Pass them to `unified({...})` from `@astrojs/markdown-remark` directly instead.";
@@ -16,6 +19,54 @@ console.warn = (...args) => {
 };
 
 const env = loadEnv(process.env.NODE_ENV === 'production' ? 'production' : 'development', process.cwd(), '');
+const require = createRequire(import.meta.url);
+
+/** @param {string} key */
+function publicEnv(key) {
+	return Object.hasOwn(process.env, key) ? process.env[key] : env[key];
+}
+
+/** @param {string | undefined} value */
+function publicMediaEnabled(value) {
+	const normalized = value?.trim().toLowerCase();
+	return Boolean(normalized && !['0', 'false', 'off', 'none'].includes(normalized));
+}
+
+const mediaApiBase = publicEnv('PUBLIC_MEDIA_API_BASE');
+const mediaV1Base = publicEnv('PUBLIC_MEDIA_V1_BASE');
+
+/** @param {string} specifier */
+function packageInstalled(specifier) {
+	try {
+		require.resolve(specifier);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+const mediaPackageInstalled = packageInstalled('@fa-m8/astro-media-m8');
+const mediaRequested = publicMediaEnabled(mediaApiBase);
+const mediaPluginEnabled = mediaRequested && mediaPackageInstalled;
+
+if (mediaRequested && !mediaPackageInstalled) {
+	console.warn(
+		'PUBLIC_MEDIA_API_BASE is set but @fa-m8/astro-media-m8 is not installed; media UI/routes are disabled.',
+	);
+}
+
+/** @param {string} file */
+const mediaStub = (file) => fileURLToPath(new URL(`./src/lib/media-stubs/${file}`, import.meta.url));
+const disabledMediaAliases = mediaPluginEnabled
+	? []
+	: [
+			{ find: '@fa-m8/astro-media-m8/api', replacement: mediaStub('api.ts') },
+			{ find: '@fa-m8/astro-media-m8/auth-adapter', replacement: mediaStub('auth-adapter.ts') },
+			{ find: '@fa-m8/astro-media-m8/hooks', replacement: mediaStub('hooks.ts') },
+			{ find: '@fa-m8/astro-media-m8/list-params', replacement: mediaStub('list-params.ts') },
+			{ find: '@fa-m8/astro-media-m8/react', replacement: mediaStub('react.tsx') },
+			{ find: '@fa-m8/astro-media-m8/schemas', replacement: mediaStub('schemas.ts') },
+		];
 
 // Deployment contract: `astro-auth-m8` is the one required plugin; every other
 // plugin is opt-in per *deployment* = (package installed) + (its PUBLIC_* env
@@ -29,12 +80,12 @@ const env = loadEnv(process.env.NODE_ENV === 'production' ? 'production' : 'deve
 // fa-auth-m8 tokens. Headless to match the auth setup — Starlight owns routing,
 // so media UI is mounted through React islands wrapped in MediaProvider.
 const mediaIntegrations = [];
-if (env.PUBLIC_MEDIA_API_BASE) {
+if (mediaPluginEnabled) {
 	const { default: faMedia } = await import('@fa-m8/astro-media-m8');
 	mediaIntegrations.push(
 		faMedia({
-			apiBase: env.PUBLIC_MEDIA_API_BASE,
-			v1Base: env.PUBLIC_MEDIA_V1_BASE ?? '/v1',
+			apiBase: mediaApiBase,
+			v1Base: mediaV1Base ?? '/v1',
 			mode: 'headless',
 			auth: { provider: 'fa-auth-astro' },
 			locales: ['en', 'es', 'fr'],
@@ -42,7 +93,60 @@ if (env.PUBLIC_MEDIA_API_BASE) {
 		}),
 	);
 }
-
+const mediaSidebarItems = mediaPluginEnabled
+	? [
+			{
+				label: translations.en.nav.media,
+				collapsed: true,
+				translations: {
+					es: translations.es.nav.media,
+					fr: translations.fr.nav.media,
+				},
+				items: [
+					{
+						label: translations.en.media.tabs.library,
+						link: '/media/',
+						translations: {
+							es: translations.es.media.tabs.library,
+							fr: translations.fr.media.tabs.library,
+						},
+					},
+					{
+						label: translations.en.media.tabs.upload,
+						link: '/media/upload',
+						translations: {
+							es: translations.es.media.tabs.upload,
+							fr: translations.fr.media.tabs.upload,
+						},
+					},
+					{
+						label: translations.en.media.tabs.presets,
+						link: '/media/presets',
+						translations: {
+							es: translations.es.media.tabs.presets,
+							fr: translations.fr.media.tabs.presets,
+						},
+					},
+					{
+						label: translations.en.media.tabs.admin,
+						link: '/media/admin',
+						translations: {
+							es: translations.es.media.tabs.admin,
+							fr: translations.fr.media.tabs.admin,
+						},
+					},
+					{
+						label: translations.en.media.tabs.maintenance,
+						link: '/media/maintenance',
+						translations: {
+							es: translations.es.media.tabs.maintenance,
+							fr: translations.fr.media.tabs.maintenance,
+						},
+					},
+				],
+			},
+		]
+	: [];
 // https://astro.build/config
 export default defineConfig({
 	site: env.PUBLIC_SITE_URL ?? 'http://localhost:4321',
@@ -51,7 +155,28 @@ export default defineConfig({
 	security: buildSecurityConfig(),
 	vite: {
 		cacheDir: process.env.VITE_CACHE_DIR ?? '.astro/vite',
+		define: {
+			'import.meta.env.PUBLIC_FA_MEDIA_ENABLED': JSON.stringify(mediaPluginEnabled),
+			...(mediaPluginEnabled
+				? {}
+				: {
+						'import.meta.env.PUBLIC_FA_MEDIA_API_BASE': JSON.stringify(''),
+						'import.meta.env.PUBLIC_FA_MEDIA_V1_BASE': JSON.stringify('/v1'),
+						'import.meta.env.PUBLIC_FA_MEDIA_LEGACY_BASE': JSON.stringify(''),
+						'import.meta.env.PUBLIC_FA_MEDIA_ADMIN_ROLE': JSON.stringify('is_superuser'),
+					}),
+		},
 		plugins: [tailwindcss()],
+		resolve: {
+			alias: disabledMediaAliases,
+			dedupe: [
+				'react',
+				'react-dom',
+				'@tanstack/react-query',
+				'@fa-m8/astro-auth-m8',
+				'@fa-m8/astro-media-m8',
+			],
+		},
 		optimizeDeps: {
 			include: [
 				'class-variance-authority',
@@ -78,6 +203,7 @@ export default defineConfig({
 			components: {
 				// Add an auth entry point (Account / Sign in) to the top bar.
 				SocialIcons: './src/components/starlight/AuthNav.astro',
+				Sidebar: './src/components/starlight/Sidebar.astro',
 			},
 			disable404Route: true,
 			// Set English as the default language for this site.
@@ -98,7 +224,7 @@ export default defineConfig({
 				},
 			},
 			sidebar: [
-				{ 
+				{
 					label: 'Home',
 					link: '/',
 					translations: {
@@ -106,7 +232,6 @@ export default defineConfig({
 						'fr': 'Accueil',
 					},
 				},
-				
 				{
 					label: 'Docs',
 					collapsed: true,
@@ -223,6 +348,7 @@ export default defineConfig({
 					label: 'Reference',
 					items: [{ autogenerate: { directory: 'reference' } }],
 				},
+				...mediaSidebarItems,
 			],
 		}),
 		react(),

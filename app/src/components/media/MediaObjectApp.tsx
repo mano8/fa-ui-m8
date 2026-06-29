@@ -2,7 +2,6 @@
 // Object-detail island. Starlight is static, so the object id can't come from a
 // dynamic [id] route — it's read from the `?id=` query param at hydration time.
 // Same AuthProvider + MediaProvider + auth gate as the studio.
-import "../../styles/media.css";
 import { ArrowLeft } from "lucide-react";
 import { ObjectDetail } from "@fa-m8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
@@ -53,7 +52,7 @@ function ObjectShell() {
   }
 
   return (
-    <div className="not-content mx-auto w-full max-w-4xl space-y-4">
+    <div className="not-content mx-auto w-full max-w-6xl space-y-4">
       <a
         href={libraryHref}
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"

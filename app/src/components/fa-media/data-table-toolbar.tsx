@@ -24,6 +24,7 @@ interface DataTableToolbarProps<TData> {
   onSearchChange?: (q: string) => void;
   filterValue?: string;
   onFilterChange?: (value: string) => void;
+  filterControls?: React.ReactNode;
   toolbarAction?: React.ReactNode;
 }
 
@@ -34,10 +35,12 @@ export function DataTableToolbar<TData>({
   onSearchChange,
   filterValue,
   onFilterChange,
+  filterControls,
   toolbarAction,
 }: DataTableToolbarProps<TData>) {
   const showSearch = q !== undefined || onSearchChange !== undefined;
-  const showFilter = filterValue !== undefined || onFilterChange !== undefined;
+  const showFilter =
+    !filterControls && (filterValue !== undefined || onFilterChange !== undefined);
 
   return (
     <div className="grid gap-2 sm:flex sm:items-center sm:justify-between">
@@ -74,6 +77,12 @@ export function DataTableToolbar<TData>({
               placeholder={labels.filterPlaceholder}
             />
           </label>
+        ) : null}
+
+        {filterControls ? (
+          <div className="grid min-w-0 gap-2 sm:flex sm:items-center">
+            {filterControls}
+          </div>
         ) : null}
       </div>
 

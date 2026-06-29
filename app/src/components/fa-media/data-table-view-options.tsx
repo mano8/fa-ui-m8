@@ -17,6 +17,16 @@ interface DataTableViewOptionsProps<TData> {
 }
 
 function getColumnLabel(columnId: string): string {
+  const friendlyLabels: Record<string, string> = {
+    original_filename: "Filename",
+    size_bytes: "Size",
+    created_at: "Created",
+  };
+
+  if (friendlyLabels[columnId]) {
+    return friendlyLabels[columnId];
+  }
+
   return columnId
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());

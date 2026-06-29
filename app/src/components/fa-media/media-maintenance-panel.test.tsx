@@ -28,6 +28,7 @@ const labels: MediaMaintenanceLabels = {
 function hook(overrides = {}) {
   return {
     allowed: true,
+    loading: false,
     purgeStale: vi.fn().mockResolvedValue({ purged: 0 }),
     repair: vi.fn().mockResolvedValue({}),
     purgeExpiredObjects: vi.fn().mockResolvedValue({ purged: 0 }),
@@ -44,6 +45,15 @@ describe("MediaMaintenancePanel", () => {
     expect(screen.getByText(labels.purgeStaleTitle)).toBeTruthy();
     expect(screen.getByText(labels.repairTitle)).toBeTruthy();
     expect(screen.getByText(labels.purgeExpiredTitle)).toBeTruthy();
+  });
+
+  it("disables destructive actions until media admin permission is allowed", () => {
+    useMediaAdminMock.mockReturnValue(hook({ allowed: false }));
+    render(<MediaMaintenancePanel labels={labels} />);
+
+    for (const trigger of screen.getAllByRole("button", { name: labels.confirm })) {
+      expect((trigger as HTMLButtonElement).disabled).toBe(true);
+    }
   });
 
   it("runs purge-stale only after the alert-dialog is confirmed", async () => {

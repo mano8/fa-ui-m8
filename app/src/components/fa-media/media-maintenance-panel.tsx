@@ -70,11 +70,13 @@ function DangerAction({
   description,
   labels,
   run,
+  disabled = false,
 }: {
   title: string;
   description: string;
   labels: MediaMaintenanceLabels;
   run: () => Promise<unknown>;
+  disabled?: boolean;
 }) {
   const [state, setState] = React.useState<OpState>({ status: "idle" });
 
@@ -107,7 +109,11 @@ function DangerAction({
       </div>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" className="w-full sm:w-auto" disabled={state.status === "running"}>
+          <Button
+            variant="destructive"
+            className="w-full sm:w-auto"
+            disabled={disabled || state.status === "running"}
+          >
             {state.status === "running" ? labels.running : labels.confirm}
           </Button>
         </AlertDialogTrigger>
@@ -130,7 +136,8 @@ function DangerAction({
 
 export function MediaMaintenancePanel({ labels }: MediaMaintenancePanelProps) {
   const t = { ...DEFAULT_LABELS, ...labels };
-  const { purgeStale, repair, purgeExpiredObjects } = useMediaAdmin();
+  const { allowed, loading, purgeStale, repair, purgeExpiredObjects } = useMediaAdmin();
+  const actionsDisabled = loading || !allowed;
 
   return (
     <Card className="not-content border-destructive/40">
@@ -146,18 +153,21 @@ export function MediaMaintenancePanel({ labels }: MediaMaintenancePanelProps) {
           title={t.purgeStaleTitle}
           description={t.purgeStaleDescription}
           labels={t}
+          disabled={actionsDisabled}
           run={() => purgeStale()}
         />
         <DangerAction
           title={t.repairTitle}
           description={t.repairDescription}
           labels={t}
+          disabled={actionsDisabled}
           run={() => repair(true)}
         />
         <DangerAction
           title={t.purgeExpiredTitle}
           description={t.purgeExpiredDescription}
           labels={t}
+          disabled={actionsDisabled}
           run={() => purgeExpiredObjects()}
         />
       </CardContent>

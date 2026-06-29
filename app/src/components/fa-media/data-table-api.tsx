@@ -65,6 +65,7 @@ export interface DataTableApiProps<TData, TValue> {
   onSearchChange?: (q: string) => void;
   filterValue?: string;
   onFilterChange?: (value: string) => void;
+  filterControls?: React.ReactNode;
   loading?: boolean;
   toolbarAction?: React.ReactNode;
   pageSizeOptions?: number[];
@@ -121,6 +122,7 @@ export function DataTableApi<TData, TValue>({
   onSearchChange,
   filterValue,
   onFilterChange,
+  filterControls,
   loading = false,
   toolbarAction,
   pageSizeOptions = [10, 20, 50],
@@ -209,6 +211,7 @@ export function DataTableApi<TData, TValue>({
         onSearchChange={onSearchChange}
         filterValue={filterValue}
         onFilterChange={onFilterChange}
+        filterControls={filterControls}
         toolbarAction={toolbarAction}
       />
 

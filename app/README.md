@@ -230,13 +230,8 @@ The media integration re-exposes the `PUBLIC_MEDIA_*` values internally as
 `PUBLIC_FA_MEDIA_*` at build time; those are an implementation detail and must not
 be set directly.
 
-> Note: fa-ui-m8's own `src/` still contains hand-maintained media components that
-> import `@fa-m8/astro-media-m8/react` directly, which is why the package is kept
-> installed as an `optionalDependencies` rather than fully removed. Decoupling those
-> source imports (so a true auth-only checkout needs no media package at all) is
-> tracked by the registry/reconciliation work in the fa-ui-m8 plan (Steps 5–6).
-> Likewise, the `file:` dependency paths are local dev links; published
-> configurations will pin registry-versioned ranges once the plugins are published.
+> Note: the `file:` dependency paths are local dev links; published configurations
+> will pin registry-versioned ranges once the plugins are published.
 
 ## Content-Security-Policy (production)
 

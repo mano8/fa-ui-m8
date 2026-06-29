@@ -1,0 +1,16 @@
+---
+import MediaObjectPage from '@/components/media/MediaObjectPage.astro';
+import MediaPage from '@/components/media/MediaPage.astro';
+import MediaPresetActionPage from '@/components/media/MediaPresetActionPage.astro';
+import { getMediaStaticPaths, type MediaRouteProps } from '@/lib/mediaFeature';
+
+export function getStaticPaths() {
+  return getMediaStaticPaths('es');
+}
+
+const props = Astro.props as MediaRouteProps;
+---
+
+{props.kind === 'view' ? <MediaPage locale={props.locale} view={props.view} /> : null}
+{props.kind === 'object' ? <MediaObjectPage locale={props.locale} /> : null}
+{props.kind === 'presetAction' ? <MediaPresetActionPage locale={props.locale} action={props.action} /> : null}

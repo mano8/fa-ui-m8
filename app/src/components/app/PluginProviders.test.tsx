@@ -98,4 +98,24 @@ describe("PluginProviders", () => {
     expect(clients).toHaveLength(2);
     expect(clients[0]).toBe(clients[1]);
   });
+
+  it("reuses the default query client across separate island mounts", () => {
+    const clients: QueryClient[] = [];
+
+    const first = render(
+      <PluginProviders>
+        <QueryClientProbe label="first" onClient={(client) => clients.push(client)} />
+      </PluginProviders>,
+    );
+    first.unmount();
+
+    render(
+      <PluginProviders>
+        <QueryClientProbe label="second" onClient={(client) => clients.push(client)} />
+      </PluginProviders>,
+    );
+
+    expect(clients).toHaveLength(2);
+    expect(clients[0]).toBe(clients[1]);
+  });
 });

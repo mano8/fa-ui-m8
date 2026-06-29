@@ -3,26 +3,28 @@
 // media-service-m8 only accepts fa-auth-m8 tokens, so the adapter reads the same
 // access token (and refresh) the auth plugin already manages — no second store.
 import { getToken } from "@fa-m8/astro-auth-m8/client";
-import { refreshToken, getProfile } from "@fa-m8/astro-auth-m8/api";
+import { refreshToken } from "@fa-m8/astro-auth-m8/api";
 import {
   createFaAuthAdapter,
   setMediaAuthAdapter,
   type MediaAuthAdapter,
 } from "@fa-m8/astro-media-m8/auth-adapter";
 
-let adapter: MediaAuthAdapter | null = null;
+type MediaUser = { is_superuser?: boolean } | null | undefined;
 
-/** Build and register the fa-auth-backed media adapter once, then reuse it. */
-export function getMediaAdapter(): MediaAuthAdapter {
-  if (!adapter) {
-    adapter = createFaAuthAdapter({
-      getToken,
-      refreshToken,
-      // Used only for client-side superuser gating of admin media operations.
-      getUser: () => getProfile().catch(() => null),
-      isSuperuser: (user) => Boolean((user as { is_superuser?: boolean } | null)?.is_superuser),
-    });
-    setMediaAuthAdapter(adapter);
-  }
+function isSuperuser(user: unknown): boolean {
+  return Boolean((user as MediaUser)?.is_superuser);
+}
+
+/** Build and register the fa-auth-backed media adapter for the current auth user. */
+export function getMediaAdapter(getUser: () => unknown | Promise<unknown>): MediaAuthAdapter {
+  const adapter = createFaAuthAdapter({
+    getToken,
+    refreshToken,
+    getUser,
+    // Used only for client-side superuser gating of admin media operations.
+    isSuperuser,
+  });
+  setMediaAuthAdapter(adapter);
   return adapter;
 }

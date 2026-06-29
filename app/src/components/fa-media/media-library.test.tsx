@@ -2,8 +2,12 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MediaObjectPublic } from "@fa-m8/astro-media-m8/schemas";
 
-const { useMediaObjectsMock } = vi.hoisted(() => ({ useMediaObjectsMock: vi.fn() }));
+const { deleteObjectMock, useMediaObjectsMock } = vi.hoisted(() => ({
+  deleteObjectMock: vi.fn(),
+  useMediaObjectsMock: vi.fn(),
+}));
 vi.mock("@fa-m8/astro-media-m8/hooks", () => ({ useMediaObjects: useMediaObjectsMock }));
+vi.mock("@fa-m8/astro-media-m8/api", () => ({ deleteObject: deleteObjectMock }));
 
 import { MediaLibrary } from "./media-library";
 
@@ -49,6 +53,7 @@ function hook(overrides = {}) {
 afterEach(() => cleanup());
 beforeEach(() => {
   window.history.replaceState({}, "", "/en/media");
+  deleteObjectMock.mockReset().mockResolvedValue(undefined);
   useMediaObjectsMock.mockReset().mockReturnValue(hook());
 });
 
@@ -57,16 +62,27 @@ describe("MediaLibrary", () => {
     render(<MediaLibrary objectHref={(id) => `/media/object?id=${id}`} />);
 
     expect(useMediaObjectsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ limit: 10, sort_by: "created_at", order: "desc" }),
+      expect.objectContaining({ limit: 10, sort_by: "original_filename", order: "asc" }),
     );
     expect(screen.getByText("Media library")).toBeTruthy();
     expect(screen.getByRole("link", { name: "file.png" }).getAttribute("href")).toBe(
       "/media/object?id=11111111-1111-4111-8111-111111111111",
     );
+    expect(screen.getByRole("link", { name: "View file.png" }).getAttribute("href")).toBe(
+      "/media/object?id=11111111-1111-4111-8111-111111111111",
+    );
+    expect(screen.getByRole("button", { name: "Delete file.png" })).toBeTruthy();
+    const columnHeaders = screen.getAllByRole("columnheader").map((header) =>
+      (header.textContent ?? "").replace(/Sort (ascending|descending)|Clear sorting/g, ""),
+    );
+    expect(columnHeaders).toEqual(["Filename", "Actions", "Category", "Status", "Size", "Created"]);
+    expect(screen.getByRole("link", { name: "View file.png" }).closest("div")?.className).toContain(
+      "justify-center",
+    );
     expect(screen.getByText("2.0 KB")).toBeTruthy();
   });
 
-  it("updates hook params from search, category, page size, and sort controls", () => {
+  it("updates hook params from search, category, status, page size, and sort controls", () => {
     render(<MediaLibrary />);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search" }), {
@@ -77,11 +93,21 @@ describe("MediaLibrary", () => {
     );
     expect(window.location.search).toContain("q=avatar");
 
-    fireEvent.change(screen.getByLabelText("Filter"), { target: { value: "document" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Category" }), {
+      target: { value: "document" },
+    });
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ category: "document", q: "avatar" }),
     );
     expect(window.location.search).toContain("category=document");
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Status" }), {
+      target: { value: "ready" },
+    });
+    expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "ready", category: "document", q: "avatar" }),
+    );
+    expect(window.location.search).toContain("status=ready");
 
     fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "25" } });
     expect(useMediaObjectsMock).toHaveBeenLastCalledWith(
@@ -95,6 +121,19 @@ describe("MediaLibrary", () => {
     );
     expect(window.location.search).toContain("sort=size_bytes");
     expect(window.location.search).toContain("order=asc");
+  });
+
+  it("deletes a row through the plugin API and refreshes the list", async () => {
+    const refresh = vi.fn().mockResolvedValue(undefined);
+    useMediaObjectsMock.mockReturnValue(hook({ refresh }));
+
+    render(<MediaLibrary />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete file.png" }));
+
+    await waitFor(() =>
+      expect(deleteObjectMock).toHaveBeenCalledWith("11111111-1111-4111-8111-111111111111"),
+    );
+    expect(refresh).toHaveBeenCalledOnce();
   });
 
   it("loads the next cursor page before moving forward", async () => {

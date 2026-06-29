@@ -15,6 +15,7 @@ describe("media-library-url-state", () => {
         sort: "size_bytes",
         order: "ASC",
         category: "document",
+        status: "ready",
       }),
     );
 
@@ -25,16 +26,18 @@ describe("media-library-url-state", () => {
       sort: "size_bytes",
       order: "asc",
       category: "document",
+      status: "ready",
     });
   });
 
-  it("merges initial defaults and strips invalid category values", () => {
-    const state = parseMediaLibraryUrlState(new URLSearchParams("category=unknown"), {
+  it("merges initial defaults and strips invalid category and status values", () => {
+    const state = parseMediaLibraryUrlState(new URLSearchParams("category=unknown&status=unknown"), {
       limit: 50,
       q: "avatar",
       sort_by: "size_bytes",
       order: "asc",
       category: "receipt",
+      status: "processing",
     });
 
     expect(state).toEqual({
@@ -44,6 +47,7 @@ describe("media-library-url-state", () => {
       sort: "size_bytes",
       order: "asc",
       category: "",
+      status: "",
     });
   });
 
@@ -53,10 +57,11 @@ describe("media-library-url-state", () => {
         page: 3,
         pageSize: 10,
         q: "hero asset",
-        sort: "created_at",
-        order: "desc",
+        sort: "original_filename",
+        order: "asc",
         category: "asset",
+        status: "ready",
       }),
-    ).toBe("page=3&pageSize=10&q=hero+asset&sort=created_at&order=desc&category=asset");
+    ).toBe("page=3&pageSize=10&q=hero+asset&sort=original_filename&order=asc&category=asset&status=ready");
   });
 });

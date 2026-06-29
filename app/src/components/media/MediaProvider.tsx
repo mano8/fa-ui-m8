@@ -2,14 +2,18 @@
 // Local wrapper around the media plugin's provider, mirroring AuthProvider.
 // Registers the fa-auth-backed adapter and pins the runtime config from the
 // PUBLIC_FA_MEDIA_* env vars the faMedia integration defines at build time.
-import { type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { MediaProvider as PluginMediaProvider } from "@fa-m8/astro-media-m8/react";
+import { useAuth } from "../../hooks/auth/useAuth";
 import { getMediaAdapter } from "../../lib/mediaAdapter";
 
 export function MediaProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const adapter = useMemo(() => getMediaAdapter(() => user), [user]);
+
   return (
     <PluginMediaProvider
-      adapter={getMediaAdapter()}
+      adapter={adapter}
       config={{
         apiBase: import.meta.env.PUBLIC_FA_MEDIA_API_BASE ?? "/media",
         v1Base: import.meta.env.PUBLIC_FA_MEDIA_V1_BASE ?? "/v1",

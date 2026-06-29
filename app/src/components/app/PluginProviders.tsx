@@ -9,12 +9,26 @@ export type PluginProvidersProps = {
   queryClient?: QueryClient;
 };
 
+let sharedPluginQueryClient: QueryClient | null = null;
+
 export function createPluginQueryClient() {
-  return new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        staleTime: 5_000,
+      },
+    },
+  });
+}
+
+function getSharedPluginQueryClient() {
+  sharedPluginQueryClient ??= createPluginQueryClient();
+  return sharedPluginQueryClient;
 }
 
 export function PluginProviders({ children, media = false, queryClient }: PluginProvidersProps) {
-  const [client] = useState(() => queryClient ?? createPluginQueryClient());
+  const [client] = useState(() => queryClient ?? getSharedPluginQueryClient());
   const content = media ? <MediaProvider>{children}</MediaProvider> : children;
 
   return (

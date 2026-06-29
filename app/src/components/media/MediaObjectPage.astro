@@ -1,10 +1,15 @@
 ---
-// src/pages/es/media/object.astro
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import MediaObjectApp from '@/components/media/MediaObjectApp';
-import { getTranslations } from '@/content/i18n/app';
+import MediaObjectApp from './MediaObjectApp';
+import { getTranslations, type Locale } from '@/content/i18n/app';
+import '../../styles/media.css';
 
-const t = getTranslations('es');
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
 ---
 
 <StarlightPage frontmatter={{
@@ -12,7 +17,7 @@ const t = getTranslations('es');
   tableOfContents: false
 }}>
   <MediaObjectApp client:only="react">
-    <div slot="fallback" class="mx-auto w-full max-w-4xl space-y-4 py-6 animate-pulse">
+    <div slot="fallback" class="mx-auto w-full max-w-6xl space-y-4 py-6 animate-pulse">
       <div class="h-4 w-32 rounded bg-muted/40"></div>
       <div class="h-72 rounded-xl border bg-muted/20"></div>
     </div>

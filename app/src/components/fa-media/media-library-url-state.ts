@@ -6,12 +6,19 @@ import {
 } from "@fa-m8/astro-media-m8/list-params";
 import type {
   MediaCategory,
+  MediaObjectStatus,
   ObjectListParams,
   SortField,
   SortOrder,
 } from "@fa-m8/astro-media-m8/schemas";
 
-const SORT_FIELDS = ["created_at", "size_bytes"] as const satisfies readonly SortField[];
+const SORT_FIELDS = [
+  "original_filename",
+  "category",
+  "status",
+  "size_bytes",
+  "created_at",
+] as const satisfies readonly SortField[];
 const PAGE_SIZES = [10, 25, 50] as const;
 const CATEGORIES = [
   "avatar",
@@ -21,26 +28,44 @@ const CATEGORIES = [
   "export",
   "receipt",
 ] as const satisfies readonly MediaCategory[];
+const STATUSES = [
+  "pending_upload",
+  "uploaded",
+  "processing",
+  "ready",
+  "failed",
+  "deleted",
+  "rejected",
+] as const satisfies readonly MediaObjectStatus[];
 
 const mediaLibraryListSchema = makeListSchema({
   allowedSorts: SORT_FIELDS,
   allowedPageSizes: PAGE_SIZES,
-  defaultSort: "created_at",
-  defaultOrder: "desc",
+  defaultSort: "original_filename",
+  defaultOrder: "asc",
   defaultPage: 1,
   defaultPageSize: 10,
 });
 
 export interface MediaLibraryUrlState extends ListParams<SortField> {
   category: MediaCategory | "";
+  status: MediaObjectStatus | "";
 }
 
 function normalizeCategory(value: string | null | undefined): MediaCategory | "" {
   return CATEGORIES.includes(value as MediaCategory) ? (value as MediaCategory) : "";
 }
 
+function normalizeStatus(value: string | null | undefined): MediaObjectStatus | "" {
+  return STATUSES.includes(value as MediaObjectStatus) ? (value as MediaObjectStatus) : "";
+}
+
 export function parseMediaLibraryCategory(value: string | null | undefined): MediaCategory | "" {
   return normalizeCategory(value);
+}
+
+export function parseMediaLibraryStatus(value: string | null | undefined): MediaObjectStatus | "" {
+  return normalizeStatus(value);
 }
 
 function defaultStateFromInitial(initial: ObjectListParams): MediaLibraryUrlState {
@@ -50,8 +75,8 @@ function defaultStateFromInitial(initial: ObjectListParams): MediaLibraryUrlStat
       page: 1,
       pageSize: 10,
       q: "",
-      sort: "created_at",
-      order: "desc",
+      sort: "original_filename",
+      order: "asc",
     },
     {
       pageSize: initial.limit,
@@ -64,6 +89,7 @@ function defaultStateFromInitial(initial: ObjectListParams): MediaLibraryUrlStat
   return {
     ...normalized,
     category: normalizeCategory(initial.category),
+    status: normalizeStatus(initial.status),
   };
 }
 
@@ -87,6 +113,7 @@ export function parseMediaLibraryUrlState(
   return {
     ...normalized,
     category: normalizeCategory(source.get("category") ?? defaults.category),
+    status: normalizeStatus(source.get("status") ?? defaults.status),
   };
 }
 
@@ -105,6 +132,12 @@ export function stringifyMediaLibraryUrlState(state: MediaLibraryUrlState): stri
     query.set("category", state.category);
   } else {
     query.delete("category");
+  }
+
+  if (state.status !== "") {
+    query.set("status", state.status);
+  } else {
+    query.delete("status");
   }
 
   return query.toString();
