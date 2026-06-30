@@ -16,10 +16,9 @@ RUN apt-get update && \
         git curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Dependencies are installed at container startup after the app and the local
-# astro-auth-m8 / astro-media-m8 plugins have been mounted. This keeps Docker
-# Desktop from following host node_modules file links and lets the dev stack
-# test the local plugins without publishing them to npm.
+# Dependencies are installed at container startup after the app has been mounted.
+# Published @mano8 plugin packages resolve from npm by default; mounted local
+# checkouts remain available as a dev override for live plugin work.
 RUN mkdir -p /app/node_modules /astro-auth-m8/node_modules /astro-media-m8/node_modules && \
     chown -R $UID:$GID /app /astro-auth-m8 /astro-media-m8
 

@@ -440,8 +440,8 @@ services:
 
     volumes:
       - ../../app:/app                          # mount the Astro app dir (app/) for live reload
-      - ../../../astro-auth-m8:/astro-auth-m8   # local auth plugin; package.json uses file:../../astro-auth-m8
-      - ../../../astro-media-m8:/astro-media-m8 # local media plugin; package.json uses file:../../astro-media-m8
+      - ../../../astro-auth-m8:/astro-auth-m8   # optional local auth plugin override for live development
+      - ../../../astro-media-m8:/astro-media-m8 # optional local media plugin override for live development
       - astro_node_modules:/app/node_modules
       - astro_auth_m8_node_modules:/astro-auth-m8/node_modules
       - astro_media_m8_node_modules:/astro-media-m8/node_modules
