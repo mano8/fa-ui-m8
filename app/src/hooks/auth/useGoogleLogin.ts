@@ -1,7 +1,7 @@
 // src/hooks/auth/useGoogleLogin.ts
 import { useCallback } from "react";
-import { createPkcePair, exchangeGoogleCode, getGoogleLoginUrl, savePkceVerifier, takePkceVerifier } from "@fa-m8/astro-auth-m8/api";
-import { setToken } from "@fa-m8/astro-auth-m8/client";
+import { createPkcePair, exchangeGoogleCode, getGoogleLoginUrl, savePkceVerifier, takePkceVerifier } from "@mano8/astro-auth-m8/api";
+import { setToken } from "@mano8/astro-auth-m8/client";
 import { getOAuthRedirect, isValidOAuthRedirect } from "../../lib/authConfig";
 import { localeFromPath } from "../../lib/locale";
 import { useAuth } from "./useAuth";

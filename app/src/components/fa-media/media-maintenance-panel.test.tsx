@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MediaMaintenanceLabels } from "./media-maintenance-panel";
 
 const { useMediaAdminMock } = vi.hoisted(() => ({ useMediaAdminMock: vi.fn() }));
-vi.mock("@fa-m8/astro-media-m8/hooks", () => ({ useMediaAdmin: useMediaAdminMock }));
+vi.mock("@mano8/astro-media-m8/hooks", () => ({ useMediaAdmin: useMediaAdminMock }));
 
 import { MediaMaintenancePanel } from "./media-maintenance-panel";
 

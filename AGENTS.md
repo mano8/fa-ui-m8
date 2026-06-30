@@ -14,10 +14,10 @@ features arrive through Astro plugin packages and HTTP contracts.
 
 ## Plugin Model
 
-- `@fa-m8/astro-auth-m8` is the only required plugin and the default baseline.
+- `@mano8/astro-auth-m8` is the only required plugin and the default baseline.
 - Every other plugin is optional per deployment: installed package plus matching
   `PUBLIC_*` env enables it.
-- `@fa-m8/astro-media-m8` is optional for this app, but when enabled it must run
+- `@mano8/astro-media-m8` is optional for this app, but when enabled it must run
   after auth and use auth through the plugin adapter.
 - A deployment configuration is packages installed + env vars set. Do not create
   branches, forks, or per-config repos for plugin combinations.

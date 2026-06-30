@@ -1,13 +1,13 @@
 "use client";
 
 // fa-auth API keys panel: mint and revoke programmatic API tokens. Headless
-// logic stays a live dependency — `useApiKeys` (@fa-m8/astro-auth-m8/hooks) owns
+// logic stays a live dependency — `useApiKeys` (@mano8/astro-auth-m8/hooks) owns
 // the list/create/revoke calls and the package Zod schema validates the form.
 // This file is only the shadcn skin, copied into the consumer via the
 // @fa-m8-auth registry — edit (and translate via `labels`) freely per app.
 import * as React from "react";
-import { useApiKeys } from "@fa-m8/astro-auth-m8/hooks";
-import { ApiKeyCreateSchema } from "@fa-m8/astro-auth-m8/schemas";
+import { useApiKeys } from "@mano8/astro-auth-m8/hooks";
+import { ApiKeyCreateSchema } from "@mano8/astro-auth-m8/schemas";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -158,9 +158,9 @@ export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> 
           </form>
 
           {lastCreated && (
-            <div className="mt-4 space-y-2 rounded-md border border-amber-200 bg-amber-50 p-4 pb-3 text-amber-900">
-              <p className="text-sm font-bold">{t.securityNotice}</p>
-              <div className="flex items-center gap-2 overflow-x-auto rounded border bg-white p-2 pb-3 font-mono text-xs">
+            <div className="mt-4 space-y-2 rounded-md border ">
+              <p className="text-sm font-bold p-2">{t.securityNotice}</p>
+              <div className="flex items-center gap-2 overflow-x-auto rounded border p-2 pb-3 font-mono text-xs">
                 <span className="flex-1 select-all break-all">{lastCreated.plaintext}</span>
                 <Button size="sm" variant="ghost" onClick={() => handleCopy(lastCreated.plaintext)}>
                   {copied ? t.copied : t.copy}

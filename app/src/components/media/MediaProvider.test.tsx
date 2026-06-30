@@ -1,7 +1,7 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
-import type { MediaAuthAdapter } from "@fa-m8/astro-media-m8/auth-adapter";
+import type { MediaAuthAdapter } from "@mano8/astro-media-m8/auth-adapter";
 
 const authState = vi.hoisted(() => ({ user: null as unknown }));
 const mediaProviderState = vi.hoisted(() => ({ adapters: [] as MediaAuthAdapter[] }));
@@ -13,15 +13,15 @@ vi.mock("../../hooks/auth/useAuth", () => ({
   useAuth: () => ({ user: authState.user }),
 }));
 
-vi.mock("@fa-m8/astro-auth-m8/client", () => ({
+vi.mock("@mano8/astro-auth-m8/client", () => ({
   getToken: authClient.getToken,
 }));
 
-vi.mock("@fa-m8/astro-auth-m8/api", () => ({
+vi.mock("@mano8/astro-auth-m8/api", () => ({
   refreshToken: authApi.refreshToken,
 }));
 
-vi.mock("@fa-m8/astro-media-m8/auth-adapter", () => ({
+vi.mock("@mano8/astro-media-m8/auth-adapter", () => ({
   createFaAuthAdapter(bindings: {
     getToken: () => string | null;
     refreshToken?: () => Promise<{ access_token?: string } | string | null | undefined>;
@@ -42,7 +42,7 @@ vi.mock("@fa-m8/astro-media-m8/auth-adapter", () => ({
   setMediaAuthAdapter: mediaAuthAdapter.setMediaAuthAdapter,
 }));
 
-vi.mock("@fa-m8/astro-media-m8/react", async () => {
+vi.mock("@mano8/astro-media-m8/react", async () => {
   const React = await vi.importActual<typeof import("react")>("react");
 
   return {

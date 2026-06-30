@@ -2,7 +2,7 @@
 // Route-driven media studio island. It mirrors AccountApp so all media pages
 // share the auth/media providers while Starlight owns the page routes.
 import { useEffect, useState } from "react";
-import { MediaLibrary, MediaUploadDropzone } from "@fa-m8/astro-media-m8/react";
+import { MediaLibrary, MediaUploadDropzone } from "@mano8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";

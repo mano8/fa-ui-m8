@@ -1,13 +1,13 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { MediaObjectPublic } from "@fa-m8/astro-media-m8/schemas";
+import type { MediaObjectPublic } from "@mano8/astro-media-m8/schemas";
 
 const { deleteObjectMock, useMediaObjectsMock } = vi.hoisted(() => ({
   deleteObjectMock: vi.fn(),
   useMediaObjectsMock: vi.fn(),
 }));
-vi.mock("@fa-m8/astro-media-m8/hooks", () => ({ useMediaObjects: useMediaObjectsMock }));
-vi.mock("@fa-m8/astro-media-m8/api", () => ({ deleteObject: deleteObjectMock }));
+vi.mock("@mano8/astro-media-m8/hooks", () => ({ useMediaObjects: useMediaObjectsMock }));
+vi.mock("@mano8/astro-media-m8/api", () => ({ deleteObject: deleteObjectMock }));
 
 import { MediaLibrary } from "./media-library";
 

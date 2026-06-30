@@ -3,14 +3,14 @@ import {
   mergeAndNormalize,
   stringifyListUrlParams,
   type ListParams,
-} from "@fa-m8/astro-media-m8/list-params";
+} from "@mano8/astro-media-m8/list-params";
 import type {
   MediaCategory,
   MediaObjectStatus,
   ObjectListParams,
   SortField,
   SortOrder,
-} from "@fa-m8/astro-media-m8/schemas";
+} from "@mano8/astro-media-m8/schemas";
 
 const SORT_FIELDS = [
   "original_filename",

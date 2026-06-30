@@ -2,7 +2,7 @@
 import {
   LoginForm as SharedLoginForm,
   type LoginFormProps as SharedLoginFormProps,
-} from "@fa-m8/astro-auth-m8/default-ui";
+} from "@mano8/astro-auth-m8/default-ui";
 import { useGoogleLogin } from "../../hooks/auth/useGoogleLogin";
 import { isGoogleLoginAvailable } from "../../lib/authConfig";
 import { localeFromPath } from "../../lib/locale";

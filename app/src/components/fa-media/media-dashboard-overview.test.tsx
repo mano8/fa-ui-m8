@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MediaDashboardOverviewLabels } from "./media-dashboard-overview";
 
 const { useMediaAdminMock } = vi.hoisted(() => ({ useMediaAdminMock: vi.fn() }));
-vi.mock("@fa-m8/astro-media-m8/hooks", () => ({ useMediaAdmin: useMediaAdminMock }));
+vi.mock("@mano8/astro-media-m8/hooks", () => ({ useMediaAdmin: useMediaAdminMock }));
 
 // recharts' ResponsiveContainer measures its parent; happy-dom reports 0x0 and
 // logs a benign warning. Silence it so the chart branch can be asserted cleanly.

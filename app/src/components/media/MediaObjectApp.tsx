@@ -3,7 +3,7 @@
 // dynamic [id] route — it's read from the `?id=` query param at hydration time.
 // Same AuthProvider + MediaProvider + auth gate as the studio.
 import { ArrowLeft } from "lucide-react";
-import { ObjectDetail } from "@fa-m8/astro-media-m8/react";
+import { ObjectDetail } from "@mano8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { getTranslations } from "../../content/i18n/app";

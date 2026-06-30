@@ -6,8 +6,8 @@ const { useAuthMock, useSessionsMock, useDashboardMock } = vi.hoisted(() => ({
   useSessionsMock: vi.fn(),
   useDashboardMock: vi.fn(),
 }));
-vi.mock("@fa-m8/astro-auth-m8/react", () => ({ useAuth: useAuthMock }));
-vi.mock("@fa-m8/astro-auth-m8/hooks", () => ({
+vi.mock("@mano8/astro-auth-m8/react", () => ({ useAuth: useAuthMock }));
+vi.mock("@mano8/astro-auth-m8/hooks", () => ({
   useSessions: useSessionsMock,
   useDashboard: useDashboardMock,
 }));

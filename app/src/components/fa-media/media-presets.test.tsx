@@ -1,10 +1,10 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ImagePresetPublic } from "@fa-m8/astro-media-m8/schemas";
+import type { ImagePresetPublic } from "@mano8/astro-media-m8/schemas";
 
 const { useMediaPresetsMock } = vi.hoisted(() => ({ useMediaPresetsMock: vi.fn() }));
 
-vi.mock("@fa-m8/astro-media-m8/hooks", () => ({
+vi.mock("@mano8/astro-media-m8/hooks", () => ({
   useMediaPresets: useMediaPresetsMock,
 }));
 

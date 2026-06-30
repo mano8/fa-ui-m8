@@ -1,7 +1,7 @@
 // src/components/auth/SignupForm.tsx
 import { useState, type FormEvent } from "react";
-import { signupUser } from "@fa-m8/astro-auth-m8/api";
-import { UserRegisterSchema } from "@fa-m8/astro-auth-m8/schemas";
+import { signupUser } from "@mano8/astro-auth-m8/api";
+import { UserRegisterSchema } from "@mano8/astro-auth-m8/schemas";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";

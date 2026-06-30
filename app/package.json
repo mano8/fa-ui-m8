@@ -1,5 +1,5 @@
 {
-  "name": "fa-ui-m8",
+  "name": "@mano8/fa-ui-m8",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@astrojs/react": "^5.0.7",
     "@astrojs/starlight": "^0.39.3",
-    "@fa-m8/astro-auth-m8": "file:../../astro-auth-m8",
+    "@mano8/astro-auth-m8": "^0.1.0-alpha.1",
     "@fontsource-variable/geist": "^5.2.9",
     "@tailwindcss/vite": "^4.3.1",
     "@tanstack/react-query": "^5.101.1",
@@ -36,7 +36,7 @@
     "zod": "^4.4.3"
   },
   "optionalDependencies": {
-    "@fa-m8/astro-media-m8": "file:../../astro-media-m8"
+    "@mano8/astro-media-m8": "^0.1.0-alpha.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

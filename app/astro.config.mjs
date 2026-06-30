@@ -5,7 +5,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from "@tailwindcss/vite";
 import react from '@astrojs/react';
-import faAuth from '@fa-m8/astro-auth-m8';
+import faAuth from '@mano8/astro-auth-m8';
 import { loadEnv } from 'vite';
 import { buildSecurityConfig } from './src/lib/csp.ts';
 import { translations } from './src/content/i18n/app/index.ts';
@@ -45,13 +45,13 @@ function packageInstalled(specifier) {
 	}
 }
 
-const mediaPackageInstalled = packageInstalled('@fa-m8/astro-media-m8');
+const mediaPackageInstalled = packageInstalled('@mano8/astro-media-m8');
 const mediaRequested = publicMediaEnabled(mediaApiBase);
 const mediaPluginEnabled = mediaRequested && mediaPackageInstalled;
 
 if (mediaRequested && !mediaPackageInstalled) {
 	console.warn(
-		'PUBLIC_MEDIA_API_BASE is set but @fa-m8/astro-media-m8 is not installed; media UI/routes are disabled.',
+		'PUBLIC_MEDIA_API_BASE is set but @mano8/astro-media-m8 is not installed; media UI/routes are disabled.',
 	);
 }
 
@@ -60,12 +60,12 @@ const mediaStub = (file) => fileURLToPath(new URL(`./src/lib/media-stubs/${file}
 const disabledMediaAliases = mediaPluginEnabled
 	? []
 	: [
-			{ find: '@fa-m8/astro-media-m8/api', replacement: mediaStub('api.ts') },
-			{ find: '@fa-m8/astro-media-m8/auth-adapter', replacement: mediaStub('auth-adapter.ts') },
-			{ find: '@fa-m8/astro-media-m8/hooks', replacement: mediaStub('hooks.ts') },
-			{ find: '@fa-m8/astro-media-m8/list-params', replacement: mediaStub('list-params.ts') },
-			{ find: '@fa-m8/astro-media-m8/react', replacement: mediaStub('react.tsx') },
-			{ find: '@fa-m8/astro-media-m8/schemas', replacement: mediaStub('schemas.ts') },
+			{ find: '@mano8/astro-media-m8/api', replacement: mediaStub('api.ts') },
+			{ find: '@mano8/astro-media-m8/auth-adapter', replacement: mediaStub('auth-adapter.ts') },
+			{ find: '@mano8/astro-media-m8/hooks', replacement: mediaStub('hooks.ts') },
+			{ find: '@mano8/astro-media-m8/list-params', replacement: mediaStub('list-params.ts') },
+			{ find: '@mano8/astro-media-m8/react', replacement: mediaStub('react.tsx') },
+			{ find: '@mano8/astro-media-m8/schemas', replacement: mediaStub('schemas.ts') },
 		];
 
 // Deployment contract: `astro-auth-m8` is the one required plugin; every other
@@ -81,7 +81,7 @@ const disabledMediaAliases = mediaPluginEnabled
 // so media UI is mounted through React islands wrapped in MediaProvider.
 const mediaIntegrations = [];
 if (mediaPluginEnabled) {
-	const { default: faMedia } = await import('@fa-m8/astro-media-m8');
+	const { default: faMedia } = await import('@mano8/astro-media-m8');
 	mediaIntegrations.push(
 		faMedia({
 			apiBase: mediaApiBase,
@@ -173,8 +173,8 @@ export default defineConfig({
 				'react',
 				'react-dom',
 				'@tanstack/react-query',
-				'@fa-m8/astro-auth-m8',
-				'@fa-m8/astro-media-m8',
+				'@mano8/astro-auth-m8',
+				'@mano8/astro-media-m8',
 			],
 		},
 		optimizeDeps: {

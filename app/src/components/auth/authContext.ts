@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { LoginForm, UserPublic } from "@fa-m8/astro-auth-m8/schemas";
+import type { LoginForm, UserPublic } from "@mano8/astro-auth-m8/schemas";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

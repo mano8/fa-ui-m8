@@ -7,7 +7,7 @@ import type {
 } from "./schemas";
 
 function disabled(): Error {
-  return new Error("@fa-m8/astro-media-m8 is not enabled for this build.");
+  return new Error("@mano8/astro-media-m8 is not enabled for this build.");
 }
 
 async function rejectDisabled(): Promise<never> {

@@ -10,8 +10,8 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import { RequireRole } from "@fa-m8/astro-auth-m8/react";
-import { useUsers } from "@fa-m8/astro-auth-m8/hooks";
+import { RequireRole } from "@mano8/astro-auth-m8/react";
+import { useUsers } from "@mano8/astro-auth-m8/hooks";
 import {
   AuthProviderTypeSchema,
   RoleTypeSchema,
@@ -20,7 +20,7 @@ import {
   type AuthProviderType,
   type RoleType,
   type UserPublic,
-} from "@fa-m8/astro-auth-m8/schemas";
+} from "@mano8/astro-auth-m8/schemas";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

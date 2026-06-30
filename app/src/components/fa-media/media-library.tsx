@@ -2,15 +2,15 @@
 
 import * as React from "react";
 import { Eye, Trash2 } from "lucide-react";
-import { deleteObject } from "@fa-m8/astro-media-m8/api";
-import { useMediaObjects } from "@fa-m8/astro-media-m8/hooks";
+import { deleteObject } from "@mano8/astro-media-m8/api";
+import { useMediaObjects } from "@mano8/astro-media-m8/hooks";
 import type {
   MediaCategory,
   MediaObjectPublic,
   MediaObjectStatus,
   ObjectListParams,
   SortField,
-} from "@fa-m8/astro-media-m8/schemas";
+} from "@mano8/astro-media-m8/schemas";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableApi, type DataTableApiLabels } from "@/components/fa-media/data-table-api";

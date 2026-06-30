@@ -3,7 +3,7 @@ import {
   AuthProvider as PluginAuthProvider,
   useAuth as usePluginAuth,
   type AuthContextValue as PluginAuthContextValue,
-} from "@fa-m8/astro-auth-m8/react";
+} from "@mano8/astro-auth-m8/react";
 import { AuthContext, type AuthContextValue } from "./authContext";
 
 function AuthBridge({ children }: { children: ReactNode }) {

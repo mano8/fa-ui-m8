@@ -2,7 +2,7 @@ import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { useApiKeysMock } = vi.hoisted(() => ({ useApiKeysMock: vi.fn() }));
-vi.mock("@fa-m8/astro-auth-m8/hooks", () => ({ useApiKeys: useApiKeysMock }));
+vi.mock("@mano8/astro-auth-m8/hooks", () => ({ useApiKeys: useApiKeysMock }));
 
 import { ApiKeysPanel } from "./api-keys-panel";
 

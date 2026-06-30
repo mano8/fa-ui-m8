@@ -3,7 +3,7 @@
 // Registers the fa-auth-backed adapter and pins the runtime config from the
 // PUBLIC_FA_MEDIA_* env vars the faMedia integration defines at build time.
 import { useMemo, type ReactNode } from "react";
-import { MediaProvider as PluginMediaProvider } from "@fa-m8/astro-media-m8/react";
+import { MediaProvider as PluginMediaProvider } from "@mano8/astro-media-m8/react";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { getMediaAdapter } from "../../lib/mediaAdapter";
 

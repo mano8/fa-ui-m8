@@ -1,4 +1,4 @@
-/* Theme bridge for the @fa-m8/astro-media-m8 headless React components.
+/* Theme bridge for the @mano8/astro-media-m8 headless React components.
    The plugin ships framework-neutral `fa-media-*` classes (it deliberately
    assumes no Tailwind/theme). This file is NOT a verbatim copy of the plugin's
    scaffold CSS: it maps the plugin's `--fa-media-*` hooks onto the host's shadcn
@@ -30,6 +30,30 @@
   gap: 0.75rem;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.fa-media-title-row,
+.fa-media-filter-row {
+  display: flex;
+  width: 100%;
+  gap: 0.75rem;
+}
+
+.fa-media-title-row {
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fa-media-filter-row {
+  flex-direction: column;
+}
+
+@media (min-width: 48rem) {
+  .fa-media-filter-row {
+    flex-direction: row;
+    align-items: center;
+  }
 }
 
 .fa-media-panel fieldset {
@@ -130,6 +154,31 @@
 .fa-media-panel button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.fa-media-action-link {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg, 0.5rem);
+  padding: 0.25rem 0.75rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.fa-media-action-link:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.fa-media-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .fa-media-table {

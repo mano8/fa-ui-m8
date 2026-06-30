@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useMediaPresets } from "@fa-m8/astro-media-m8/hooks";
-import type { ImageFormat, ImagePresetPublic } from "@fa-m8/astro-media-m8/schemas";
+import { useMediaPresets } from "@mano8/astro-media-m8/hooks";
+import type { ImageFormat, ImagePresetPublic } from "@mano8/astro-media-m8/schemas";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";

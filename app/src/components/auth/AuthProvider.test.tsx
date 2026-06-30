@@ -12,7 +12,7 @@ const pluginAuth = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@fa-m8/astro-auth-m8/react", () => ({
+vi.mock("@mano8/astro-auth-m8/react", () => ({
   AuthProvider({ children }: { children: ReactNode }) {
     return <>{children}</>;
   },

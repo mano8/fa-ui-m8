@@ -1,6 +1,6 @@
 // src/hooks/auth/useUser.ts
 import { useAuth } from "./useAuth";
-import type { RoleType } from "@fa-m8/astro-auth-m8/schemas";
+import type { RoleType } from "@mano8/astro-auth-m8/schemas";
 
 export function useUser() {
   const { user } = useAuth();

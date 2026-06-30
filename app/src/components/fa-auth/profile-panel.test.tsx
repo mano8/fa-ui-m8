@@ -5,8 +5,8 @@ const { useAuthMock, useProfileMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
   useProfileMock: vi.fn(),
 }));
-vi.mock("@fa-m8/astro-auth-m8/react", () => ({ useAuth: useAuthMock }));
-vi.mock("@fa-m8/astro-auth-m8/hooks", () => ({ useProfile: useProfileMock }));
+vi.mock("@mano8/astro-auth-m8/react", () => ({ useAuth: useAuthMock }));
+vi.mock("@mano8/astro-auth-m8/hooks", () => ({ useProfile: useProfileMock }));
 
 import { ProfilePanel } from "./profile-panel";
 

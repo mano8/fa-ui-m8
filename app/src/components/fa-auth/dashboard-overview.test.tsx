@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DashboardOverviewLabels } from "./dashboard-overview";
 
 const { useDashboardMock } = vi.hoisted(() => ({ useDashboardMock: vi.fn() }));
-vi.mock("@fa-m8/astro-auth-m8/hooks", () => ({ useDashboard: useDashboardMock }));
+vi.mock("@mano8/astro-auth-m8/hooks", () => ({ useDashboard: useDashboardMock }));
 
 // recharts' ResponsiveContainer measures its parent; happy-dom reports 0x0 and
 // logs a benign warning. Silence it so the chart branch can be asserted cleanly.

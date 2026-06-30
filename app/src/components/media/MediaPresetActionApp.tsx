@@ -1,7 +1,7 @@
 // src/components/media/MediaPresetActionApp.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useMediaPresets } from "@fa-m8/astro-media-m8/hooks";
-import type { ImageFormat, ImagePresetPublic, PresetSpec } from "@fa-m8/astro-media-m8/schemas";
+import { useMediaPresets } from "@mano8/astro-media-m8/hooks";
+import type { ImageFormat, ImagePresetPublic, PresetSpec } from "@mano8/astro-media-m8/schemas";
 import { Save, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

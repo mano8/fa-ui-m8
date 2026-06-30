@@ -7,8 +7,8 @@ const { useUsersMock, requireRoleMock } = vi.hoisted(() => ({
   // Default: superuser → RequireRole renders its children.
   requireRoleMock: vi.fn(({ children }: { children: ReactNode }) => children),
 }));
-vi.mock("@fa-m8/astro-auth-m8/react", () => ({ RequireRole: requireRoleMock }));
-vi.mock("@fa-m8/astro-auth-m8/hooks", () => ({ useUsers: useUsersMock }));
+vi.mock("@mano8/astro-auth-m8/react", () => ({ RequireRole: requireRoleMock }));
+vi.mock("@mano8/astro-auth-m8/hooks", () => ({ useUsers: useUsersMock }));
 
 import { AdminUsersPanel } from "./admin-users-panel";
 

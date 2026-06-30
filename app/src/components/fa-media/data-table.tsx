@@ -2,7 +2,7 @@
 
 // Generic, pure-shadcn data table (sorting + filtering + pagination) built on
 // @tanstack/react-table and the shadcn `table` primitive. Copied into the
-// consumer via the @fa-m8/astro-media-m8 registry; edit freely per app.
+// consumer via the @mano8/astro-media-m8 registry; edit freely per app.
 import * as React from "react";
 import {
   type ColumnDef,

@@ -135,18 +135,18 @@ Backend validation remains authoritative — the UI check catches misconfigurati
 
 The account page's landing tab is an **activity dashboard**, and every other tab
 (profile, sessions, API keys, admin users) is also a registry skin from the
-`@fa-m8/astro-auth-m8` shadcn registry. The logic stays a live dependency
+`@mano8/astro-auth-m8` shadcn registry. The logic stays a live dependency
 (`useAuth`/`useProfile`/`useSessions`/`useApiKeys`/`useUsers`/`useDashboard` from the
 package) — only the skin is copied in, adopting radix-nova tokens and editable here.
 
 What was added from the registry (run from `app/`):
 
 ```bash
-npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/dashboard-overview.json
-npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/profile-panel.json
-npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/sessions-panel.json
-npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/api-keys-panel.json
-npx shadcn add ./node_modules/@fa-m8/astro-auth-m8/registry/r/admin-users-panel.json
+npx shadcn add ./node_modules/@mano8/astro-auth-m8/registry/r/dashboard-overview.json
+npx shadcn add ./node_modules/@mano8/astro-auth-m8/registry/r/profile-panel.json
+npx shadcn add ./node_modules/@mano8/astro-auth-m8/registry/r/sessions-panel.json
+npx shadcn add ./node_modules/@mano8/astro-auth-m8/registry/r/api-keys-panel.json
+npx shadcn add ./node_modules/@mano8/astro-auth-m8/registry/r/admin-users-panel.json
 # pulls: src/components/fa-auth/{dashboard-overview,activity-bar-chart,profile-panel,
 #        sessions-panel,api-keys-panel,admin-users-panel}.tsx + shadcn primitives
 ```
@@ -169,15 +169,15 @@ See the plugin's "shadcn views" README for the full item list (incl. `data-table
 When media is enabled (`PUBLIC_MEDIA_API_BASE` set), the Media Studio's superuser
 **Admin** tab landing view is a **storage dashboard**, and the destructive operations
 live behind confirmations in a separate **Maintenance** tab — both registry skins from
-the `@fa-m8/astro-media-m8` registry. The logic stays a live dependency (`useMediaAdmin`
+the `@mano8/astro-media-m8` registry. The logic stays a live dependency (`useMediaAdmin`
 from the package) — only the skin is copied in, adopting radix-nova tokens and editable
 here.
 
 What was added from the registry (run from `app/`):
 
 ```bash
-npx shadcn add ./node_modules/@fa-m8/astro-media-m8/registry/r/media-dashboard-overview.json
-npx shadcn add ./node_modules/@fa-m8/astro-media-m8/registry/r/media-maintenance-panel.json
+npx shadcn add ./node_modules/@mano8/astro-media-m8/registry/r/media-dashboard-overview.json
+npx shadcn add ./node_modules/@mano8/astro-media-m8/registry/r/media-maintenance-panel.json
 # pulls: src/components/fa-media/{media-dashboard-overview,media-storage-chart,
 #        data-table,media-maintenance-panel}.tsx + shadcn primitives (table, alert-dialog)
 ```
@@ -206,8 +206,8 @@ same `astro.config.mjs` serves every configuration.
 
 | Plugin | Package | Required? | Enabled when |
 | :-- | :-- | :-- | :-- |
-| Auth | `@fa-m8/astro-auth-m8` | **Required** (the one mandatory peer) | always |
-| Media | `@fa-m8/astro-media-m8` | Opt-in (`optionalDependencies`) | package installed **and** `PUBLIC_MEDIA_API_BASE` set |
+| Auth | `@mano8/astro-auth-m8` | **Required** (the one mandatory peer) | always |
+| Media | `@mano8/astro-media-m8` | Opt-in (`optionalDependencies`) | package installed **and** `PUBLIC_MEDIA_API_BASE` set |
 
 How the media gate works: [`astro.config.mjs`](astro.config.mjs) reads
 `PUBLIC_MEDIA_API_BASE` and, only when it is set, `await import()`s the media

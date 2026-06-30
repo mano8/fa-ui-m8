@@ -1,7 +1,7 @@
 // src/components/auth/RequireRole.tsx
 import type { ReactNode } from "react";
 import { useUser } from "../../hooks/auth/useUser";
-import type { RoleType } from "@fa-m8/astro-auth-m8/schemas";
+import type { RoleType } from "@mano8/astro-auth-m8/schemas";
 
 interface RequireRoleProps {
   role?: RoleType;
