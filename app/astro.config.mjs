@@ -34,6 +34,8 @@ function publicMediaEnabled(value) {
 
 const mediaApiBase = publicEnv('PUBLIC_MEDIA_API_BASE');
 const mediaV1Base = publicEnv('PUBLIC_MEDIA_V1_BASE');
+const promptApiBase = publicEnv('PUBLIC_PROMPT_API_BASE');
+const promptApiPrefix = publicEnv('PUBLIC_PROMPT_API_PREFIX');
 
 /** @param {string} specifier */
 function packageInstalled(specifier) {
@@ -55,6 +57,16 @@ if (mediaRequested && !mediaPackageInstalled) {
 	);
 }
 
+const promptPackageInstalled = packageInstalled('@mano8/astro-prompt-m8');
+const promptRequested = publicMediaEnabled(promptApiBase);
+const promptPluginEnabled = promptRequested && promptPackageInstalled;
+
+if (promptRequested && !promptPackageInstalled) {
+	console.warn(
+		'PUBLIC_PROMPT_API_BASE is set but @mano8/astro-prompt-m8 is not installed; prompt UI/routes are disabled.',
+	);
+}
+
 /** @param {string} file */
 const mediaStub = (file) => fileURLToPath(new URL(`./src/lib/media-stubs/${file}`, import.meta.url));
 const disabledMediaAliases = mediaPluginEnabled
@@ -66,6 +78,19 @@ const disabledMediaAliases = mediaPluginEnabled
 			{ find: '@mano8/astro-media-m8/list-params', replacement: mediaStub('list-params.ts') },
 			{ find: '@mano8/astro-media-m8/react', replacement: mediaStub('react.tsx') },
 			{ find: '@mano8/astro-media-m8/schemas', replacement: mediaStub('schemas.ts') },
+		];
+
+/** @param {string} file */
+const promptStub = (file) => fileURLToPath(new URL(`./src/lib/prompt-stubs/${file}`, import.meta.url));
+const disabledPromptAliases = promptPluginEnabled
+	? []
+	: [
+			{ find: '@mano8/astro-prompt-m8/api', replacement: promptStub('api.ts') },
+			{ find: '@mano8/astro-prompt-m8/auth-adapter', replacement: promptStub('auth-adapter.ts') },
+			{ find: '@mano8/astro-prompt-m8/hooks', replacement: promptStub('hooks.ts') },
+			{ find: '@mano8/astro-prompt-m8/list-params', replacement: promptStub('list-params.ts') },
+			{ find: '@mano8/astro-prompt-m8/react', replacement: promptStub('react.tsx') },
+			{ find: '@mano8/astro-prompt-m8/schemas', replacement: promptStub('schemas.ts') },
 		];
 
 // Deployment contract: `astro-auth-m8` is the one required plugin; every other
@@ -147,6 +172,79 @@ const mediaSidebarItems = mediaPluginEnabled
 			},
 		]
 	: [];
+
+// Opt-in prompt plugin: same pattern as media. Loaded via dynamic import so the
+// build never requires the package when prompts are disabled. Wired AFTER faAuth
+// (below): its auth adapter is backed by fa-auth-m8 tokens. Starlight owns
+// routing; prompt UI is mounted through React islands wrapped in PromptProvider.
+const promptIntegrations = [];
+if (promptPluginEnabled) {
+	const { default: faPrompt } = await import('@mano8/astro-prompt-m8');
+	promptIntegrations.push(
+		faPrompt({
+			apiBase: promptApiBase,
+			apiPrefix: promptApiPrefix ?? '/fastapi',
+			mode: 'headless',
+			auth: { provider: 'fa-auth-astro' },
+			locales: ['en', 'es', 'fr'],
+			defaultLocale: 'en',
+		}),
+	);
+}
+const promptSidebarItems = promptPluginEnabled
+	? [
+			{
+				label: translations.en.nav.prompt,
+				collapsed: true,
+				translations: {
+					es: translations.es.nav.prompt,
+					fr: translations.fr.nav.prompt,
+				},
+				items: [
+					{
+						label: translations.en.prompt.tabs.templates,
+						link: '/prompt/',
+						translations: {
+							es: translations.es.prompt.tabs.templates,
+							fr: translations.fr.prompt.tabs.templates,
+						},
+					},
+					{
+						label: translations.en.prompt.tabs.blocks,
+						link: '/prompt/blocks',
+						translations: {
+							es: translations.es.prompt.tabs.blocks,
+							fr: translations.fr.prompt.tabs.blocks,
+						},
+					},
+					{
+						label: translations.en.prompt.tabs.composer,
+						link: '/prompt/composer',
+						translations: {
+							es: translations.es.prompt.tabs.composer,
+							fr: translations.fr.prompt.tabs.composer,
+						},
+					},
+					{
+						label: translations.en.prompt.tabs.admin,
+						link: '/prompt/admin',
+						translations: {
+							es: translations.es.prompt.tabs.admin,
+							fr: translations.fr.prompt.tabs.admin,
+						},
+					},
+					{
+						label: translations.en.prompt.tabs.maintenance,
+						link: '/prompt/maintenance',
+						translations: {
+							es: translations.es.prompt.tabs.maintenance,
+							fr: translations.fr.prompt.tabs.maintenance,
+						},
+					},
+				],
+			},
+		]
+	: [];
 // https://astro.build/config
 export default defineConfig({
 	site: env.PUBLIC_SITE_URL ?? 'http://localhost:4321',
@@ -165,16 +263,25 @@ export default defineConfig({
 						'import.meta.env.PUBLIC_FA_MEDIA_LEGACY_BASE': JSON.stringify(''),
 						'import.meta.env.PUBLIC_FA_MEDIA_ADMIN_ROLE': JSON.stringify('is_superuser'),
 					}),
+			'import.meta.env.PUBLIC_FA_PROMPT_ENABLED': JSON.stringify(promptPluginEnabled),
+			...(promptPluginEnabled
+				? {}
+				: {
+						'import.meta.env.PUBLIC_FA_PROMPT_API_BASE': JSON.stringify(''),
+						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify('/fastapi'),
+						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('is_superuser'),
+					}),
 		},
 		plugins: [tailwindcss()],
 		resolve: {
-			alias: disabledMediaAliases,
+			alias: [...disabledMediaAliases, ...disabledPromptAliases],
 			dedupe: [
 				'react',
 				'react-dom',
 				'@tanstack/react-query',
 				'@mano8/astro-auth-m8',
 				'@mano8/astro-media-m8',
+				'@mano8/astro-prompt-m8',
 			],
 		},
 		optimizeDeps: {
@@ -348,9 +455,10 @@ export default defineConfig({
 					label: 'Reference',
 					items: [{ autogenerate: { directory: 'reference' } }],
 				},
-				...mediaSidebarItems,
-			],
-		}),
+...mediaSidebarItems,
+			...promptSidebarItems,
+		],
+	}),
 		react(),
 		faAuth({
 			apiBase: env.PUBLIC_AUTH_API_BASE ?? '/user',
@@ -361,5 +469,8 @@ export default defineConfig({
 		// Opt-in media plugin: empty unless PUBLIC_MEDIA_API_BASE is set (see the
 		// mediaIntegrations block above). Stays last so it wires after faAuth.
 		...mediaIntegrations,
+		// Opt-in prompt plugin: same pattern as media. Stays after faAuth + media
+		// so its auth adapter is wired against fa-auth-m8 tokens.
+		...promptIntegrations,
 	],
 });

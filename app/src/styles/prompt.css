@@ -1,0 +1,4 @@
+/* Prompt plugin starter styles: keep minimal and let the app theme drive the UI. */
+.not-content :where(.fa-prompt-shell) {
+  box-sizing: border-box;
+}

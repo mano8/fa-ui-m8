@@ -1,0 +1,12 @@
+---
+import PromptPage from '@/components/prompt/PromptPage.astro';
+import { getPromptStaticPaths, type PromptRouteProps } from '@/lib/promptFeature';
+
+export function getStaticPaths() {
+  return getPromptStaticPaths('fr');
+}
+
+const props = Astro.props as PromptRouteProps;
+---
+
+{props.kind === 'view' ? <PromptPage locale={props.locale} view={props.view} /> : null}
