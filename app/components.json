@@ -23,6 +23,7 @@
   "menuAccent": "subtle",
   "registries": {
     "@fa-m8-auth": "./node_modules/@mano8/astro-auth-m8/registry/r/{name}.json",
-    "@fa-m8-media": "./node_modules/@mano8/astro-media-m8/registry/r/{name}.json"
+    "@fa-m8-media": "./node_modules/@mano8/astro-media-m8/registry/r/{name}.json",
+    "@fa-m8-prompt": "./node_modules/@mano8/astro-prompt-m8/registry/r/{name}.json"
   }
 }

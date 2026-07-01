@@ -40,6 +40,22 @@ vi.mock("../media/MediaProvider", async () => {
   };
 });
 
+vi.mock("../prompt/PromptProvider", async () => {
+  const React = await vi.importActual<typeof import("react")>("react");
+  const query = await vi.importActual<typeof import("@tanstack/react-query")>(
+    "@tanstack/react-query",
+  );
+
+  return {
+    PromptProvider({ children }: { children: ReactNode }) {
+      providerEvents.push(
+        query.useQueryClient() === expectedClient.current ? "prompt:shared" : "prompt:other",
+      );
+      return React.createElement("section", { "data-provider": "prompt" }, children);
+    },
+  };
+});
+
 afterEach(() => {
   providerEvents.length = 0;
   expectedClient.current = null;
@@ -78,6 +94,37 @@ describe("PluginProviders", () => {
     );
 
     expect(providerEvents).toEqual(["auth:shared", "child:shared"]);
+  });
+
+  it("wraps prompt islands after auth with one shared query client", () => {
+    const client = createPluginQueryClient();
+    expectedClient.current = client;
+
+    render(
+      <PluginProviders prompt queryClient={client}>
+        <QueryClientProbe label="child" />
+      </PluginProviders>,
+    );
+
+    expect(providerEvents).toEqual(["auth:shared", "prompt:shared", "child:shared"]);
+  });
+
+  it("wraps combined plugin islands with media before prompt inside auth", () => {
+    const client = createPluginQueryClient();
+    expectedClient.current = client;
+
+    render(
+      <PluginProviders media prompt queryClient={client}>
+        <QueryClientProbe label="child" />
+      </PluginProviders>,
+    );
+
+    expect(providerEvents).toEqual([
+      "auth:shared",
+      "prompt:shared",
+      "media:shared",
+      "child:shared",
+    ]);
   });
 
   it("creates a stable island query client across rerenders", () => {

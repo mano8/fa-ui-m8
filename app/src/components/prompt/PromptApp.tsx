@@ -4,10 +4,10 @@
 import { useEffect, useState } from "react";
 import {
   AdminPromptPanel,
-  PromptBlockLibrary,
   PromptComposer,
-  PromptTemplateEditor
 } from "@mano8/astro-prompt-m8/react";
+import PromptBlockEditor from "../fa-prompt/prompt-block-editor";
+import PromptTemplateEditor from "../fa-prompt/prompt-template-editor";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
@@ -28,17 +28,46 @@ function promptViewFromPath(pathname: string): PromptView | null {
   return null;
 }
 
-function pathForPromptView(locale: string, view: PromptView): string {
-  if (view === "templates") return `/${locale}/prompt`;
-  return `/${locale}/prompt/${view}`;
-}
-
 function LoadingState() {
   return (
     <div className="flex min-h-[360px] items-center justify-center">
       <div className="size-8 animate-spin rounded-full border-2 border-muted border-b-primary" />
     </div>
   );
+}
+
+function blockEditorLabels(t: ReturnType<typeof getTranslations>) {
+  return {
+    ...t.prompt.blocks,
+    deleteLabel: t.prompt.blocks.delete,
+    deleteTitle: t.prompt.blocks.confirmDelete,
+    deleteDescription: t.prompt.blocks.confirmDelete,
+    allTypes: "All types",
+    allDynamic: `${t.prompt.blocks.dynamicYes} + ${t.prompt.blocks.dynamicNo}`,
+    allPublic: `${t.prompt.blocks.publicYes} + ${t.prompt.blocks.publicNo}`,
+    columns: "Columns",
+    search: t.prompt.blocks.name,
+    selected: (selected: number, total: number) => `${selected} / ${total}`,
+  };
+}
+
+function templateEditorLabels(t: ReturnType<typeof getTranslations>) {
+  return {
+    ...t.prompt.templates,
+    type: t.prompt.blocks.type,
+    deleteLabel: t.prompt.templates.delete,
+    deleteTitle: t.prompt.templates.confirmDelete,
+    deleteDescription: t.prompt.templates.confirmDelete,
+    composeTitle: t.prompt.templates.composeLabel,
+    composeResult: t.prompt.templates.composed,
+    searchTemplates: t.prompt.templates.name,
+    searchBlocks: t.prompt.blocks.name,
+    allPublic: `${t.prompt.blocks.publicYes} + ${t.prompt.blocks.publicNo}`,
+    allDynamic: `${t.prompt.blocks.dynamicYes} + ${t.prompt.blocks.dynamicNo}`,
+    allTypes: "All types",
+    columns: "Columns",
+    selected: (selected: number, total: number) => `${selected} / ${total}`,
+  };
 }
 
 function AppShellContent({ view }: { view: PromptView }) {
@@ -49,10 +78,6 @@ function AppShellContent({ view }: { view: PromptView }) {
   const t = getTranslations(locale);
   const activeView: PromptView =
     !isSuperuser && (view === "admin" || view === "maintenance") ? "templates" : view;
-
-  const navigatePromptView = (nextView: PromptView) => {
-    window.location.assign(pathForPromptView(locale, nextView));
-  };
 
   if (status === "loading") return <LoadingState />;
 
@@ -90,10 +115,10 @@ function AppShellContent({ view }: { view: PromptView }) {
 
       <div className="space-y-4 pb-3">
         {activeView === "blocks" ? (
-          <PromptBlockLibrary labels={t.prompt.blocks} />
+          <PromptBlockEditor labels={blockEditorLabels(t)} />
         ) : null}
         {activeView === "templates" ? (
-          <PromptTemplateEditor labels={t.prompt.templates} />
+          <PromptTemplateEditor labels={templateEditorLabels(t)} />
         ) : null}
         {activeView === "composer" ? (
           <PromptComposer labels={t.prompt.composer} />
@@ -103,27 +128,10 @@ function AppShellContent({ view }: { view: PromptView }) {
         ) : null}
         {activeView === "maintenance" && isSuperuser ? (
           <div className="not-content space-y-4">
-            <PromptBlockLibrary labels={t.prompt.blocks} />
-            <PromptTemplateEditor labels={t.prompt.templates} />
+            <PromptBlockEditor labels={blockEditorLabels(t)} />
+            <PromptTemplateEditor labels={templateEditorLabels(t)} />
           </div>
         ) : null}
-        <nav className="flex flex-wrap gap-2 pt-3 text-sm">
-          {(["templates", "blocks", "composer", "admin", "maintenance"] as PromptView[]).map(
-            (candidate) => (
-              <button
-                key={candidate}
-                type="button"
-                className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
-                disabled={
-                  (candidate === "admin" || candidate === "maintenance") && !isSuperuser
-                }
-                onClick={() => navigatePromptView(candidate)}
-              >
-                {t.prompt.tabs[candidate]}
-              </button>
-            )
-          )}
-        </nav>
       </div>
     </div>
   );
