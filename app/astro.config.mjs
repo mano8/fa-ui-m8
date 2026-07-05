@@ -32,10 +32,24 @@ function publicMediaEnabled(value) {
 	return Boolean(normalized && !['0', 'false', 'off', 'none'].includes(normalized));
 }
 
+const authApiBase = publicEnv('PUBLIC_AUTH_API_BASE');
+const siteUrl = publicEnv('PUBLIC_SITE_URL');
 const mediaApiBase = publicEnv('PUBLIC_MEDIA_API_BASE');
 const mediaV1Base = publicEnv('PUBLIC_MEDIA_V1_BASE');
+const mediaStorageOrigin = publicEnv('PUBLIC_MEDIA_STORAGE_ORIGIN');
 const promptApiBase = publicEnv('PUBLIC_PROMPT_API_BASE');
 const promptApiPrefix = publicEnv('PUBLIC_PROMPT_API_PREFIX');
+const repartoApiBase = publicEnv('PUBLIC_REPARTO_API_BASE');
+const repartoApiPrefix = publicEnv('PUBLIC_REPARTO_API_PREFIX');
+const securityEnv = {
+	PUBLIC_SITE_URL: siteUrl,
+	PUBLIC_AUTH_API_BASE: authApiBase,
+	PUBLIC_MEDIA_API_BASE: mediaApiBase,
+	PUBLIC_MEDIA_V1_BASE: mediaV1Base,
+	PUBLIC_MEDIA_STORAGE_ORIGIN: mediaStorageOrigin,
+	PUBLIC_PROMPT_API_BASE: promptApiBase,
+	PUBLIC_REPARTO_API_BASE: repartoApiBase,
+};
 
 /** @param {string} specifier */
 function packageInstalled(specifier) {
@@ -64,6 +78,16 @@ const promptPluginEnabled = promptRequested && promptPackageInstalled;
 if (promptRequested && !promptPackageInstalled) {
 	console.warn(
 		'PUBLIC_PROMPT_API_BASE is set but @mano8/astro-prompt-m8 is not installed; prompt UI/routes are disabled.',
+	);
+}
+
+const repartoPackageInstalled = packageInstalled('@mano8/astro-reparto-m8');
+const repartoRequested = publicMediaEnabled(repartoApiBase);
+const repartoPluginEnabled = repartoRequested && repartoPackageInstalled;
+
+if (repartoRequested && !repartoPackageInstalled) {
+	console.warn(
+		'PUBLIC_REPARTO_API_BASE is set but @mano8/astro-reparto-m8 is not installed; reparto UI/routes are disabled.',
 	);
 }
 
@@ -233,12 +257,90 @@ const promptSidebarItems = promptPluginEnabled
 							fr: translations.fr.prompt.tabs.admin,
 						},
 					},
+				],
+			},
+		]
+	: [];
+
+// Opt-in reparto plugin: same optional deployment contract as media/prompt.
+// It stays package-owned; fa-ui-m8 only decides whether to mount its starter
+// routes and expose the route menu in Starlight.
+const repartoIntegrations = [];
+if (repartoPluginEnabled) {
+	const { default: faReparto } = await import('@mano8/astro-reparto-m8');
+	repartoIntegrations.push(
+		faReparto({
+			apiBase: repartoApiBase,
+			apiPrefix: repartoApiPrefix ?? '',
+			mode: 'starter',
+			auth: { provider: 'fa-auth-astro' },
+		}),
+	);
+}
+const repartoSidebarItems = repartoPluginEnabled
+	? [
+			{
+				label: 'Reparto Docente',
+				collapsed: true,
+				translations: {
+					es: 'Reparto docente',
+					fr: 'Repartition docente',
+				},
+				items: [
 					{
-						label: translations.en.prompt.tabs.maintenance,
-						link: '/prompt/maintenance',
+						label: 'Dashboard',
+						link: '/reparto',
 						translations: {
-							es: translations.es.prompt.tabs.maintenance,
-							fr: translations.fr.prompt.tabs.maintenance,
+							es: 'Panel',
+							fr: 'Tableau de bord',
+						},
+					},
+					{
+						label: 'Processes',
+						link: '/reparto/processes',
+						translations: {
+							es: 'Procesos',
+							fr: 'Processus',
+						},
+					},
+					{
+						label: 'Meeting',
+						link: '/reparto/meeting/current',
+						translations: {
+							es: 'Reunion',
+							fr: 'Reunion',
+						},
+					},
+					{
+						label: 'Teacher view',
+						link: '/reparto/processes/current/my-view',
+						translations: {
+							es: 'Vista docente',
+							fr: 'Vue enseignant',
+						},
+					},
+					{
+						label: 'Shared screen',
+						link: '/reparto/processes/current/shared',
+						translations: {
+							es: 'Pantalla compartida',
+							fr: 'Ecran partage',
+						},
+					},
+					{
+						label: 'Versions',
+						link: '/reparto/processes/current/versions',
+						translations: {
+							es: 'Versiones',
+							fr: 'Versions',
+						},
+					},
+					{
+						label: 'Exports',
+						link: '/reparto/processes/current/exports',
+						translations: {
+							es: 'Exportaciones',
+							fr: 'Exports',
 						},
 					},
 				],
@@ -247,10 +349,10 @@ const promptSidebarItems = promptPluginEnabled
 	: [];
 // https://astro.build/config
 export default defineConfig({
-	site: env.PUBLIC_SITE_URL ?? 'http://localhost:4321',
+	site: siteUrl ?? 'http://localhost:4321',
 	// Production CSP for the static UI (plan item 8.1). Build-time only — a no-op
 	// under `astro dev`; takes effect in `build`/`preview`. See src/lib/csp.ts.
-	security: buildSecurityConfig(),
+	security: buildSecurityConfig(securityEnv),
 	vite: {
 		cacheDir: process.env.VITE_CACHE_DIR ?? '.astro/vite',
 		define: {
@@ -271,6 +373,13 @@ export default defineConfig({
 						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify('/fastapi'),
 						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('is_superuser'),
 					}),
+			'import.meta.env.PUBLIC_FA_REPARTO_ENABLED': JSON.stringify(repartoPluginEnabled),
+			...(repartoPluginEnabled
+				? {}
+				: {
+						'import.meta.env.PUBLIC_FA_REPARTO_API_BASE': JSON.stringify(''),
+						'import.meta.env.PUBLIC_FA_REPARTO_API_PREFIX': JSON.stringify(''),
+					}),
 		},
 		plugins: [tailwindcss()],
 		resolve: {
@@ -282,6 +391,7 @@ export default defineConfig({
 				'@mano8/astro-auth-m8',
 				'@mano8/astro-media-m8',
 				'@mano8/astro-prompt-m8',
+				'@mano8/astro-reparto-m8',
 			],
 		},
 		optimizeDeps: {
@@ -457,11 +567,12 @@ export default defineConfig({
 				},
 ...mediaSidebarItems,
 			...promptSidebarItems,
+			...repartoSidebarItems,
 		],
 	}),
 		react(),
 		faAuth({
-			apiBase: env.PUBLIC_AUTH_API_BASE ?? '/user',
+			apiBase: authApiBase ?? '/user',
 			mode: 'headless',
 			locales: ['en', 'es', 'fr'],
 			defaultLocale: 'en',
@@ -472,5 +583,8 @@ export default defineConfig({
 		// Opt-in prompt plugin: same pattern as media. Stays after faAuth + media
 		// so its auth adapter is wired against fa-auth-m8 tokens.
 		...promptIntegrations,
+		// Opt-in reparto plugin: starter routes are mounted only when requested
+		// and installed, and it stays after faAuth for the shared auth adapter.
+		...repartoIntegrations,
 	],
 });

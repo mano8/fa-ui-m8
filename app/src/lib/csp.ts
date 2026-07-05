@@ -59,6 +59,8 @@ export const CONNECT_ORIGIN_ENV_KEYS = [
   'PUBLIC_MEDIA_API_BASE',
   'PUBLIC_MEDIA_V1_BASE',
   'PUBLIC_MEDIA_STORAGE_ORIGIN',
+  'PUBLIC_PROMPT_API_BASE',
+  'PUBLIC_REPARTO_API_BASE',
 ] as const;
 
 type EnvLike = Record<string, string | undefined>;

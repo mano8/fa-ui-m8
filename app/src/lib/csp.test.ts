@@ -50,8 +50,14 @@ describe('connectSrc', () => {
       connectSrc({
         PUBLIC_AUTH_API_BASE: 'https://auth.example.com/user',
         PUBLIC_MEDIA_API_BASE: 'https://media.example.com/media',
+        PUBLIC_PROMPT_API_BASE: 'https://prompt.example.com/prompt',
       }),
-    ).toEqual(["'self'", 'https://auth.example.com', 'https://media.example.com']);
+    ).toEqual([
+      "'self'",
+      'https://auth.example.com',
+      'https://media.example.com',
+      'https://prompt.example.com',
+    ]);
   });
 
   it('deduplicates origins shared across keys', () => {
@@ -60,6 +66,7 @@ describe('connectSrc', () => {
         PUBLIC_AUTH_API_BASE: 'https://api.example.com/user',
         PUBLIC_MEDIA_API_BASE: 'https://api.example.com/media',
         PUBLIC_MEDIA_V1_BASE: 'https://api.example.com/v1',
+        PUBLIC_PROMPT_API_BASE: 'https://api.example.com/prompt',
       }),
     ).toEqual(["'self'", 'https://api.example.com']);
   });
@@ -71,6 +78,8 @@ describe('connectSrc', () => {
   it('scans the documented connect-origin keys', () => {
     expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_SITE_URL');
     expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_AUTH_API_BASE');
+    expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_PROMPT_API_BASE');
+    expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_REPARTO_API_BASE');
     expect(CONNECT_ORIGIN_ENV_KEYS).toContain('PUBLIC_MEDIA_STORAGE_ORIGIN');
   });
 

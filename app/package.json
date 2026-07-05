@@ -17,7 +17,7 @@
     "@astrojs/starlight": "^0.39.3",
     "@fontsource-variable/geist": "^5.2.9",
     "@hookform/resolvers": "^5.4.0",
-    "@mano8/astro-auth-m8": "^0.1.0-alpha.1",
+    "@mano8/astro-auth-m8": "file:../../astro-auth-m8",
     "@tailwindcss/vite": "^4.3.1",
     "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-table": "^8.21.3",
@@ -38,8 +38,9 @@
     "zod": "^4.4.3"
   },
   "optionalDependencies": {
-    "@mano8/astro-media-m8": "^0.1.0-alpha.1",
-    "@mano8/astro-prompt-m8": "file:../../astro-prompt-m8"
+    "@mano8/astro-media-m8": "file:../../astro-media-m8",
+    "@mano8/astro-prompt-m8": "file:../../astro-prompt-m8",
+    "@mano8/astro-reparto-m8": "file:../../astro-reparto-m8"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
