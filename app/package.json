@@ -38,8 +38,6 @@
     "zod": "^4.4.3"
   },
   "optionalDependencies": {
-    "@mano8/astro-media-m8": "file:../../astro-media-m8",
-    "@mano8/astro-prompt-m8": "file:../../astro-prompt-m8",
     "@mano8/astro-reparto-m8": "file:../../astro-reparto-m8"
   },
   "devDependencies": {

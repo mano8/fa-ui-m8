@@ -66,7 +66,7 @@ export function useMediaAdmin(): {
   loadSubscriptions: () => Promise<void>;
   removeSubscription: (_id: string) => Promise<void>;
   purgeStale: () => Promise<void>;
-  repair: () => Promise<void>;
+  repair: (_deleteStorageOrphans?: boolean) => Promise<void>;
   purgeExpiredObjects: () => Promise<void>;
 } {
   return {

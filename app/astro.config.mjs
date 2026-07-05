@@ -274,6 +274,8 @@ if (repartoPluginEnabled) {
 			apiPrefix: repartoApiPrefix ?? '',
 			mode: 'starter',
 			auth: { provider: 'fa-auth-astro' },
+			locales: ['en', 'es', 'fr'],
+			defaultLocale: 'en',
 		}),
 	);
 }

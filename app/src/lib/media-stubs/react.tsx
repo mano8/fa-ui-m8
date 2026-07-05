@@ -1,17 +1,28 @@
 import type { ReactNode } from "react";
+import type { MediaAuthAdapter } from "./auth-adapter";
 
 function DisabledMedia() {
   return <p role="alert">Media is not enabled for this build.</p>;
 }
 
-export function MediaProvider({ children }: { children: ReactNode }) {
+type MediaProviderProps = {
+  adapter?: MediaAuthAdapter;
+  children: ReactNode;
+  config?: Record<string, unknown>;
+};
+
+export function MediaProvider({ children }: MediaProviderProps) {
   return <>{children}</>;
 }
 
-export function MediaUploadDropzone() {
+export function MediaUploadDropzone(_props: { onUploaded?: () => void }) {
   return <DisabledMedia />;
 }
 
-export function ObjectDetail() {
+export function MediaLibrary(_props: { objectHref?: (id: string) => string }) {
+  return <DisabledMedia />;
+}
+
+export function ObjectDetail(_props: { objectId: string; onDeleted?: () => void }) {
   return <DisabledMedia />;
 }

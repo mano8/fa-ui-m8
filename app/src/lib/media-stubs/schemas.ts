@@ -51,15 +51,30 @@ export type ImagePresetPublic = {
   spec: PresetSpec;
   builtin: boolean;
   created_at: string | null;
+  updated_at?: string | null;
 };
 
 export type MediaObjectPublic = {
   id: string;
+  tenant_id?: string | null;
+  owner_user_id?: string | null;
   original_filename: string | null;
+  storage_bucket?: string;
+  object_key?: string;
+  mime_type?: string | null;
+  extension?: string | null;
   category: MediaCategory;
+  visibility?: MediaVisibility;
   status: MediaObjectStatus;
+  scan_status?: string | null;
+  moderation_status?: string | null;
   size_bytes: number;
+  sha256?: string | null;
+  etag?: string | null;
+  storage_class?: string | null;
   created_at: string;
+  updated_at?: string | null;
+  deleted_at?: string | null;
 };
 
 export type SubscriptionPublic = {

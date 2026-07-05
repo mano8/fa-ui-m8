@@ -112,7 +112,7 @@ const blockTypes = ["role", "task", "context", "instruction", "example", "format
 const blockFormSchema = z.object({
   name: z.string().trim().min(1).max(100),
   description: z.string().trim().max(1000).optional(),
-  content: z.string().trim().min(1).max(5000),
+  content: z.string().min(1).max(5000).refine((value) => value.trim().length > 0),
   type: z.enum(blockTypes),
   is_dynamic: z.boolean(),
   is_public: z.boolean(),

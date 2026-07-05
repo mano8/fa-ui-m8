@@ -15,7 +15,7 @@ import { getTranslations } from "../../content/i18n/app";
 import { localeFromPath } from "../../lib/locale";
 import { PluginProviders } from "../app/PluginProviders";
 
-export type PromptView = "blocks" | "templates" | "composer" | "admin" | "maintenance";
+export type PromptView = "blocks" | "templates" | "composer" | "admin";
 const PROMPT_ROUTE_EVENT = "fa-ui-m8:prompt-route";
 
 function promptViewFromPath(pathname: string): PromptView | null {
@@ -24,7 +24,6 @@ function promptViewFromPath(pathname: string): PromptView | null {
   if (/^\/(en|es|fr)\/prompt\/blocks$/.test(path)) return "blocks";
   if (/^\/(en|es|fr)\/prompt\/composer$/.test(path)) return "composer";
   if (/^\/(en|es|fr)\/prompt\/admin$/.test(path)) return "admin";
-  if (/^\/(en|es|fr)\/prompt\/maintenance$/.test(path)) return "maintenance";
   return null;
 }
 
@@ -76,8 +75,7 @@ function AppShellContent({ view }: { view: PromptView }) {
   const locale =
     typeof window === "undefined" ? "en" : localeFromPath(window.location.pathname);
   const t = getTranslations(locale);
-  const activeView: PromptView =
-    !isSuperuser && (view === "admin" || view === "maintenance") ? "templates" : view;
+  const activeView: PromptView = !isSuperuser && view === "admin" ? "templates" : view;
 
   if (status === "loading") return <LoadingState />;
 
@@ -125,12 +123,6 @@ function AppShellContent({ view }: { view: PromptView }) {
         ) : null}
         {activeView === "admin" && isSuperuser ? (
           <AdminPromptPanel labels={t.prompt.admin} />
-        ) : null}
-        {activeView === "maintenance" && isSuperuser ? (
-          <div className="not-content space-y-4">
-            <PromptBlockEditor labels={blockEditorLabels(t)} />
-            <PromptTemplateEditor labels={templateEditorLabels(t)} />
-          </div>
         ) : null}
       </div>
     </div>

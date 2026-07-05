@@ -386,7 +386,6 @@ export default {
       templates: "Modèles",
       composer: "Compositeur",
       admin: "Admin",
-      maintenance: "Maintenance",
     },
     blocks: {
       title: "Blocs de prompt",
@@ -441,6 +440,9 @@ export default {
       compose: "Composer",
       composeLabel: "Composer ce modèle",
       composed: "Prompt composé",
+      copyComposed: "Copier",
+      copied: "Copié",
+      copyError: "Impossible de copier",
       composing: "Composition…",
       composingError: "Impossible de composer le modèle.",
       dynamicFor: "Contenu dynamique pour",
@@ -453,6 +455,9 @@ export default {
       pickTemplate: "Modèle",
       noTemplate: "Sélectionnez un modèle à composer",
       composed: "Prompt composé",
+      copyComposed: "Copier",
+      copied: "Copié",
+      copyError: "Impossible de copier",
       compose: "Composer",
       composing: "Composition…",
       composingError: "Impossible de composer le prompt.",
@@ -487,10 +492,8 @@ export default {
       blockDelete: "Supprimer le bloc",
       templateDelete: "Supprimer le modèle",
       dashboardTab: "Tableau de bord",
-      maintenanceTab: "Maintenance",
     },
   },
-
   pages: {
     loginTitle: "Connexion",
     logoutTitle: "Déconnexion...",

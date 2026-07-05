@@ -1,25 +1,37 @@
 // Stub for when @mano8/astro-prompt-m8 is not installed. Mirrors media-stubs/auth-adapter.
+type RefreshResult = { access_token?: string } | string | null | undefined;
+
 export type PromptAuthAdapter = {
-  getAccessToken: () => Promise<string | null>;
-  isSuperuser: () => boolean | Promise<boolean>;
+  getAccessToken: () => string | null | Promise<string | null>;
+  refresh?: () => Promise<string | null>;
+  getUser?: () => unknown | Promise<unknown>;
+  isSuperuser?: (user?: unknown) => boolean | Promise<boolean>;
 };
 
 type FaAuthAdapterOptions = {
   getToken: () => string | null | Promise<string | null>;
-  refreshToken: () => string | null | Promise<string | null>;
+  refreshToken: () => RefreshResult | Promise<RefreshResult>;
   getUser: () => unknown | Promise<unknown>;
   isSuperuser: (user: unknown) => boolean;
 };
 
 let currentAdapter: PromptAuthAdapter | null = null;
 
-export function createFaAuthAdapter(_options: FaAuthAdapterOptions): PromptAuthAdapter {
+export function createFaAuthAdapter(options: FaAuthAdapterOptions): PromptAuthAdapter {
   return {
     async getAccessToken() {
-      return null;
+      return options.getToken();
     },
-    async isSuperuser() {
-      return false;
+    async refresh() {
+      const result = await options.refreshToken();
+      if (!result) return null;
+      return typeof result === "string" ? result : result.access_token ?? null;
+    },
+    getUser() {
+      return options.getUser();
+    },
+    isSuperuser(user?: unknown) {
+      return options.isSuperuser(user);
     }
   };
 }

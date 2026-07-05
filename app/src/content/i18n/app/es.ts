@@ -386,7 +386,6 @@ export default {
       templates: "Plantillas",
       composer: "Compositor",
       admin: "Admin",
-      maintenance: "Mantenimiento",
     },
     blocks: {
       title: "Bloques de prompt",
@@ -441,6 +440,9 @@ export default {
       compose: "Componer",
       composeLabel: "Componer esta plantilla",
       composed: "Prompt compuesto",
+      copyComposed: "Copiar",
+      copied: "Copiado",
+      copyError: "No se pudo copiar",
       composing: "Componiendo…",
       composingError: "No se pudo componer la plantilla.",
       dynamicFor: "Contenido dinámico para",
@@ -453,6 +455,9 @@ export default {
       pickTemplate: "Plantilla",
       noTemplate: "Selecciona una plantilla para componer",
       composed: "Prompt compuesto",
+      copyComposed: "Copiar",
+      copied: "Copiado",
+      copyError: "No se pudo copiar",
       compose: "Componer",
       composing: "Componiendo…",
       composingError: "No se pudo componer el prompt.",
@@ -487,10 +492,8 @@ export default {
       blockDelete: "Eliminar bloque",
       templateDelete: "Eliminar plantilla",
       dashboardTab: "Panel",
-      maintenanceTab: "Mantenimiento",
     },
   },
-
   pages: {
     loginTitle: "Iniciar sesión",
     logoutTitle: "Cerrando sesión...",

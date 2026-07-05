@@ -2,7 +2,6 @@ import { useCallback, useMemo, type ReactNode } from "react";
 import {
   AuthProvider as PluginAuthProvider,
   useAuth as usePluginAuth,
-  type AuthContextValue as PluginAuthContextValue,
 } from "@mano8/astro-auth-m8/react";
 import { AuthContext, type AuthContextValue } from "./authContext";
 

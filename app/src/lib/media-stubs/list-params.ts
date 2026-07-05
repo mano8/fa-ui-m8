@@ -54,7 +54,9 @@ export function mergeAndNormalize<TSort extends string>(
     pageSize: schema.allowedPageSizes.includes(requestedPageSize)
       ? requestedPageSize
       : defaults.pageSize ?? schema.defaultPageSize,
-    q: String(readValue(source, "q") ?? defaults.q ?? ""),
+    q: String(readValue(source, "q") ?? defaults.q ?? "")
+      .trim()
+      .replace(/\s+/g, " "),
     sort: schema.allowedSorts.includes(sortValue) ? sortValue : defaults.sort ?? schema.defaultSort,
     order: orderValue === "desc" ? "desc" : "asc",
   };

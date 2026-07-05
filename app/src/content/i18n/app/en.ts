@@ -379,7 +379,6 @@ export default {
       templates: "Templates",
       composer: "Composer",
       admin: "Admin",
-      maintenance: "Maintenance",
     },
     blocks: {
       title: "Prompt blocks",
@@ -434,6 +433,9 @@ export default {
       compose: "Compose",
       composeLabel: "Compose this template",
       composed: "Composed prompt",
+      copyComposed: "Copy",
+      copied: "Copied",
+      copyError: "Could not copy",
       composing: "Composing…",
       composingError: "Could not compose template.",
       dynamicFor: "Dynamic content for",
@@ -446,6 +448,9 @@ export default {
       pickTemplate: "Template",
       noTemplate: "Select a template to compose",
       composed: "Composed prompt",
+      copyComposed: "Copy",
+      copied: "Copied",
+      copyError: "Could not copy",
       compose: "Compose",
       composing: "Composing…",
       composingError: "Could not compose prompt.",
@@ -480,10 +485,8 @@ export default {
       blockDelete: "Delete block",
       templateDelete: "Delete template",
       dashboardTab: "Dashboard",
-      maintenanceTab: "Maintenance",
     },
   },
-
   nav: {
     account: "Account",
     media: "Media",

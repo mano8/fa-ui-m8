@@ -8,6 +8,48 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@mano8/astro-media-m8": [
+        "./src/lib/media-stubs/integration.ts"
+      ],
+      "@mano8/astro-media-m8/api": [
+        "./src/lib/media-stubs/api.ts"
+      ],
+      "@mano8/astro-media-m8/auth-adapter": [
+        "./src/lib/media-stubs/auth-adapter.ts"
+      ],
+      "@mano8/astro-media-m8/hooks": [
+        "./src/lib/media-stubs/hooks.ts"
+      ],
+      "@mano8/astro-media-m8/list-params": [
+        "./src/lib/media-stubs/list-params.ts"
+      ],
+      "@mano8/astro-media-m8/react": [
+        "./src/lib/media-stubs/react.tsx"
+      ],
+      "@mano8/astro-media-m8/schemas": [
+        "./src/lib/media-stubs/schemas.ts"
+      ],
+      "@mano8/astro-prompt-m8": [
+        "./src/lib/prompt-stubs/integration.ts"
+      ],
+      "@mano8/astro-prompt-m8/api": [
+        "./src/lib/prompt-stubs/api.ts"
+      ],
+      "@mano8/astro-prompt-m8/auth-adapter": [
+        "./src/lib/prompt-stubs/auth-adapter.ts"
+      ],
+      "@mano8/astro-prompt-m8/hooks": [
+        "./src/lib/prompt-stubs/hooks.ts"
+      ],
+      "@mano8/astro-prompt-m8/list-params": [
+        "./src/lib/prompt-stubs/list-params.ts"
+      ],
+      "@mano8/astro-prompt-m8/react": [
+        "./src/lib/prompt-stubs/react.tsx"
+      ],
+      "@mano8/astro-prompt-m8/schemas": [
+        "./src/lib/prompt-stubs/schemas.ts"
       ]
     }
   }
