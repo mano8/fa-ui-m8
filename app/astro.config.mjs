@@ -347,7 +347,7 @@ if (repartoPluginEnabled) {
 			apiBase: repartoApiBase,
 			apiPrefix: repartoApiPrefix ?? '',
 			mode: 'starter',
-			auth: { provider: 'fa-auth-astro' },
+			auth: { provider: 'fa-auth-astro', loginPath: '/auth/login' },
 			locales: ['en', 'es', 'fr'],
 			defaultLocale: 'en',
 		}),
