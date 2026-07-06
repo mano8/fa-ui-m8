@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { RepartoAuthAdapter } from "./auth-adapter";
 import type { RepartoListParams } from "./routes";
 
 function disabled(): Error {
@@ -14,7 +15,13 @@ export type RepartoRuntimeConfig = {
   apiPrefix: string;
 };
 
-export function RepartoProvider({ children }: { children: ReactNode; config?: Partial<RepartoRuntimeConfig> }) {
+export function RepartoProvider({
+  children
+}: {
+  children: ReactNode;
+  adapter?: RepartoAuthAdapter;
+  config?: Partial<RepartoRuntimeConfig>;
+}) {
   return <>{children}</>;
 }
 
@@ -22,8 +29,11 @@ export function RepartoQueryProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-export function useRepartoContext(): { config?: Partial<RepartoRuntimeConfig> } {
-  return {};
+export function useRepartoContext(): {
+  adapter?: RepartoAuthAdapter;
+  config?: Partial<RepartoRuntimeConfig>;
+} {
+  return { adapter: undefined, config: undefined };
 }
 
 export function useRepartoProcesses(_params: RepartoListParams = {}) {

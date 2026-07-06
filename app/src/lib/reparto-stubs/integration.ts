@@ -64,7 +64,10 @@ export type FaRepartoAstroOptions = {
   mode?: "headless" | "starter";
   locales?: string[];
   defaultLocale?: string;
-  auth?: { provider?: "fa-auth-astro" | "custom" | "none" };
+  auth?: {
+    provider?: "fa-auth-astro" | "custom" | "none";
+    loginPath?: string;
+  };
   routes?: RepartoRouteFragments;
   views?: { strategy?: "none" | "package" | "scaffolded" };
 };
@@ -131,7 +134,7 @@ export function buildRepartoNav(
     const pattern = routes[entry.route];
     return {
       ...entry,
-      href: pattern ? String(pattern).replace(/\/\[[^\]]*\]/g, "") : "#",
+      href: pattern ? String(pattern).replace(/\[([^\]]+)\]/g, "current") : "#",
     };
   };
 
