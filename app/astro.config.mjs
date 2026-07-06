@@ -117,6 +117,22 @@ const disabledPromptAliases = promptPluginEnabled
 			{ find: '@mano8/astro-prompt-m8/schemas', replacement: promptStub('schemas.ts') },
 		];
 
+/** @param {string} file */
+const repartoStub = (file) => fileURLToPath(new URL(`./src/lib/reparto-stubs/${file}`, import.meta.url));
+const disabledRepartoAliases = repartoPluginEnabled
+	? []
+	: [
+			{ find: '@mano8/astro-reparto-m8/api', replacement: repartoStub('api.ts') },
+			{ find: '@mano8/astro-reparto-m8/auth-adapter', replacement: repartoStub('auth-adapter.ts') },
+			{ find: '@mano8/astro-reparto-m8/client', replacement: repartoStub('client.ts') },
+			{ find: '@mano8/astro-reparto-m8/compatibility', replacement: repartoStub('compatibility.ts') },
+			{ find: '@mano8/astro-reparto-m8/default-ui', replacement: repartoStub('default-ui.tsx') },
+			{ find: '@mano8/astro-reparto-m8/react', replacement: repartoStub('react.tsx') },
+			{ find: '@mano8/astro-reparto-m8/routes', replacement: repartoStub('routes.ts') },
+			{ find: '@mano8/astro-reparto-m8/schemas', replacement: repartoStub('schemas.ts') },
+			{ find: '@mano8/astro-reparto-m8/ui', replacement: repartoStub('ui.ts') },
+		];
+
 // Deployment contract: `astro-auth-m8` is the one required plugin; every other
 // plugin is opt-in per *deployment* = (package installed) + (its PUBLIC_* env
 // set). Media is therefore wired only when PUBLIC_MEDIA_API_BASE is present, and
@@ -385,7 +401,7 @@ export default defineConfig({
 		},
 		plugins: [tailwindcss()],
 		resolve: {
-			alias: [...disabledMediaAliases, ...disabledPromptAliases],
+			alias: [...disabledMediaAliases, ...disabledPromptAliases, ...disabledRepartoAliases],
 			dedupe: [
 				'react',
 				'react-dom',

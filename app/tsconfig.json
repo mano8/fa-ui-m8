@@ -50,6 +50,36 @@
       ],
       "@mano8/astro-prompt-m8/schemas": [
         "./src/lib/prompt-stubs/schemas.ts"
+      ],
+      "@mano8/astro-reparto-m8": [
+        "./src/lib/reparto-stubs/integration.ts"
+      ],
+      "@mano8/astro-reparto-m8/api": [
+        "./src/lib/reparto-stubs/api.ts"
+      ],
+      "@mano8/astro-reparto-m8/auth-adapter": [
+        "./src/lib/reparto-stubs/auth-adapter.ts"
+      ],
+      "@mano8/astro-reparto-m8/client": [
+        "./src/lib/reparto-stubs/client.ts"
+      ],
+      "@mano8/astro-reparto-m8/compatibility": [
+        "./src/lib/reparto-stubs/compatibility.ts"
+      ],
+      "@mano8/astro-reparto-m8/default-ui": [
+        "./src/lib/reparto-stubs/default-ui.tsx"
+      ],
+      "@mano8/astro-reparto-m8/react": [
+        "./src/lib/reparto-stubs/react.tsx"
+      ],
+      "@mano8/astro-reparto-m8/routes": [
+        "./src/lib/reparto-stubs/routes.ts"
+      ],
+      "@mano8/astro-reparto-m8/schemas": [
+        "./src/lib/reparto-stubs/schemas.ts"
+      ],
+      "@mano8/astro-reparto-m8/ui": [
+        "./src/lib/reparto-stubs/ui.ts"
       ]
     }
   }
