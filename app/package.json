@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "verify:auth-only": "node scripts/verify-auth-only.mjs",
+    "verify:plugin-matrix": "node scripts/verify-plugin-matrix.mjs",
     "astro": "astro",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
