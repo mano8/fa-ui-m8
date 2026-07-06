@@ -84,6 +84,12 @@ export type ProcessVersionsPublic = {
   count: number;
 };
 
+export type VersionComparison = {
+  left_version_id: string;
+  right_version_id: string;
+  changes: unknown[];
+};
+
 export type ExportArtifactPublic = {
   id: string;
   assignment_process_id: string;

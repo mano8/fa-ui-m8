@@ -23,12 +23,22 @@ const routeGroups = {
   ]),
   reparto: locales.flatMap((locale) => [
     `dist/${locale}/reparto/index.html`,
+    `dist/${locale}/reparto/setup/schools/index.html`,
+    `dist/${locale}/reparto/setup/academic-years/index.html`,
+    `dist/${locale}/reparto/setup/departments/index.html`,
+    `dist/${locale}/reparto/setup/teacher-roster/index.html`,
     `dist/${locale}/reparto/processes/index.html`,
     `dist/${locale}/reparto/meeting/current/index.html`,
+    `dist/${locale}/reparto/processes/current/subjects/index.html`,
+    `dist/${locale}/reparto/processes/current/classrooms/index.html`,
+    `dist/${locale}/reparto/processes/current/requirements/index.html`,
+    `dist/${locale}/reparto/processes/current/participants/index.html`,
+    `dist/${locale}/reparto/processes/current/assignments/index.html`,
     `dist/${locale}/reparto/processes/current/my-view/index.html`,
     `dist/${locale}/reparto/processes/current/shared/index.html`,
     `dist/${locale}/reparto/processes/current/versions/index.html`,
     `dist/${locale}/reparto/processes/current/exports/index.html`,
+    `dist/${locale}/reparto/processes/current/audit/index.html`,
   ]),
 };
 

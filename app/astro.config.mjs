@@ -278,14 +278,72 @@ const promptSidebarItems = promptPluginEnabled
 		]
 	: [];
 
+/**
+ * @param {Record<string, unknown>} dictionary
+ * @param {string} key
+ */
+function repartoMessage(dictionary, key) {
+	/** @type {unknown} */
+	let value = dictionary;
+	for (const segment of key.split('.')) {
+		if (!value || typeof value !== 'object') return key;
+		value = /** @type {Record<string, unknown>} */ (value)[segment];
+	}
+	return typeof value === 'string' ? value : key;
+}
+
+/**
+ * @param {{ labelKey: string, href?: string }} entry
+ * @param {{ en: Record<string, unknown>, es: Record<string, unknown>, fr: Record<string, unknown> }} dictionaries
+ */
+function repartoSidebarEntry(entry, dictionaries) {
+	return {
+		label: repartoMessage(dictionaries.en, entry.labelKey),
+		link: entry.href,
+		translations: {
+			es: repartoMessage(dictionaries.es, entry.labelKey),
+			fr: repartoMessage(dictionaries.fr, entry.labelKey),
+		},
+	};
+}
+
+/**
+ * @param {{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }} group
+ * @param {{ en: Record<string, unknown>, es: Record<string, unknown>, fr: Record<string, unknown> }} dictionaries
+ */
+function repartoSidebarGroup(group, dictionaries) {
+	return {
+		label: repartoMessage(dictionaries.en, group.labelKey),
+		collapsed: true,
+		translations: {
+			es: repartoMessage(dictionaries.es, group.labelKey),
+			fr: repartoMessage(dictionaries.fr, group.labelKey),
+		},
+		items: group.entries.map((entry) => repartoSidebarEntry(entry, dictionaries)),
+	};
+}
+
 // Opt-in reparto plugin: same optional deployment contract as media/prompt.
-// It stays package-owned; fa-ui-m8 only decides whether to mount its starter
-// routes and expose the route menu in Starlight.
+// It stays package-owned; fa-ui-m8 only mounts starter routes and sidebar groups.
 const repartoIntegrations = [];
+/** @type {any[]} */
+let repartoSidebarItems = [];
 if (repartoPluginEnabled) {
-	const { default: faReparto } = await import('@mano8/astro-reparto-m8');
+	const repartoModule = await import('@mano8/astro-reparto-m8');
+	const repartoI18n = await import('@mano8/astro-reparto-m8/i18n');
+	const repartoRoutes = repartoModule.buildRepartoRoutes();
+	const repartoNav = repartoModule.buildRepartoNav(
+		repartoRoutes,
+		repartoModule.DEFAULT_REPARTO_NAV,
+	);
+	const repartoDictionaries = {
+		en: repartoI18n.getRepartoDictionary('en'),
+		es: repartoI18n.getRepartoDictionary('es'),
+		fr: repartoI18n.getRepartoDictionary('fr'),
+	};
+
 	repartoIntegrations.push(
-		faReparto({
+		repartoModule.default({
 			apiBase: repartoApiBase,
 			apiPrefix: repartoApiPrefix ?? '',
 			mode: 'starter',
@@ -294,77 +352,22 @@ if (repartoPluginEnabled) {
 			defaultLocale: 'en',
 		}),
 	);
-}
-const repartoSidebarItems = repartoPluginEnabled
-	? [
-			{
-				label: 'Reparto Docente',
-				collapsed: true,
-				translations: {
-					es: 'Reparto docente',
-					fr: 'Repartition docente',
-				},
-				items: [
-					{
-						label: 'Dashboard',
-						link: '/reparto',
-						translations: {
-							es: 'Panel',
-							fr: 'Tableau de bord',
-						},
-					},
-					{
-						label: 'Processes',
-						link: '/reparto/processes',
-						translations: {
-							es: 'Procesos',
-							fr: 'Processus',
-						},
-					},
-					{
-						label: 'Meeting',
-						link: '/reparto/meeting/current',
-						translations: {
-							es: 'Reunion',
-							fr: 'Reunion',
-						},
-					},
-					{
-						label: 'Teacher view',
-						link: '/reparto/processes/current/my-view',
-						translations: {
-							es: 'Vista docente',
-							fr: 'Vue enseignant',
-						},
-					},
-					{
-						label: 'Shared screen',
-						link: '/reparto/processes/current/shared',
-						translations: {
-							es: 'Pantalla compartida',
-							fr: 'Ecran partage',
-						},
-					},
-					{
-						label: 'Versions',
-						link: '/reparto/processes/current/versions',
-						translations: {
-							es: 'Versiones',
-							fr: 'Versions',
-						},
-					},
-					{
-						label: 'Exports',
-						link: '/reparto/processes/current/exports',
-						translations: {
-							es: 'Exportaciones',
-							fr: 'Exports',
-						},
-					},
-				],
+
+	repartoSidebarItems = [
+		{
+			label: 'Reparto Docente',
+			collapsed: true,
+			translations: {
+				es: 'Reparto docente',
+				fr: 'Repartition docente',
 			},
-		]
-	: [];
+			items: [
+				repartoSidebarGroup(repartoNav.setup, repartoDictionaries),
+				repartoSidebarGroup(repartoNav.process, repartoDictionaries),
+			],
+		},
+	];
+}
 // https://astro.build/config
 export default defineConfig({
 	site: siteUrl ?? 'http://localhost:4321',
