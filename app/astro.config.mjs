@@ -304,6 +304,7 @@ function repartoSidebarEntry(entry, dictionaries) {
 			es: repartoMessage(dictionaries.es, entry.labelKey),
 			fr: repartoMessage(dictionaries.fr, entry.labelKey),
 		},
+		attrs: entry.labelKey === 'nav.item.classroomStages' ? { 'data-reparto-stage-admin': '' } : undefined,
 	};
 }
 

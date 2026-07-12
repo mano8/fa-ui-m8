@@ -22,6 +22,7 @@ function AccountSidebarFooterContent({ accountHref, loginHref, logoutHref, label
   const { status, user } = useAuth();
   const authenticated = status === "authenticated";
   const isSuperuser = Boolean(user?.is_superuser);
+  const canManageStages = isSuperuser || user?.role === "admin" || user?.role === "superadmin";
 
   // Reveal the native Starlight account menu only for signed-in users, and
   // drop the admin entry unless the current user is a superuser.
@@ -35,7 +36,11 @@ function AccountSidebarFooterContent({ accountHref, loginHref, logoutHref, label
       const adminItem = adminLink.closest("li") ?? adminLink;
       adminItem.hidden = !(authenticated && isSuperuser);
     }
-  }, [authenticated, isSuperuser]);
+    for (const link of document.querySelectorAll<HTMLElement>("[data-reparto-stage-admin]")) {
+      const item = link.closest("li") ?? link;
+      item.hidden = !(authenticated && canManageStages);
+    }
+  }, [authenticated, canManageStages, isSuperuser]);
 
   if (status === "loading") {
     return (
