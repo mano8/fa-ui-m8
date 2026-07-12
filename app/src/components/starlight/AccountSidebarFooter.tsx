@@ -1,111 +1,41 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Activity,
-  ChevronDown,
-  CircleUserRound,
-  KeyRound,
-  LayoutDashboard,
-  LoaderCircle,
-  LogIn,
-  Shield,
-  UserRound,
-} from "lucide-react";
+import { useEffect } from "react";
+import { CircleUserRound, LoaderCircle, LogIn, LogOut } from "lucide-react";
 import { AuthProvider } from "../auth/AuthProvider";
 import { useAuth } from "../../hooks/auth/useAuth";
 
 type AccountSidebarFooterLabels = {
-  accountSettings: string;
-  dashboard: string;
-  profile: string;
-  sessions: string;
-  credentials: string;
-  adminUsers: string;
   signIn: string;
+  signOut: string;
   signedIn: string;
 };
 
 type AccountSidebarFooterProps = {
   accountHref: string;
   loginHref: string;
+  logoutHref: string;
   labels: AccountSidebarFooterLabels;
 };
 
-const ACCOUNT_ROUTE_EVENT = "fa-ui-m8:account-route";
-const ACCOUNT_MENU_OPEN_KEY = "fa-ui-m8:account-sidebar-menu-open";
-const ACCOUNT_PATH_PATTERN = /^\/(en|es|fr)\/user\/account(?:\/.*)?$/;
+const ACCOUNT_NAV_SLOT_ID = "fa-account-nav-slot";
 
-function normalizePath(pathname: string) {
-  return pathname.replace(/\/$/, "");
-}
-
-function initialMenuOpen() {
-  if (typeof window === "undefined") return false;
-  return window.sessionStorage.getItem(ACCOUNT_MENU_OPEN_KEY) === "true";
-}
-
-function isAccountRouteLink(target: EventTarget | null) {
-  if (!(target instanceof Element)) return false;
-  const anchor = target.closest("a[href]");
-  if (!(anchor instanceof HTMLAnchorElement)) return false;
-  const url = new URL(anchor.href);
-  return url.origin === window.location.origin && ACCOUNT_PATH_PATTERN.test(url.pathname);
-}
-
-function AccountSidebarFooterContent({ accountHref, loginHref, labels }: AccountSidebarFooterProps) {
+function AccountSidebarFooterContent({ accountHref, loginHref, logoutHref, labels }: AccountSidebarFooterProps) {
   const { status, user } = useAuth();
-  const [open, setOpen] = useState(initialMenuOpen);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [activePath, setActivePath] = useState(() =>
-    typeof window === "undefined" ? "" : normalizePath(window.location.pathname),
-  );
-  const accountBase = normalizePath(accountHref);
+  const authenticated = status === "authenticated";
+  const isSuperuser = Boolean(user?.is_superuser);
 
+  // Reveal the native Starlight account menu only for signed-in users, and
+  // drop the admin entry unless the current user is a superuser.
   useEffect(() => {
-    const sync = () => setActivePath(normalizePath(window.location.pathname));
-    window.addEventListener("popstate", sync);
-    window.addEventListener(ACCOUNT_ROUTE_EVENT, sync);
-    sync();
-    return () => {
-      window.removeEventListener("popstate", sync);
-      window.removeEventListener(ACCOUNT_ROUTE_EVENT, sync);
-    };
-  }, []);
+    const slot = document.getElementById(ACCOUNT_NAV_SLOT_ID);
+    if (!slot) return;
+    slot.hidden = !authenticated;
 
-  useEffect(() => {
-    if (!open) return;
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (isAccountRouteLink(event.target)) return;
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    window.sessionStorage.setItem(ACCOUNT_MENU_OPEN_KEY, String(open));
-  }, [open]);
-
-  const items = useMemo(
-    () => [
-      { href: accountHref, label: labels.dashboard, icon: LayoutDashboard },
-      { href: `${accountHref}/profile`, label: labels.profile, icon: UserRound },
-      { href: `${accountHref}/sessions`, label: labels.sessions, icon: Activity },
-      { href: `${accountHref}/api-keys`, label: labels.credentials, icon: KeyRound },
-      ...(user?.is_superuser
-        ? [{ href: `${accountHref}/admin`, label: labels.adminUsers, icon: Shield }]
-        : []),
-    ],
-    [accountHref, labels, user?.is_superuser],
-  );
+    const adminLink = slot.querySelector<HTMLElement>("[data-account-admin]");
+    if (adminLink) {
+      const adminItem = adminLink.closest("li") ?? adminLink;
+      adminItem.hidden = !(authenticated && isSuperuser);
+    }
+  }, [authenticated, isSuperuser]);
 
   if (status === "loading") {
     return (
@@ -118,7 +48,7 @@ function AccountSidebarFooterContent({ accountHref, loginHref, labels }: Account
     );
   }
 
-  if (status !== "authenticated") {
+  if (!authenticated) {
     return (
       <div className="fa-account-sidebar-footer">
         <a className="fa-account-sidebar-link fa-account-sidebar-primary" href={loginHref}>
@@ -130,44 +60,19 @@ function AccountSidebarFooterContent({ accountHref, loginHref, labels }: Account
   }
 
   return (
-    <div ref={rootRef} className="fa-account-sidebar-footer">
-      <button
-        type="button"
-        className="fa-account-sidebar-trigger"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onClick={() => setOpen((value) => !value)}
+    <div className="fa-account-sidebar-footer fa-account-footer-bar">
+      <a
+        className="fa-account-footer-user"
+        href={accountHref}
+        title={user?.email ?? labels.signedIn}
+        aria-label={user?.email ?? labels.signedIn}
       >
         <CircleUserRound className="size-4" />
-        <span className="fa-account-sidebar-trigger-text">
-          <span>{labels.accountSettings}</span>
-          <span title={user?.email ?? labels.signedIn}>{user?.email ?? labels.signedIn}</span>
-        </span>
-        <ChevronDown className="fa-account-sidebar-caret size-4" data-open={open} />
-      </button>
-
-      {open ? (
-        <nav className="fa-account-sidebar-menu" aria-label={labels.accountSettings}>
-          {items.map((item) => {
-            const Icon = item.icon;
-            const itemPath = normalizePath(item.href);
-            const active = itemPath === activePath
-              || (item.href === accountHref && activePath === accountBase)
-              || (itemPath.endsWith("/admin") && activePath.startsWith(`${itemPath}/`));
-            return (
-              <a
-                key={item.href}
-                className="fa-account-sidebar-link"
-                aria-current={active ? "page" : undefined}
-                href={item.href}
-              >
-                <Icon className="size-4" />
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
-        </nav>
-      ) : null}
+      </a>
+      <a className="fa-account-sidebar-link fa-account-footer-logout" href={logoutHref}>
+        <LogOut className="size-4" />
+        <span>{labels.signOut}</span>
+      </a>
     </div>
   );
 }

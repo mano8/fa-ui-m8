@@ -17,7 +17,7 @@ services:
         openssl req -x509 -newkey rsa:2048 -nodes \
           -keyout /certs/local.key -out /certs/local.crt \
           -days 365 -subj "/CN=localhost" \
-          -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+          -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:192.168.1.35"
         chmod 600 /certs/local.key && chmod 644 /certs/local.crt
         echo "==> cert-init: self-signed cert ready (browsers will warn)"
         echo "    For trusted certs: mkcert -install, then bash init.sh --rotate-certs"

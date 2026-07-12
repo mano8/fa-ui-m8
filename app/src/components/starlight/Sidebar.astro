@@ -2,6 +2,7 @@
 import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
 import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import type { SidebarEntry } from '@astrojs/starlight/utils/routing/types';
 import AccountSidebarFooter from './AccountSidebarFooter';
 import { getTranslations } from '@/content/i18n/app';
 import { localeFromPath } from '@/lib/locale';
@@ -11,6 +12,39 @@ const locale = localeFromPath(Astro.url.pathname);
 const t = getTranslations(locale);
 const accountHref = `/${locale}/user/account`;
 const loginHref = `/${locale}/auth/login`;
+const logoutHref = `/${locale}/auth/logout`;
+
+// Account settings rendered as a native Starlight sidebar menu group (last item).
+// Visibility is gated client-side by AccountSidebarFooter (auth + superuser).
+const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const accountLink = (
+  href: string,
+  label: string,
+  attrs: Record<string, unknown> = {},
+): SidebarEntry => ({
+  type: 'link',
+  href,
+  label,
+  isCurrent: currentPath === href.replace(/\/+$/, ''),
+  badge: undefined,
+  attrs,
+});
+const accountEntries: SidebarEntry[] = [
+  accountLink(accountHref, t.auth.dashboard.overview.navLabel),
+  accountLink(`${accountHref}/profile`, t.auth.profile.title),
+  accountLink(`${accountHref}/sessions`, t.auth.sessions.title),
+  accountLink(`${accountHref}/api-keys`, t.auth.apiKeys.navLabel),
+  accountLink(`${accountHref}/admin`, t.auth.adminUsers.title, { 'data-account-admin': '' }),
+];
+const accountSublist: SidebarEntry[] = [
+  {
+    type: 'group',
+    label: t.pages.accountTitle,
+    collapsed: !accountEntries.some((entry) => entry.type === 'link' && entry.isCurrent),
+    badge: undefined,
+    entries: accountEntries,
+  },
+];
 ---
 
 <div class="fa-starlight-sidebar-shell">
@@ -18,20 +52,19 @@ const loginHref = `/${locale}/auth/login`;
     <SidebarPersister>
       <SidebarSublist sublist={sidebar} />
     </SidebarPersister>
+    <div id="fa-account-nav-slot" class="fa-account-nav" hidden>
+      <SidebarSublist sublist={accountSublist} />
+    </div>
   </div>
 
   <AccountSidebarFooter
     client:only="react"
     accountHref={accountHref}
     loginHref={loginHref}
+    logoutHref={logoutHref}
     labels={{
-      accountSettings: t.pages.accountTitle,
-      dashboard: t.auth.dashboard.overview.navLabel,
-      profile: t.auth.profile.title,
-      sessions: t.auth.sessions.title,
-      credentials: t.auth.apiKeys.navLabel,
-      adminUsers: t.auth.adminUsers.title,
       signIn: t.auth.signup.signIn,
+      signOut: t.auth.dashboard.signOut,
       signedIn: t.auth.dashboard.authenticatedUser,
     }}
   />

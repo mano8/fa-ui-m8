@@ -26,7 +26,7 @@ fi
 if command -v mkcert &>/dev/null; then
     echo "==> Generating mkcert TLS certificate (trusted by OS/browsers)"
     echo "    Tip: run 'mkcert -install' once to register the local CA system-wide."
-    mkcert -cert-file "$CERT" -key-file "$KEY" localhost 127.0.0.1 ::1
+    mkcert -cert-file "$CERT" -key-file "$KEY" localhost 127.0.0.1 ::1 192.168.1.35
     chmod 600 "$KEY" && chmod 644 "$CERT"
     echo "==> init-certs done (mkcert — trusted cert)"
     echo "    Chrome, Edge, Safari: trusted automatically."
@@ -63,7 +63,7 @@ prompt             = no
 CN = localhost
 
 [v3_req]
-subjectAltName = DNS:localhost,IP:127.0.0.1
+subjectAltName = DNS:localhost,IP:127.0.0.1,IP:192.168.1.35
 CONF
 
     openssl req -x509 -newkey rsa:2048 \

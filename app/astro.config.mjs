@@ -371,6 +371,10 @@ if (repartoPluginEnabled) {
 // https://astro.build/config
 export default defineConfig({
 	site: siteUrl ?? 'http://localhost:4321',
+	server: {
+		host: true,
+		port: 4321,
+	},
 	// Production CSP for the static UI (plan item 8.1). Build-time only — a no-op
 	// under `astro dev`; takes effect in `build`/`preview`. See src/lib/csp.ts.
 	security: buildSecurityConfig(securityEnv),

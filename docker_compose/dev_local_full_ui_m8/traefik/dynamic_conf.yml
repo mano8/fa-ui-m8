@@ -56,7 +56,7 @@ http:
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless —
       # /user/metrics + /user/private are never public on ANY host. /user/health is
       # public-shallow (its deep detail stays app-gated, fail-closed).
-      rule: "Host(`localhost`) && PathPrefix(`/user`) && !(PathPrefix(`/user/metrics`) || PathPrefix(`/user/private`))"
+      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/user`) && !(PathPrefix(`/user/metrics`) || PathPrefix(`/user/private`))"
       service: auth-service
       middlewares:
         - security-headers
@@ -87,7 +87,7 @@ http:
       # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
       # host. TO EXPOSE /media ON THE LAN, delete the `Host(`localhost`) && ` prefix.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
-      rule: "Host(`localhost`) && PathPrefix(`/media`) && !PathPrefix(`/media/metrics`)"
+      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/media`) && !PathPrefix(`/media/metrics`)"
       service: media-service
       middlewares:
         - security-headers
@@ -117,7 +117,7 @@ http:
       # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
       # host. TO EXPOSE /prompt ON THE LAN, delete the `Host(`localhost`) && ` prefix.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
-      rule: "Host(`localhost`) && PathPrefix(`/prompt`) && !PathPrefix(`/prompt/metrics`)"
+      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/prompt`) && !PathPrefix(`/prompt/metrics`)"
       service: prompt-engine-service
       middlewares:
         - security-headers
@@ -145,7 +145,7 @@ http:
       # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
       # host. TO EXPOSE /reparto ON THE LAN, delete the `Host(`localhost`) && ` prefix.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
-      rule: "Host(`localhost`) && PathPrefix(`/reparto`) && !PathPrefix(`/reparto/metrics`)"
+      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/reparto`) && !PathPrefix(`/reparto/metrics`)"
       service: reparto-service
       middlewares:
         - security-headers

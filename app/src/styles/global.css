@@ -172,74 +172,50 @@ html:not([data-has-toc]) main > .content-panel > .sl-container {
   flex: 0 0 auto;
 }
 
-.fa-account-sidebar-status,
-.fa-account-sidebar-link,
-.fa-account-sidebar-trigger {
+.fa-account-footer-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.fa-account-sidebar-trigger {
-  width: 100%;
-  border: 0;
-  border-radius: 0.25rem;
-  background: transparent;
+.fa-account-footer-user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid var(--sl-color-gray-6);
   color: var(--sl-color-white);
-  font-size: var(--sl-text-sm);
-  font-weight: 600;
-  justify-content: space-between;
-  line-height: 1.2;
-  padding: 0.35rem 0.5rem;
-  text-align: start;
+  text-decoration: none;
 }
 
-.fa-account-sidebar-trigger:hover,
-.fa-account-sidebar-trigger:focus {
+.fa-account-footer-user:hover,
+.fa-account-footer-user:focus {
   background: var(--sl-color-gray-6);
 }
 
-.fa-account-sidebar-trigger-text {
-  display: grid;
-  min-width: 0;
-  gap: 0.1rem;
+.fa-account-footer-logout {
+  flex: 1 1 auto;
 }
 
-.fa-account-sidebar-trigger-text > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Native Starlight account menu, rendered as the last sidebar item. */
+.fa-account-nav {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sl-color-gray-6);
 }
 
-.fa-account-sidebar-trigger-text > span + span {
-  color: var(--sl-color-gray-3);
-  font-size: var(--sl-text-xs);
-  font-weight: 400;
+.fa-account-nav[hidden] {
+  display: none;
 }
 
-.fa-account-sidebar-caret {
-  flex: 0 0 auto;
-  transition: transform 160ms ease;
-}
-
-.fa-account-sidebar-caret[data-open='true'] {
-  transform: rotate(180deg);
-}
-
-.fa-account-sidebar-menu {
-  display: grid;
-  gap: 0.125rem;
-  padding: 0.35rem;
-  border: 1px solid var(--sl-color-gray-6);
-  border-radius: 0.5rem;
-  background: var(--sl-color-bg-nav);
-  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 35%);
-  position: fixed;
-  inset-block-end: calc(env(safe-area-inset-bottom, 0rem) + 4.75rem);
-  inset-inline: 0.75rem;
-  max-height: min(22rem, calc(100dvh - var(--sl-nav-height) - 6rem));
-  overflow-y: auto;
-  z-index: calc(var(--sl-z-index-menu) + 2);
+.fa-account-sidebar-status,
+.fa-account-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .fa-account-sidebar-link {
@@ -278,14 +254,6 @@ html:not([data-has-toc]) main > .content-panel > .sl-container {
 }
 
 @media (min-width: 50rem) {
-  .fa-account-sidebar-menu {
-    position: fixed;
-    inset-block-end: 1rem;
-    inset-inline-start: calc(var(--sl-sidebar-width) + 0.75rem);
-    inset-inline-end: auto;
-    width: min(18rem, calc(100vw - var(--sl-sidebar-width) - 2rem));
-  }
-
   .fa-sidebar-toggle {
     position: fixed;
     z-index: calc(var(--sl-z-index-menu) + 1);
