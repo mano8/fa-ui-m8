@@ -67,6 +67,41 @@ export type DynamicBlock = { id: number; content: string };
 
 export type ComposedPrompt = { content: string };
 
+export type PortableBlock = {
+  name: string;
+  slug?: string | null;
+  description?: string | null;
+  content: string;
+  type: PromptBlockType;
+  is_dynamic: boolean;
+  is_public: boolean;
+};
+
+export type PortableTemplateBlock = { position: number; block: PortableBlock };
+
+export type PortableTemplate = {
+  name: string;
+  slug?: string | null;
+  description?: string | null;
+  is_public: boolean;
+  blocks: PortableTemplateBlock[];
+};
+
+export type PromptExport = {
+  format: "astro-prompt-m8/export";
+  version: 1;
+  exportedAt: string;
+  blocks: PortableBlock[];
+  templates: PortableTemplate[];
+};
+
+export function promptExportFilename(
+  _kind: "block" | "template" | "bundle",
+  _slug?: string | null,
+): string {
+  throw new Error("@mano8/astro-prompt-m8 is not enabled for this build.");
+}
+
 export type PromptBlocksPublic = { count: number; data: PromptBlockPublic[] };
 export type PromptTemplatesPublic = { count: number; data: PromptTemplatePublic[] };
 

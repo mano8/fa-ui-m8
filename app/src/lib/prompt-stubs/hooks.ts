@@ -5,10 +5,17 @@ import type {
   PromptBlockCreate,
   PromptBlockPublic,
   PromptBlockUpdate,
+  PromptExport,
   PromptTemplateCreate,
   PromptTemplatePublic,
   PromptTemplateUpdate,
 } from "./schemas";
+
+type TransferItem = { slug: string | null; name: string };
+type ImportResult = {
+  blocks: { created: TransferItem[]; reused: TransferItem[] };
+  templates: { created: TransferItem[]; skipped: TransferItem[] };
+};
 
 function disabled(): Error {
   return new Error("@mano8/astro-prompt-m8 is not enabled for this build.");
@@ -162,6 +169,30 @@ export function useComposePrompt(): {
     compose: rejectDisabled,
     composeMutation: { isPending: false }
   };
+}
+
+export function usePromptTransfer(): {
+  exportBlockMutation: AsyncMutation<number, PromptExport>;
+  exportTemplateMutation: AsyncMutation<number, PromptExport>;
+  importMutation: AsyncMutation<unknown, ImportResult>;
+} {
+  const exportBlockMutation: AsyncMutation<number, PromptExport> = {
+    isPending: false,
+    mutate: () => undefined,
+    mutateAsync: rejectDisabled,
+  };
+  const exportTemplateMutation: AsyncMutation<number, PromptExport> = {
+    isPending: false,
+    mutate: () => undefined,
+    mutateAsync: rejectDisabled,
+  };
+  const importMutation: AsyncMutation<unknown, ImportResult> = {
+    isPending: false,
+    mutate: () => undefined,
+    mutateAsync: rejectDisabled,
+  };
+
+  return { exportBlockMutation, exportTemplateMutation, importMutation };
 }
 
 export function usePromptAdmin(): {
