@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+@source "../../node_modules/@mano8/astro-reparto-m8/src/runtime/react";
+
 @custom-variant dark (&:is([data-theme='dark'] *));
 
 @theme inline {
