@@ -9,7 +9,12 @@ import { ArrowUpDown, Download, Plus, Upload } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { usePromptBlocks, usePromptTransfer } from "@mano8/astro-prompt-m8/hooks";
-import { promptExportFilename, type PromptBlockPublic } from "@mano8/astro-prompt-m8/schemas";
+import {
+  buildPromptExport,
+  promptExportFilename,
+  toPortableBlock,
+  type PromptBlockPublic,
+} from "@mano8/astro-prompt-m8/schemas";
 import { downloadPromptExport, readPromptExportFile } from "@mano8/astro-prompt-m8/react";
 
 import { DataTable, type DataTableFilter } from "@/components/fa-prompt/data-table";
@@ -80,6 +85,7 @@ export interface PromptBlockEditorLabels {
   columns: string;
   selected: (selected: number, total: number) => string;
   exportLabel: string;
+  exportAllLabel: string;
   importLabel: string;
   importError: string;
 }
@@ -111,6 +117,7 @@ const DEFAULT_LABELS: PromptBlockEditorLabels = {
   columns: "Columns",
   selected: (selected, total) => `${selected} of ${total} selected`,
   exportLabel: "Export",
+  exportAllLabel: "Export all",
   importLabel: "Import",
   importError: "Could not import file.",
 };
@@ -200,6 +207,15 @@ export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
     setTransferStatus(null);
     const payload = await exportBlockMutation.mutateAsync(block.id);
     downloadPromptExport(payload, promptExportFilename("block", block.slug));
+  };
+
+  const exportAllBlocks = () => {
+    const allBlocks = data?.data ?? [];
+    if (allBlocks.length === 0) return;
+    setTransferStatus(null);
+    const payload = buildPromptExport({ blocks: allBlocks.map(toPortableBlock) });
+    downloadPromptExport(payload, promptExportFilename("bundle"));
+    setTransferStatus(`Exported ${allBlocks.length} block(s).`);
   };
 
   const onImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -366,6 +382,15 @@ export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
           <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={(data?.data.length ?? 0) === 0}
+            onClick={exportAllBlocks}
+          >
+            <Download className="mr-2 size-4" />
+            {t.exportAllLabel}
+          </Button>
           <Button
             type="button"
             variant="outline"

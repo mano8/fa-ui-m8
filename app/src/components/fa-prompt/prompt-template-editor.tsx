@@ -25,7 +25,9 @@ import {
   usePromptTransfer,
 } from "@mano8/astro-prompt-m8/hooks";
 import {
+  buildPromptExport,
   promptExportFilename,
+  toPortableTemplate,
   type PromptBlockPublic,
   type PromptTemplatePublic,
   type TemplateBlockPublic,
@@ -114,6 +116,7 @@ export interface PromptTemplateEditorLabels {
   columns: string;
   selected: (selected: number, total: number) => string;
   exportLabel: string;
+  exportAllLabel: string;
   importLabel: string;
   importError: string;
 }
@@ -158,6 +161,7 @@ const DEFAULT_LABELS: PromptTemplateEditorLabels = {
   columns: "Columns",
   selected: (selected, total) => `${selected} of ${total} selected`,
   exportLabel: "Export",
+  exportAllLabel: "Export all",
   importLabel: "Import",
   importError: "Could not import file.",
 };
@@ -299,6 +303,15 @@ export default function PromptTemplateEditorSkin({ labels }: PromptTemplateEdito
     setTransferStatus(null);
     const payload = await exportTemplateMutation.mutateAsync(template.id);
     downloadPromptExport(payload, promptExportFilename("template", template.slug));
+  };
+
+  const exportAllTemplates = () => {
+    const allTemplates = templates.data?.data ?? [];
+    if (allTemplates.length === 0) return;
+    setTransferStatus(null);
+    const payload = buildPromptExport({ templates: allTemplates.map(toPortableTemplate) });
+    downloadPromptExport(payload, promptExportFilename("bundle"));
+    setTransferStatus(`Exported ${allTemplates.length} template(s).`);
   };
 
   const onImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -614,6 +627,15 @@ export default function PromptTemplateEditorSkin({ labels }: PromptTemplateEdito
           <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={(templates.data?.data.length ?? 0) === 0}
+            onClick={exportAllTemplates}
+          >
+            <Download className="mr-2 size-4" />
+            {t.exportAllLabel}
+          </Button>
           <Button
             type="button"
             variant="outline"

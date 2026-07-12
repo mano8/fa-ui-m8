@@ -102,6 +102,21 @@ export function promptExportFilename(
   throw new Error("@mano8/astro-prompt-m8 is not enabled for this build.");
 }
 
+export function buildPromptExport(
+  _parts: { blocks?: PortableBlock[]; templates?: PortableTemplate[] },
+  _exportedAt?: string,
+): PromptExport {
+  throw new Error("@mano8/astro-prompt-m8 is not enabled for this build.");
+}
+
+export function toPortableBlock(_block: PromptBlockPublic | TemplateBlockPublic): PortableBlock {
+  throw new Error("@mano8/astro-prompt-m8 is not enabled for this build.");
+}
+
+export function toPortableTemplate(_template: PromptTemplatePublic): PortableTemplate {
+  throw new Error("@mano8/astro-prompt-m8 is not enabled for this build.");
+}
+
 export type PromptBlocksPublic = { count: number; data: PromptBlockPublic[] };
 export type PromptTemplatesPublic = { count: number; data: PromptTemplatePublic[] };
 
