@@ -381,6 +381,11 @@ export default defineConfig({
 	security: buildSecurityConfig(securityEnv),
 	vite: {
 		cacheDir: process.env.VITE_CACHE_DIR ?? '.astro/vite',
+		ssr: {
+			// Local plugin junctions otherwise externalize Sonner from the plugin's
+			// node_modules, which gives SSR a second React module instance.
+			noExternal: ['sonner'],
+		},
 		define: {
 			'import.meta.env.PUBLIC_FA_MEDIA_ENABLED': JSON.stringify(mediaPluginEnabled),
 			...(mediaPluginEnabled
