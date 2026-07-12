@@ -396,7 +396,7 @@ services:
       m8_db:
         condition: service_healthy
       auth_user_service:
-        condition: service_healthy
+        condition: service_started
       media_redis_cache:
         condition: service_healthy
       minio:
@@ -510,7 +510,7 @@ services:
       m8_db:
         condition: service_healthy
       auth_user_service:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/reparto/health/')"]
       interval: 10s
