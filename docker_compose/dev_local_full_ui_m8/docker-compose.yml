@@ -263,6 +263,12 @@ services:
         condition: service_healthy
       redis_cache:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os, urllib.request; urllib.request.urlopen(f'http://localhost:8000{os.getenv(\"API_PREFIX\", \"\")}/health/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
     networks:
       - app_net
@@ -390,7 +396,7 @@ services:
       m8_db:
         condition: service_healthy
       auth_user_service:
-        condition: service_started
+        condition: service_healthy
       media_redis_cache:
         condition: service_healthy
       minio:
@@ -504,7 +510,7 @@ services:
       m8_db:
         condition: service_healthy
       auth_user_service:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/reparto/health/')"]
       interval: 10s
