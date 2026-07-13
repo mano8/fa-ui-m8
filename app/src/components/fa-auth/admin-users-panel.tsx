@@ -1,30 +1,27 @@
 "use client";
 
+// fa-auth admin users panel: superuser-only user management (create / update /
+// delete). Headless logic stays a live dependency - `useUsers`
+// (@mano8/astro-auth-m8/hooks) owns the API calls, the package Zod schemas
+// validate the forms, and the package's `RequireRole superuser` gates the whole
+// panel. This file is only the shadcn skin, copied into the consumer via the
+// @fa-m8-auth registry - edit (and translate via `labels`) freely per app.
 import * as React from "react";
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  Pencil,
-  Plus,
-  RefreshCw,
-  Trash2,
-} from "lucide-react";
+import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
+import { UserPlus } from "lucide-react";
 import { RequireRole } from "@mano8/astro-auth-m8/react";
 import { useUsers } from "@mano8/astro-auth-m8/hooks";
 import {
-  AuthProviderTypeSchema,
   RoleTypeSchema,
   UserCreateSchema,
   UserUpdateSchema,
-  type AuthProviderType,
-  type RoleType,
   type UserPublic,
 } from "@mano8/astro-auth-m8/schemas";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -32,14 +29,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DialogFooter } from "@/components/ui/dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DataTable,
+  createDataTableSelectionColumn,
+} from "@/components/m8-ui/data-table";
+import { DataTableColumnHeader } from "@/components/m8-ui/data-table-column-header";
+import {
+  AccountToastHost,
+  accountToast,
+  ConfirmDeleteDialog,
+  EntityFormDialog,
+  RowActions,
+  errorMessage,
+  useClientTable,
+} from "./account-crud";
 
 export interface AdminUsersPanelLabels {
   title: string;
@@ -49,10 +53,10 @@ export interface AdminUsersPanelLabels {
   invalidUpdate: string;
   created: string;
   updated: string;
-  deleted: string;
   createFailed: string;
   updateFailed: string;
   deleteFailed: string;
+  deleted: string;
   email: string;
   fullName: string;
   avatar: string;
@@ -61,36 +65,29 @@ export interface AdminUsersPanelLabels {
   passwordPlaceholder: string;
   passwordUnsupported: string;
   create: string;
-  addUser: string;
-  editUser: string;
-  deleteUser: string;
+  createTitle: string;
+  editTitle: string;
   role: string;
   emailVerified: string;
   superuser: string;
   users: string;
-  refresh: string;
   loading: string;
-  user: string;
   provider: string;
   providerPassword: string;
   providerGoogle: string;
   actions: string;
+  status: string;
   active: string;
   inactive: string;
   save: string;
-  delete: string;
-  edit: string;
   cancel: string;
-  confirmDelete: string;
-  deletePrompt: string;
+  edit: string;
+  delete: string;
+  deleteSelected: string;
+  confirmDeleteTitle: string;
+  confirmDeleteBody: string;
   empty: string;
   search: string;
-  searchPlaceholder: string;
-  allRoles: string;
-  allProviders: string;
-  status: string;
-  details: string;
-  noFullName: string;
 }
 
 const DEFAULT_LABELS: AdminUsersPanelLabels = {
@@ -102,10 +99,10 @@ const DEFAULT_LABELS: AdminUsersPanelLabels = {
   invalidUpdate: "Invalid update payload.",
   created: "User created.",
   updated: "User updated.",
-  deleted: "User deleted.",
   createFailed: "Failed to create user.",
   updateFailed: "Failed to update user.",
   deleteFailed: "Failed to delete user.",
+  deleted: "User deleted.",
   email: "Email",
   fullName: "Full name",
   avatar: "Avatar URL",
@@ -113,607 +110,613 @@ const DEFAULT_LABELS: AdminUsersPanelLabels = {
   password: "Password",
   passwordPlaceholder: "Leave blank to keep current password",
   passwordUnsupported: "Password disabled for Google users",
-  create: "Create",
-  addUser: "Add user",
-  editUser: "Edit user",
-  deleteUser: "Delete user",
+  create: "Create user",
+  createTitle: "Create user",
+  editTitle: "Edit user",
   role: "Role",
   emailVerified: "Email verified",
   superuser: "Superuser",
   users: "users",
-  refresh: "Refresh",
   loading: "Loading users...",
-  user: "User",
   provider: "Provider",
   providerPassword: "Password",
   providerGoogle: "Google",
   actions: "Actions",
+  status: "Status",
   active: "Active",
   inactive: "Inactive",
   save: "Save",
-  delete: "Delete",
-  edit: "Edit",
   cancel: "Cancel",
-  confirmDelete: "Yes, delete user",
-  deletePrompt: "Are you sure you want to delete this user?",
-  empty: "No users match the current filters.",
-  search: "Search",
-  searchPlaceholder: "Search by email or full name",
-  allRoles: "All roles",
-  allProviders: "All providers",
-  status: "Status",
-  details: "Details",
-  noFullName: "No full name",
+  edit: "Edit",
+  delete: "Delete",
+  deleteSelected: "Delete selected",
+  confirmDeleteTitle: "Delete user?",
+  confirmDeleteBody:
+    "This permanently removes the user account and revokes its access.",
+  empty: "No users found.",
+  search: "Search users",
 };
 
-type AdminPage =
-  | { name: "list" }
-  | { name: "add" }
-  | { name: "edit"; userId: string }
-  | { name: "delete"; userId: string };
-
-type SortKey = "email" | "full_name" | "role" | "provider" | "status";
-type SortDirection = "asc" | "desc";
-
-function formString(formData: FormData, key: string): string | undefined {
-  const value = formData.get(key);
-  return typeof value === "string" && value.length > 0 ? value : undefined;
+interface CreateFormState {
+  email: string;
+  full_name: string;
+  avatar: string;
+  password: string;
+  role: string;
+  is_active: boolean;
+  is_superuser: boolean;
 }
 
-const inputClassName =
-  "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30";
-
-const badgeClassName =
-  "inline-flex min-h-6 items-center rounded-md border bg-muted/40 px-2 py-0.5 text-xs font-medium";
-
-function providerLabel(t: AdminUsersPanelLabels, provider: AuthProviderType) {
-  return provider === "google" ? t.providerGoogle : t.providerPassword;
+interface EditFormState {
+  email: string;
+  full_name: string;
+  avatar: string;
+  password: string;
+  role: string;
 }
 
-function userStatus(t: AdminUsersPanelLabels, user: UserPublic) {
-  return [
-    user.is_active ? t.active : t.inactive,
-    user.email_verified ? t.emailVerified : null,
-    user.is_superuser ? t.superuser : null,
-  ].filter(Boolean).join(" - ");
-}
+const EMPTY_CREATE: CreateFormState = {
+  email: "",
+  full_name: "",
+  avatar: "",
+  password: "",
+  role: "user",
+  is_active: true,
+  is_superuser: false,
+};
 
-function compareText(left: string | null | undefined, right: string | null | undefined) {
-  return (left ?? "").localeCompare(right ?? "", undefined, { sensitivity: "base" });
-}
+const selectClassName =
+  "h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-function sortUsers(users: UserPublic[], key: SortKey, direction: SortDirection) {
-  const multiplier = direction === "asc" ? 1 : -1;
-  return [...users].sort((left, right) => {
-    if (key === "status") {
-      return compareText(String(left.is_active), String(right.is_active)) * multiplier;
-    }
-    return compareText(left[key], right[key]) * multiplier;
-  });
-}
-
-function SortButton({
-  active,
-  direction,
-  label,
-  onClick,
+function RoleSelect({
+  id,
+  value,
+  onChange,
 }: {
-  active: boolean;
-  direction: SortDirection;
-  label: string;
-  onClick: () => void;
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
 }) {
-  const Icon = active ? (direction === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
   return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-1 font-medium text-foreground hover:text-primary"
-      onClick={onClick}
+    <select
+      id={id}
+      aria-label="Role"
+      className={selectClassName}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
     >
-      {label}
-      <Icon className="size-3.5" />
-    </button>
+      {RoleTypeSchema.options.map((role) => (
+        <option key={role} value={role}>
+          {role}
+        </option>
+      ))}
+    </select>
   );
-}
-
-function UserDetails({ t, user }: { t: AdminUsersPanelLabels; user: UserPublic }) {
-  return (
-    <dl className="grid gap-3 rounded-md border p-4 text-sm sm:grid-cols-2">
-      <div>
-        <dt className="text-muted-foreground">{t.email}</dt>
-        <dd className="break-all font-medium text-foreground">{user.email}</dd>
-      </div>
-      <div>
-        <dt className="text-muted-foreground">{t.fullName}</dt>
-        <dd>{user.full_name || t.noFullName}</dd>
-      </div>
-      <div>
-        <dt className="text-muted-foreground">{t.role}</dt>
-        <dd className="capitalize">{user.role}</dd>
-      </div>
-      <div>
-        <dt className="text-muted-foreground">{t.provider}</dt>
-        <dd>{providerLabel(t, user.provider)}</dd>
-      </div>
-      <div>
-        <dt className="text-muted-foreground">{t.status}</dt>
-        <dd>{userStatus(t, user)}</dd>
-      </div>
-      <div>
-        <dt className="text-muted-foreground">{t.avatar}</dt>
-        <dd className="break-all">{user.avatar || "-"}</dd>
-      </div>
-    </dl>
-  );
-}
-
-function FormGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid gap-3 md:grid-cols-2">{children}</div>;
-}
-
-function adminBaseFromPath(pathname: string) {
-  const match = pathname.match(/^\/(en|es|fr)\/user\/account\/admin/);
-  return match ? `/${match[1]}/user/account/admin` : "/en/user/account/admin";
-}
-
-function adminPageFromLocation(): AdminPage {
-  if (typeof window === "undefined") return { name: "list" };
-
-  const path = window.location.pathname.replace(/\/$/, "");
-  const search = new URLSearchParams(window.location.search);
-  const userId = search.get("id") ?? "";
-
-  if (/^\/(en|es|fr)\/user\/account\/admin\/users\/new$/.test(path)) return { name: "add" };
-  if (/^\/(en|es|fr)\/user\/account\/admin\/users\/edit$/.test(path) && userId) {
-    return { name: "edit", userId };
-  }
-  if (/^\/(en|es|fr)\/user\/account\/admin\/users\/delete$/.test(path) && userId) {
-    return { name: "delete", userId };
-  }
-
-  return { name: "list" };
-}
-
-function hrefForAdminPage(nextPage: AdminPage) {
-  const base = typeof window === "undefined" ? "/en/user/account/admin" : adminBaseFromPath(window.location.pathname);
-  if (nextPage.name === "add") return `${base}/users/new`;
-  if (nextPage.name === "edit") return `${base}/users/edit?id=${encodeURIComponent(nextPage.userId)}`;
-  if (nextPage.name === "delete") return `${base}/users/delete?id=${encodeURIComponent(nextPage.userId)}`;
-  return base;
 }
 
 function AdminUsersPanelInner({ t }: { t: AdminUsersPanelLabels }) {
-  const { users: usersData, loading, error, reload, create, update, remove } = useUsers(false);
+  const { users: usersData, loading, reload, create, update, remove } =
+    useUsers(false);
   const users = usersData?.data ?? [];
-  const count = usersData?.count ?? 0;
-  const errorText = error instanceof Error ? error.message : error ? String(error) : null;
-  const [message, setMessage] = React.useState<string | null>(null);
-  const [page, setPage] = React.useState<AdminPage>(() => adminPageFromLocation());
-  const [query, setQuery] = React.useState("");
-  const [roleFilter, setRoleFilter] = React.useState<RoleType | "all">("all");
-  const [providerFilter, setProviderFilter] = React.useState<AuthProviderType | "all">("all");
-  const [sortKey, setSortKey] = React.useState<SortKey>("email");
-  const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
+
+  const [creating, setCreating] = React.useState(false);
+  const [createForm, setCreateForm] =
+    React.useState<CreateFormState>(EMPTY_CREATE);
+  const [editing, setEditing] = React.useState<UserPublic | null>(null);
+  const [editForm, setEditForm] = React.useState<EditFormState | null>(null);
+  const [deleting, setDeleting] = React.useState<UserPublic | null>(null);
+  const [bulkDelete, setBulkDelete] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   React.useEffect(() => {
     reload().catch(() => {});
   }, [reload]);
 
-  React.useEffect(() => {
-    const sync = () => setPage(adminPageFromLocation());
-    window.addEventListener("popstate", sync);
-    window.addEventListener("fa-ui-m8:account-route", sync);
-    sync();
-    return () => {
-      window.removeEventListener("popstate", sync);
-      window.removeEventListener("fa-ui-m8:account-route", sync);
-    };
-  }, []);
+  const openCreate = () => {
+    setCreateForm(EMPTY_CREATE);
+    setCreating(true);
+  };
 
-  const navigate = React.useCallback((nextPage: AdminPage) => {
-    setMessage(null);
-    setPage(nextPage);
-    const href = hrefForAdminPage(nextPage);
-    window.history.pushState({}, "", href);
-    window.dispatchEvent(new CustomEvent("fa-ui-m8:account-route", { detail: { view: "admin" } }));
-  }, []);
-
-  const filteredUsers = React.useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase();
-    const filtered = users.filter((user) => {
-      const matchesQuery = normalizedQuery.length === 0
-        || user.email.toLocaleLowerCase().includes(normalizedQuery)
-        || (user.full_name ?? "").toLocaleLowerCase().includes(normalizedQuery);
-      const matchesRole = roleFilter === "all" || user.role === roleFilter;
-      const matchesProvider = providerFilter === "all" || user.provider === providerFilter;
-      return matchesQuery && matchesRole && matchesProvider;
+  const openEdit = (user: UserPublic) => {
+    setEditForm({
+      email: user.email,
+      full_name: user.full_name ?? "",
+      avatar: user.avatar ?? "",
+      password: "",
+      role: user.role,
     });
-    return sortUsers(filtered, sortKey, sortDirection);
-  }, [providerFilter, query, roleFilter, sortDirection, sortKey, users]);
-
-  const selectedUser = page.name === "edit" || page.name === "delete"
-    ? users.find((user) => user.id === page.userId) ?? null
-    : null;
-
-  const updateSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDirection((current) => current === "asc" ? "desc" : "asc");
-      return;
-    }
-    setSortKey(key);
-    setSortDirection("asc");
+    setEditing(user);
   };
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage(null);
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const role = formString(formData, "role");
     const parsed = UserCreateSchema.safeParse({
-      email: formString(formData, "email"),
-      password: formString(formData, "password"),
-      full_name: formString(formData, "full_name"),
-      avatar: formString(formData, "avatar"),
+      email: createForm.email || undefined,
+      password: createForm.password || undefined,
+      full_name: createForm.full_name || undefined,
+      avatar: createForm.avatar || undefined,
       provider: "password",
-      role: role ? RoleTypeSchema.parse(role) : "user",
-      is_active: formData.get("is_active") === "on",
-      is_superuser: formData.get("is_superuser") === "on",
+      role: createForm.role ? RoleTypeSchema.parse(createForm.role) : "user",
+      is_active: createForm.is_active,
+      is_superuser: createForm.is_superuser,
     });
-
     if (!parsed.success) {
-      setMessage(parsed.error.issues[0]?.message ?? t.invalidCreate);
+      accountToast.error({
+        title: parsed.error.issues[0]?.message ?? t.invalidCreate,
+      });
       return;
     }
-
+    setSubmitting(true);
     try {
       await create(parsed.data);
-      await reload();
-      form.reset();
-      setMessage(t.created);
-      navigate({ name: "list" });
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : t.createFailed);
+      setCreating(false);
+      accountToast.success({ title: t.created });
+    } catch (error) {
+      accountToast.error({ title: errorMessage(error, t.createFailed) });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleUpdate = async (event: React.FormEvent<HTMLFormElement>, id: string) => {
+  const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage(null);
-
-    const formData = new FormData(event.currentTarget);
+    if (!editing || !editForm) return;
     const parsed = UserUpdateSchema.safeParse({
-      email: formString(formData, "email"),
-      full_name: formString(formData, "full_name"),
-      avatar: formString(formData, "avatar"),
-      password: formString(formData, "password"),
-      role: formString(formData, "role"),
+      email: editForm.email || undefined,
+      full_name: editForm.full_name || undefined,
+      avatar: editForm.avatar || undefined,
+      password: editForm.password || undefined,
+      role: editForm.role || undefined,
     });
-
     if (!parsed.success) {
-      setMessage(parsed.error.issues[0]?.message ?? t.invalidUpdate);
+      accountToast.error({
+        title: parsed.error.issues[0]?.message ?? t.invalidUpdate,
+      });
       return;
     }
-
+    setSubmitting(true);
     try {
-      await update(id, parsed.data);
-      await reload();
-      setMessage(t.updated);
-      navigate({ name: "list" });
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : t.updateFailed);
+      await update(editing.id, parsed.data);
+      setEditing(null);
+      setEditForm(null);
+      accountToast.success({ title: t.updated });
+    } catch (error) {
+      accountToast.error({ title: errorMessage(error, t.updateFailed) });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    setMessage(null);
+  const confirmDelete = async (ids: string[]) => {
+    setSubmitting(true);
     try {
-      await remove(id);
-      await reload();
-      setMessage(t.deleted);
-      navigate({ name: "list" });
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : t.deleteFailed);
+      for (const id of ids) {
+        await remove(id);
+      }
+      accountToast.success({ title: t.deleted });
+      setDeleting(null);
+      setBulkDelete(false);
+      setRowSelection({});
+    } catch (error) {
+      accountToast.error({ title: errorMessage(error, t.deleteFailed) });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const renderHeaderActions = (
-    <div className="flex flex-col gap-2 sm:flex-row md:justify-end">
-      <Button type="button" size="sm" variant="outline" onClick={() => reload()}>
-        <RefreshCw />
-        {t.refresh}
-      </Button>
-      <Button asChild type="button" size="sm">
-        <a
-          href={hrefForAdminPage({ name: "add" })}
-          onClick={(event) => {
-            event.preventDefault();
-            navigate({ name: "add" });
-          }}
-        >
-          <Plus />
-          {t.addUser}
-        </a>
-      </Button>
-    </div>
+  const controller = useClientTable(users, {
+    search: (user) => `${user.email} ${user.full_name ?? ""}`,
+    sorters: {
+      email: (user) => user.email,
+      role: (user) => user.role,
+      provider: (user) => user.provider,
+      status: (user) => (user.is_active ? t.active : t.inactive),
+    },
+    initialSortBy: "email",
+  });
+
+  const columns = React.useMemo<ColumnDef<UserPublic>[]>(
+    () => [
+      createDataTableSelectionColumn<UserPublic>({
+        selectAllVisible: t.actions,
+        selectRow: (user) => `${t.edit} ${user.email}`,
+      }),
+      {
+        id: "actions",
+        header: t.actions,
+        enableHiding: false,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <RowActions
+            editLabel={t.edit}
+            deleteLabel={t.delete}
+            onEdit={() => openEdit(row.original)}
+            onDelete={() => setDeleting(row.original)}
+          />
+        ),
+      },
+      {
+        accessorKey: "email",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t.email} />
+        ),
+        cell: ({ row }) => (
+          <div className="min-w-0">
+            <div className="font-medium">{row.original.email}</div>
+            {row.original.full_name ? (
+              <div className="text-xs text-muted-foreground">
+                {row.original.full_name}
+              </div>
+            ) : null}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "role",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t.role} />
+        ),
+        cell: ({ row }) => (
+          <span className="capitalize">{row.original.role}</span>
+        ),
+      },
+      {
+        accessorKey: "provider",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t.provider} />
+        ),
+        cell: ({ row }) => (
+          <Badge variant="outline" className="capitalize">
+            {row.original.provider === "google"
+              ? t.providerGoogle
+              : t.providerPassword}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t.status} />
+        ),
+        cell: ({ row }) => {
+          const user = row.original;
+          return (
+            <div className="flex flex-wrap gap-1">
+              <Badge variant={user.is_active ? "default" : "outline"}>
+                {user.is_active ? t.active : t.inactive}
+              </Badge>
+              {user.email_verified ? (
+                <Badge variant="secondary">{t.emailVerified}</Badge>
+              ) : null}
+              {user.is_superuser ? (
+                <Badge variant="secondary">{t.superuser}</Badge>
+              ) : null}
+            </div>
+          );
+        },
+      },
+    ],
+    [t],
   );
 
-  return (
-    <Card className="not-content pb-3">
-      <CardHeader className="gap-4 pb-3 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1.5">
-          <CardTitle>{t.title}</CardTitle>
-          <CardDescription>{t.description}</CardDescription>
-        </div>
-        {page.name === "list" ? renderHeaderActions : null}
-      </CardHeader>
-      <CardContent className="space-y-5 pb-3">
-        {(message || errorText) && (
-          <p className="rounded-md border p-3 text-sm">{message ?? errorText}</p>
-        )}
+  const selectedIds = Object.keys(rowSelection).filter((id) => rowSelection[id]);
+  const editingGoogle = editing?.provider === "google";
 
-        {page.name === "add" ? (
-          <form onSubmit={handleCreate} className="space-y-5 pb-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-base font-semibold">{t.addUser}</h3>
-                <p className="text-sm text-muted-foreground">{t.updateScope}</p>
-              </div>
-              <Button asChild type="button" variant="outline">
-                <a
-                  href={hrefForAdminPage({ name: "list" })}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    navigate({ name: "list" });
-                  }}
-                >
-                  {t.cancel}
-                </a>
+  return (
+    <Card className="not-content w-full">
+      <AccountToastHost />
+      <CardHeader>
+        <CardTitle>{t.title}</CardTitle>
+        <CardDescription>{t.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">{t.updateScope}</p>
+        <DataTable<UserPublic, unknown>
+          columns={columns}
+          data={controller.data}
+          rowCount={controller.rowCount}
+          page={controller.page}
+          pageSize={controller.pageSize}
+          onPageChange={controller.onPageChange}
+          onPageSizeChange={controller.onPageSizeChange}
+          sortBy={controller.sortBy}
+          sortDir={controller.sortDir}
+          onSortChange={controller.onSortChange}
+          q={controller.q}
+          onSearchChange={controller.onSearchChange}
+          loading={loading && users.length === 0}
+          getRowId={(user) => user.id}
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+          labels={{
+            loading: t.loading,
+            empty: t.empty,
+            toolbar: { search: t.search },
+          }}
+          addButton={
+            <Button type="button" size="sm" onClick={openCreate}>
+              <UserPlus className="size-4" />
+              {t.create}
+            </Button>
+          }
+          selectionActions={
+            selectedIds.length > 0 ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                onClick={() => setBulkDelete(true)}
+              >
+                {t.deleteSelected} ({selectedIds.length})
               </Button>
+            ) : null
+          }
+        />
+      </CardContent>
+
+      {/* Create popup */}
+      <EntityFormDialog
+        open={creating}
+        onOpenChange={setCreating}
+        title={t.createTitle}
+        description={t.updateScope}
+      >
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label htmlFor="admin-create-email">{t.email}</Label>
+              <Input
+                id="admin-create-email"
+                type="email"
+                required
+                value={createForm.email}
+                onChange={(event) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    email: event.target.value,
+                  }))
+                }
+              />
             </div>
-            <FormGrid>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-create-email">{t.email}</Label>
-                <Input id="admin-create-email" name="email" type="email" required />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-create-name">{t.fullName}</Label>
-                <Input id="admin-create-name" name="full_name" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-create-avatar">{t.avatar}</Label>
-                <Input id="admin-create-avatar" name="avatar" type="url" placeholder={t.avatarPlaceholder} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-create-password">{t.password}</Label>
-                <Input id="admin-create-password" name="password" type="password" minLength={8} required />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-create-role">{t.role}</Label>
-                <select id="admin-create-role" name="role" defaultValue="user" className={inputClassName}>
-                  {RoleTypeSchema.options.map((role) => <option key={role} value={role}>{role}</option>)}
-                </select>
-              </div>
-              <label className="flex min-h-8 items-center gap-2 rounded-md border border-input px-3 py-2 text-sm">
-                <input name="is_active" type="checkbox" defaultChecked className="size-4" />
+            <div className="space-y-1">
+              <Label htmlFor="admin-create-name">{t.fullName}</Label>
+              <Input
+                id="admin-create-name"
+                value={createForm.full_name}
+                onChange={(event) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    full_name: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="admin-create-avatar">{t.avatar}</Label>
+              <Input
+                id="admin-create-avatar"
+                type="url"
+                placeholder={t.avatarPlaceholder}
+                value={createForm.avatar}
+                onChange={(event) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    avatar: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="admin-create-password">{t.password}</Label>
+              <Input
+                id="admin-create-password"
+                type="password"
+                minLength={8}
+                required
+                value={createForm.password}
+                onChange={(event) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    password: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="admin-create-role">{t.role}</Label>
+              <RoleSelect
+                id="admin-create-role"
+                value={createForm.role}
+                onChange={(role) => setCreateForm((prev) => ({ ...prev, role }))}
+              />
+            </div>
+            <div className="flex items-end gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4"
+                  checked={createForm.is_active}
+                  onChange={(event) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      is_active: event.target.checked,
+                    }))
+                  }
+                />
                 {t.active}
               </label>
-              <label className="flex min-h-8 items-center gap-2 rounded-md border border-input px-3 py-2 text-sm">
-                <input name="is_superuser" type="checkbox" className="size-4" />
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4"
+                  checked={createForm.is_superuser}
+                  onChange={(event) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      is_superuser: event.target.checked,
+                    }))
+                  }
+                />
                 {t.superuser}
               </label>
-            </FormGrid>
-            <Button type="submit">{t.create}</Button>
-          </form>
-        ) : null}
-
-        {page.name === "edit" && selectedUser ? (
-          <form onSubmit={(event) => handleUpdate(event, selectedUser.id)} className="space-y-5 pb-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-base font-semibold">{t.editUser}</h3>
-                <p className="break-all text-sm text-muted-foreground">{selectedUser.email}</p>
-              </div>
-              <Button asChild type="button" variant="outline">
-                <a
-                  href={hrefForAdminPage({ name: "list" })}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    navigate({ name: "list" });
-                  }}
-                >
-                  {t.cancel}
-                </a>
-              </Button>
             </div>
-            <FormGrid>
-              <div className="space-y-1.5">
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCreating(false)}
+            >
+              {t.cancel}
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {t.save}
+            </Button>
+          </DialogFooter>
+        </form>
+      </EntityFormDialog>
+
+      {/* Edit popup */}
+      <EntityFormDialog
+        open={Boolean(editing) && Boolean(editForm)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditing(null);
+            setEditForm(null);
+          }
+        }}
+        title={t.editTitle}
+        description={editing?.email}
+      >
+        {editForm ? (
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
                 <Label htmlFor="admin-edit-email">{t.email}</Label>
-                <Input id="admin-edit-email" name="email" type="email" defaultValue={selectedUser.email} required />
+                <Input
+                  id="admin-edit-email"
+                  type="email"
+                  required
+                  value={editForm.email}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, email: event.target.value } : prev,
+                    )
+                  }
+                />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <Label htmlFor="admin-edit-name">{t.fullName}</Label>
-                <Input id="admin-edit-name" name="full_name" defaultValue={selectedUser.full_name ?? ""} />
+                <Input
+                  id="admin-edit-name"
+                  value={editForm.full_name}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, full_name: event.target.value } : prev,
+                    )
+                  }
+                />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <Label htmlFor="admin-edit-avatar">{t.avatar}</Label>
-                <Input id="admin-edit-avatar" name="avatar" type="url" defaultValue={selectedUser.avatar ?? ""} placeholder={t.avatarPlaceholder} />
+                <Input
+                  id="admin-edit-avatar"
+                  type="url"
+                  placeholder={t.avatarPlaceholder}
+                  value={editForm.avatar}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, avatar: event.target.value } : prev,
+                    )
+                  }
+                />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <Label htmlFor="admin-edit-password">{t.password}</Label>
                 <Input
                   id="admin-edit-password"
-                  name="password"
                   type="password"
-                  placeholder={selectedUser.provider === "password" ? t.passwordPlaceholder : t.passwordUnsupported}
-                  disabled={selectedUser.provider === "google"}
+                  disabled={editingGoogle}
+                  placeholder={
+                    editingGoogle
+                      ? t.passwordUnsupported
+                      : t.passwordPlaceholder
+                  }
+                  value={editForm.password}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, password: event.target.value } : prev,
+                    )
+                  }
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <Label htmlFor="admin-edit-role">{t.role}</Label>
-                <select id="admin-edit-role" name="role" defaultValue={selectedUser.role} className={inputClassName}>
-                  {RoleTypeSchema.options.map((role) => <option key={role} value={role}>{role}</option>)}
-                </select>
+                <RoleSelect
+                  id="admin-edit-role"
+                  value={editForm.role}
+                  onChange={(role) =>
+                    setEditForm((prev) => (prev ? { ...prev, role } : prev))
+                  }
+                />
               </div>
-              <UserDetails t={t} user={selectedUser} />
-            </FormGrid>
-            <Button type="submit">{t.save}</Button>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditing(null);
+                  setEditForm(null);
+                }}
+              >
+                {t.cancel}
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {t.save}
+              </Button>
+            </DialogFooter>
           </form>
         ) : null}
+      </EntityFormDialog>
 
-        {page.name === "delete" && selectedUser ? (
-          <div className="space-y-5 pb-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-base font-semibold">{t.deleteUser}</h3>
-                <p className="text-sm text-muted-foreground">{t.deletePrompt}</p>
-              </div>
-              <Button asChild type="button" variant="outline">
-                <a
-                  href={hrefForAdminPage({ name: "list" })}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    navigate({ name: "list" });
-                  }}
-                >
-                  {t.cancel}
-                </a>
-              </Button>
-            </div>
-            <UserDetails t={t} user={selectedUser} />
-            <Button type="button" variant="destructive" onClick={() => handleDelete(selectedUser.id)}>
-              <Trash2 />
-              {t.confirmDelete}
-            </Button>
-          </div>
-        ) : null}
-
-        {page.name === "list" ? (
-          <div className="space-y-4 pb-3">
-            <div className="grid gap-3 pb-3 lg:grid-cols-[minmax(14rem,1fr)_12rem_12rem_auto] lg:items-end">
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-users-search">{t.search}</Label>
-                <Input
-                  id="admin-users-search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={t.searchPlaceholder}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-users-role">{t.role}</Label>
-                <select
-                  id="admin-users-role"
-                  value={roleFilter}
-                  onChange={(event) => setRoleFilter(event.target.value as RoleType | "all")}
-                  className={inputClassName}
-                >
-                  <option value="all">{t.allRoles}</option>
-                  {RoleTypeSchema.options.map((role) => <option key={role} value={role}>{role}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-users-provider">{t.provider}</Label>
-                <select
-                  id="admin-users-provider"
-                  value={providerFilter}
-                  onChange={(event) => setProviderFilter(event.target.value as AuthProviderType | "all")}
-                  className={inputClassName}
-                >
-                  <option value="all">{t.allProviders}</option>
-                  {AuthProviderTypeSchema.options.map((provider) => (
-                    <option key={provider} value={provider}>{providerLabel(t, provider)}</option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-sm text-muted-foreground lg:pb-1">{filteredUsers.length} / {count} {t.users}</p>
-            </div>
-
-            {loading && users.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t.loading}</p>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader className="bg-muted/40">
-                    <TableRow>
-                      <TableHead>
-                        <SortButton active={sortKey === "email"} direction={sortDirection} label={t.email} onClick={() => updateSort("email")} />
-                      </TableHead>
-                      <TableHead>
-                        <SortButton active={sortKey === "full_name"} direction={sortDirection} label={t.fullName} onClick={() => updateSort("full_name")} />
-                      </TableHead>
-                      <TableHead>
-                        <SortButton active={sortKey === "role"} direction={sortDirection} label={t.role} onClick={() => updateSort("role")} />
-                      </TableHead>
-                      <TableHead>
-                        <SortButton active={sortKey === "provider"} direction={sortDirection} label={t.provider} onClick={() => updateSort("provider")} />
-                      </TableHead>
-                      <TableHead>
-                        <SortButton active={sortKey === "status"} direction={sortDirection} label={t.status} onClick={() => updateSort("status")} />
-                      </TableHead>
-                      <TableHead className="text-right">{t.actions}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.length > 0 ? filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="min-w-56 whitespace-normal">
-                          <span className="break-all font-medium">{user.email}</span>
-                        </TableCell>
-                        <TableCell className="min-w-40 whitespace-normal">{user.full_name || t.noFullName}</TableCell>
-                        <TableCell><span className={badgeClassName}>{user.role}</span></TableCell>
-                        <TableCell><span className={badgeClassName}>{providerLabel(t, user.provider)}</span></TableCell>
-                        <TableCell className="min-w-44 whitespace-normal text-muted-foreground">{userStatus(t, user)}</TableCell>
-                        <TableCell>
-                          <div className="flex justify-end gap-2">
-                            <Button asChild size="sm" variant="outline">
-                              <a
-                                href={hrefForAdminPage({ name: "edit", userId: user.id })}
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  navigate({ name: "edit", userId: user.id });
-                                }}
-                              >
-                                <Pencil />
-                                {t.edit}
-                              </a>
-                            </Button>
-                            <Button asChild size="sm" variant="destructive">
-                              <a
-                                href={hrefForAdminPage({ name: "delete", userId: user.id })}
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  navigate({ name: "delete", userId: user.id });
-                                }}
-                              >
-                                <Trash2 />
-                                {t.delete}
-                              </a>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                          {t.empty}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
-        ) : null}
-      </CardContent>
+      {/* Delete confirmations */}
+      <ConfirmDeleteDialog
+        open={Boolean(deleting)}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
+        title={t.confirmDeleteTitle}
+        description={t.confirmDeleteBody}
+        confirmLabel={t.delete}
+        cancelLabel={t.cancel}
+        pending={submitting}
+        onConfirm={() => deleting && confirmDelete([deleting.id])}
+      />
+      <ConfirmDeleteDialog
+        open={bulkDelete}
+        onOpenChange={setBulkDelete}
+        title={t.confirmDeleteTitle}
+        description={t.confirmDeleteBody}
+        confirmLabel={t.deleteSelected}
+        cancelLabel={t.cancel}
+        pending={submitting}
+        onConfirm={() => confirmDelete(selectedIds)}
+      />
     </Card>
   );
 }
 
-export function AdminUsersPanel({ labels }: { labels?: Partial<AdminUsersPanelLabels> }) {
+export function AdminUsersPanel({
+  labels,
+}: {
+  labels?: Partial<AdminUsersPanelLabels>;
+}) {
   const t = { ...DEFAULT_LABELS, ...labels };
+  // Superuser-only: gate the whole panel via the package's RequireRole so the
+  // privileged API calls never mount for non-superusers, even if a consumer
+  // renders it unconditionally.
   return (
     <RequireRole superuser>
       <AdminUsersPanelInner t={t} />

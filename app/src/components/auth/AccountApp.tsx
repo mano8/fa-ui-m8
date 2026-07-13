@@ -70,7 +70,7 @@ function AppShellContent({ view }: { view: AccountView }) {
   }
 
   return (
-    <div className="not-content mx-auto w-full max-w-6xl space-y-6">
+    <div className="not-content w-full max-w-none space-y-6">
       <div className="flex flex-col gap-4 border-b pb-3 mb-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 space-y-2">
           <h1 className="text-2xl font-semibold tracking-normal text-foreground md:text-3xl">
@@ -88,7 +88,7 @@ function AppShellContent({ view }: { view: AccountView }) {
         </Button>
       </div>
 
-      <div className="space-y-4 pb-3">
+      <div className="flex flex-col gap-6 py-4">
         {activeView === "dashboard" ? (
           <DashboardOverview labels={t.auth.dashboard.overview} />
         ) : null}

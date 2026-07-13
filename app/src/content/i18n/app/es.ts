@@ -115,6 +115,21 @@ export default {
       notUsed: "Nunca usado",
       notAvailable: "n/d",
       revoke: "Revocar token",
+      title: "Claves API",
+      description: "Provisiona y revoca identificadores de cliente programáticos.",
+      status: "Estado",
+      cancel: "Cancelar",
+      revealTitle: "Token API creado",
+      done: "Hecho",
+      revokeSelected: "Revocar seleccionados",
+      confirmRevokeTitle: "¿Revocar token API?",
+      confirmRevokeBody:
+        "Esto invalida el token de inmediato. Las integraciones que lo usen dejarán de funcionar.",
+      search: "Buscar tokens",
+      created: "Token API creado.",
+      createFailed: "No se pudo crear el token API.",
+      revokedOk: "Token API revocado.",
+      revokeFailed: "No se pudo revocar el token API.",
     },
 
     adminUsers: {
@@ -169,6 +184,12 @@ export default {
       status: "Estado",
       details: "Detalles",
       noFullName: "Sin nombre completo",
+      createTitle: "Crear usuario",
+      editTitle: "Editar usuario",
+      deleteSelected: "Eliminar seleccionados",
+      confirmDeleteTitle: "¿Eliminar usuario?",
+      confirmDeleteBody:
+        "Esto elimina permanentemente la cuenta del usuario y revoca su acceso.",
     },
 
     sessions: {

@@ -1,4 +1,11 @@
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 
@@ -11,6 +18,29 @@ vi.mock("@mano8/astro-auth-m8/react", () => ({ RequireRole: requireRoleMock }));
 vi.mock("@mano8/astro-auth-m8/hooks", () => ({ useUsers: useUsersMock }));
 
 import { AdminUsersPanel } from "./admin-users-panel";
+
+type UserOverrides = Partial<{
+  id: string;
+  email: string;
+  full_name: string | null;
+  provider: string;
+  role: string;
+}>;
+
+function user(overrides: UserOverrides = {}) {
+  return {
+    id: "u1",
+    email: "a@x.io",
+    full_name: "Ada",
+    avatar: null,
+    role: "user",
+    provider: "password",
+    is_active: true,
+    email_verified: false,
+    is_superuser: false,
+    ...overrides,
+  };
+}
 
 function hook(overrides = {}) {
   return {
@@ -28,7 +58,9 @@ function hook(overrides = {}) {
 afterEach(() => cleanup());
 beforeEach(() => {
   useUsersMock.mockReset().mockReturnValue(hook());
-  requireRoleMock.mockReset().mockImplementation(({ children }: { children: ReactNode }) => children);
+  requireRoleMock
+    .mockReset()
+    .mockImplementation(({ children }: { children: ReactNode }) => children);
 });
 
 describe("AdminUsersPanel", () => {
@@ -42,77 +74,88 @@ describe("AdminUsersPanel", () => {
     expect(container.querySelector("table")).toBeNull();
   });
 
-  it("renders a table-only user list sorted by email", () => {
+  it("renders users in a data-table sorted by email", () => {
     useUsersMock.mockReturnValue(
       hook({
         users: {
           data: [
-            { id: "u2", email: "z@x.io", full_name: "Zed", avatar: null, role: "user", provider: "password", is_active: true, email_verified: false, is_superuser: false },
-            { id: "u1", email: "a@x.io", full_name: "A", avatar: null, role: "admin", provider: "google", is_active: true, email_verified: true, is_superuser: false },
-          ],
-          count: 2,
-        },
-      }),
-    );
-    render(<AdminUsersPanel labels={{ users: "users" }} />);
-    expect(screen.getByText("2 / 2 users")).toBeTruthy();
-    expect(screen.queryByDisplayValue("a@x.io")).toBeNull();
-
-    const rows = screen.getAllByRole("row");
-    expect(rows[1]?.textContent).toContain("a@x.io");
-    expect(rows[2]?.textContent).toContain("z@x.io");
-  });
-
-  it("filters users by email, full name, role, and provider", () => {
-    useUsersMock.mockReturnValue(
-      hook({
-        users: {
-          data: [
-            { id: "u1", email: "reader@x.io", full_name: "Ada Reader", avatar: null, role: "reader", provider: "password", is_active: true, email_verified: false, is_superuser: false },
-            { id: "u2", email: "admin@x.io", full_name: "Grace Admin", avatar: null, role: "admin", provider: "google", is_active: true, email_verified: true, is_superuser: false },
+            user({ id: "u2", email: "z@x.io", full_name: "Zed" }),
+            user({ id: "u1", email: "a@x.io", full_name: "Ada" }),
           ],
           count: 2,
         },
       }),
     );
     render(<AdminUsersPanel />);
-
-    fireEvent.change(screen.getByLabelText("Search"), { target: { value: "grace" } });
-    expect(screen.getByText("admin@x.io")).toBeTruthy();
-    expect(screen.queryByText("reader@x.io")).toBeNull();
-
-    fireEvent.change(screen.getByLabelText("Role"), { target: { value: "reader" } });
-    expect(screen.getByText("No users match the current filters.")).toBeTruthy();
-
-    fireEvent.change(screen.getByLabelText("Search"), { target: { value: "" } });
-    fireEvent.change(screen.getByLabelText("Provider"), { target: { value: "password" } });
-    expect(screen.getByText("reader@x.io")).toBeTruthy();
-    expect(screen.queryByText("admin@x.io")).toBeNull();
+    const rows = screen.getAllByRole("row");
+    // rows[0] is the header row.
+    expect(rows[1]?.textContent).toContain("a@x.io");
+    expect(rows[2]?.textContent).toContain("z@x.io");
   });
 
-  it("opens a delete page with user details before deleting", async () => {
+  it("creates a user from the popup form", async () => {
+    const create = vi.fn().mockResolvedValue({});
+    useUsersMock.mockReturnValue(hook({ create }));
+    render(<AdminUsersPanel labels={{ create: "Create user" }} />);
+
+    fireEvent.click(screen.getByText("Create user"));
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "new@x.io" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: "new@x.io",
+          provider: "password",
+          role: "user",
+        }),
+      ),
+    );
+  });
+
+  it("edits a user through the prefilled popup", async () => {
+    const update = vi.fn().mockResolvedValue({});
+    useUsersMock.mockReturnValue(
+      hook({
+        update,
+        users: { data: [user({ id: "u9", email: "e@x.io" })], count: 1 },
+      }),
+    );
+    render(<AdminUsersPanel labels={{ edit: "Edit" }} />);
+
+    fireEvent.click(screen.getByText("Edit"));
+    const nameInput = screen.getByLabelText("Full name") as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: "Renamed" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        "u9",
+        expect.objectContaining({ full_name: "Renamed" }),
+      ),
+    );
+  });
+
+  it("confirms deletion through the alert dialog before removing", async () => {
     const remove = vi.fn().mockResolvedValue(undefined);
-    const reload = vi.fn().mockResolvedValue(null);
     useUsersMock.mockReturnValue(
       hook({
         remove,
-        reload,
-        users: {
-          data: [
-            { id: "u9", email: "z@x.io", full_name: null, avatar: null, role: "user", provider: "password", is_active: true, email_verified: false, is_superuser: false },
-          ],
-          count: 1,
-        },
+        users: { data: [user({ id: "u9", email: "z@x.io" })], count: 1 },
       }),
     );
-    render(<AdminUsersPanel labels={{ delete: "Delete", confirmDelete: "Confirm delete" }} />);
+    render(<AdminUsersPanel labels={{ delete: "Delete" }} />);
+
     fireEvent.click(screen.getByText("Delete"));
     expect(remove).not.toHaveBeenCalled();
-    expect(screen.getByText("Are you sure you want to delete this user?")).toBeTruthy();
-    expect(screen.getByText("z@x.io")).toBeTruthy();
 
-    fireEvent.click(screen.getByText("Confirm delete"));
+    const dialog = screen.getByRole("alertdialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(remove).toHaveBeenCalledWith("u9"));
-    expect(reload).toHaveBeenCalled();
   });
 });

@@ -114,6 +114,21 @@ export default {
       notUsed: "Never used",
       notAvailable: "n/a",
       revoke: "Revoke token",
+      title: "API keys",
+      description: "Provision and revoke programmatic client identifiers.",
+      status: "Status",
+      cancel: "Cancel",
+      revealTitle: "API token created",
+      done: "Done",
+      revokeSelected: "Revoke selected",
+      confirmRevokeTitle: "Revoke API token?",
+      confirmRevokeBody:
+        "This immediately invalidates the token. Integrations using it will stop working.",
+      search: "Search tokens",
+      created: "API token created.",
+      createFailed: "Failed to create API token.",
+      revokedOk: "API token revoked.",
+      revokeFailed: "Failed to revoke API token.",
     },
 
     adminUsers: {
@@ -168,6 +183,12 @@ export default {
       status: "Status",
       details: "Details",
       noFullName: "No full name",
+      createTitle: "Create user",
+      editTitle: "Edit user",
+      deleteSelected: "Delete selected",
+      confirmDeleteTitle: "Delete user?",
+      confirmDeleteBody:
+        "This permanently removes the user account and revokes its access.",
     },
 
     sessions: {

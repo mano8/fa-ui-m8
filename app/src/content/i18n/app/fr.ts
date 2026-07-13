@@ -115,6 +115,21 @@ export default {
       notUsed: "Jamais utilisé",
       notAvailable: "n/a",
       revoke: "Révoquer le jeton",
+      title: "Clés API",
+      description: "Provisionnez et révoquez des identifiants clients programmatiques.",
+      status: "Statut",
+      cancel: "Annuler",
+      revealTitle: "Jeton API créé",
+      done: "Terminé",
+      revokeSelected: "Révoquer la sélection",
+      confirmRevokeTitle: "Révoquer le jeton API ?",
+      confirmRevokeBody:
+        "Cela invalide immédiatement le jeton. Les intégrations qui l'utilisent cesseront de fonctionner.",
+      search: "Rechercher des jetons",
+      created: "Jeton API créé.",
+      createFailed: "Impossible de créer le jeton API.",
+      revokedOk: "Jeton API révoqué.",
+      revokeFailed: "Impossible de révoquer le jeton API.",
     },
 
     adminUsers: {
@@ -169,6 +184,12 @@ export default {
       status: "Statut",
       details: "Détails",
       noFullName: "Aucun nom complet",
+      createTitle: "Créer un utilisateur",
+      editTitle: "Modifier l'utilisateur",
+      deleteSelected: "Supprimer la sélection",
+      confirmDeleteTitle: "Supprimer l'utilisateur ?",
+      confirmDeleteBody:
+        "Cela supprime définitivement le compte utilisateur et révoque son accès.",
     },
 
     sessions: {

@@ -73,3 +73,27 @@ const accountSublist: SidebarEntry[] = [
     <MobileMenuFooter />
   </div>
 </div>
+
+<script is:inline>
+  // The account settings pages navigate client-side (history.pushState via the
+  // account page script) without a full reload, so Starlight's server-rendered
+  // `aria-current` never moves off the entry point. Re-sync the active account
+  // nav link whenever the client-side route changes.
+  (function () {
+    const ACCOUNT_ROUTE_EVENT = "fa-ui-m8:account-route";
+    const slot = document.getElementById("fa-account-nav-slot");
+    if (!slot) return;
+    const normalize = (path) => path.replace(/\/+$/, "") || "/";
+    const syncActiveAccountLink = () => {
+      const current = normalize(window.location.pathname);
+      for (const anchor of slot.querySelectorAll("a[href]")) {
+        const href = normalize(new URL(anchor.href).pathname);
+        if (href === current) anchor.setAttribute("aria-current", "page");
+        else anchor.removeAttribute("aria-current");
+      }
+    };
+    window.addEventListener("popstate", syncActiveAccountLink);
+    window.addEventListener(ACCOUNT_ROUTE_EVENT, syncActiveAccountLink);
+    syncActiveAccountLink();
+  })();
+</script>
