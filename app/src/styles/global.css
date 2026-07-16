@@ -4,6 +4,8 @@
 @import "@fontsource-variable/geist";
 
 @source "../../node_modules/@mano8/astro-reparto-m8/src/runtime/react";
+@source "../../node_modules/@mano8/astro-auth-m8/src/runtime/react";
+@source "../../node_modules/@mano8/astro-ui-m8/registry/blocks";
 
 @custom-variant dark (&:is([data-theme='dark'] *));
 
