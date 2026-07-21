@@ -1,6 +1,3 @@
-# Local agent config — never committed
-CLAUDE.md
-
 # Python tooling / caches
 __pycache__/
 *.py[cod]
