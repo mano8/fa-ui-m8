@@ -62,10 +62,6 @@ export interface MediaPresetsProps {
   labels?: Partial<MediaPresetsLabels>;
 }
 
-function presetKey(preset: ImagePresetPublic): string {
-  return preset.id ?? preset.name;
-}
-
 function primaryFormat(preset: ImagePresetPublic): string {
   return preset.spec.formats.at(0)?.ext ?? "";
 }
@@ -105,11 +101,14 @@ function normalizeSort(value: string | undefined): SortField {
 }
 
 export function MediaPresets({ baseHref, labels }: MediaPresetsProps) {
-  const t: MediaPresetsLabels = {
-    ...DEFAULT_LABELS,
-    ...labels,
-    table: { ...DEFAULT_LABELS.table, ...labels?.table },
-  };
+  const t = React.useMemo<MediaPresetsLabels>(
+    () => ({
+      ...DEFAULT_LABELS,
+      ...labels,
+      table: { ...DEFAULT_LABELS.table, ...labels?.table },
+    }),
+    [labels],
+  );
   const { presets, loading, error } = useMediaPresets();
   const [q, setQ] = React.useState("");
   const [format, setFormat] = React.useState<ImageFormat | "">("");

@@ -7,17 +7,18 @@ import { AuthContext, type AuthContextValue } from "./authContext";
 
 function AuthBridge({ children }: { children: ReactNode }) {
   const plugin = usePluginAuth();
+  const { login: pluginLogin, reload: pluginReload } = plugin;
   const login = useCallback<AuthContextValue["login"]>(
     async (creds) => {
-      await plugin.login(creds.username, creds.password);
+      await pluginLogin(creds.username, creds.password);
     },
-    [plugin.login],
+    [pluginLogin],
   );
   const refresh = useCallback<AuthContextValue["refresh"]>(
     async () => {
-      await plugin.reload();
+      await pluginReload();
     },
-    [plugin.reload],
+    [pluginReload],
   );
   const value = useMemo<AuthContextValue>(
     () => ({

@@ -103,7 +103,7 @@ function StatCard({
 export function MediaDashboardOverview({
   labels,
 }: MediaDashboardOverviewProps) {
-  const t = { ...DEFAULT_LABELS, ...labels };
+  const t = React.useMemo(() => ({ ...DEFAULT_LABELS, ...labels }), [labels]);
   const {
     stats,
     stale,
@@ -131,9 +131,7 @@ export function MediaDashboardOverview({
     return () => {
       cancelled = true;
     };
-    // The hook callbacks are stable for a given superuser identity; run once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadOrphans, loadStale, loadStats, loadSubscriptions]);
 
   const storageData = (stats?.by_category ?? []).map((row) => ({
     category: row.category,

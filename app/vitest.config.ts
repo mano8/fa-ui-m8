@@ -7,7 +7,7 @@ export default getViteConfig({
     globals: true,
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json-summary'],
+      reporter: ['text', 'json-summary', 'lcov'],
       include: [
         'src/lib/authConfig.ts',
         'src/lib/csp.ts',

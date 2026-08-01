@@ -129,30 +129,26 @@ function mediaLabel(object: MediaObjectPublic): string {
   return object.original_filename ?? object.id;
 }
 
-export function MediaLibrary({ objectHref, initial = {}, labels }: MediaLibraryProps) {
-  const t: MediaLibraryLabels = {
-    ...DEFAULT_LABELS,
-    ...labels,
-    table: { ...DEFAULT_LABELS.table, ...labels?.table },
-    categories: { ...DEFAULT_LABELS.categories, ...labels?.categories },
-    statuses: { ...DEFAULT_LABELS.statuses, ...labels?.statuses },
-  };
+const EMPTY_INITIAL_PARAMS: ObjectListParams = {};
+
+export function MediaLibrary({
+  objectHref,
+  initial = EMPTY_INITIAL_PARAMS,
+  labels,
+}: MediaLibraryProps) {
+  const t = React.useMemo<MediaLibraryLabels>(
+    () => ({
+      ...DEFAULT_LABELS,
+      ...labels,
+      table: { ...DEFAULT_LABELS.table, ...labels?.table },
+      categories: { ...DEFAULT_LABELS.categories, ...labels?.categories },
+      statuses: { ...DEFAULT_LABELS.statuses, ...labels?.statuses },
+    }),
+    [labels],
+  );
   const initialParams = React.useMemo<ObjectListParams>(
     () => initial,
-    [
-      initial.category,
-      initial.created_from,
-      initial.created_to,
-      initial.include_deleted,
-      initial.limit,
-      initial.mime_prefix,
-      initial.order,
-      initial.owner_user_id,
-      initial.q,
-      initial.sort_by,
-      initial.status,
-      initial.visibility,
-    ],
+    [initial],
   );
   const [urlState, setUrlState] = React.useState(() =>
     typeof window === "undefined"

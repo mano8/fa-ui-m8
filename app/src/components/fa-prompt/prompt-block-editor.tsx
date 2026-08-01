@@ -151,7 +151,7 @@ function formatBool(value: boolean, yes: string, no: string) {
 }
 
 export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
-  const t = { ...DEFAULT_LABELS, ...labels };
+  const t = React.useMemo(() => ({ ...DEFAULT_LABELS, ...labels }), [labels]);
   const { data, loading, error, createMutation, updateMutation, deleteMutation, refresh } =
     usePromptBlocks();
   const { exportBlockMutation, importMutation } = usePromptTransfer();
@@ -176,7 +176,7 @@ export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
     setOpen(true);
   };
 
-  const startEdit = (block: PromptBlockPublic) => {
+  const startEdit = React.useCallback((block: PromptBlockPublic) => {
     setEditing(block);
     form.reset({
       name: block.name,
@@ -187,7 +187,7 @@ export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
       is_public: block.is_public,
     });
     setOpen(true);
-  };
+  }, [form]);
 
   const save = async (values: BlockFormValues) => {
     const body = {
@@ -203,11 +203,11 @@ export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
     setEditing(null);
   };
 
-  const exportBlock = async (block: PromptBlockPublic) => {
+  const exportBlock = React.useCallback(async (block: PromptBlockPublic) => {
     setTransferStatus(null);
     const payload = await exportBlockMutation.mutateAsync(block.id);
     downloadPromptExport(payload, promptExportFilename("block", block.slug));
-  };
+  }, [exportBlockMutation]);
 
   const exportAllBlocks = () => {
     const allBlocks = data?.data ?? [];
@@ -344,7 +344,7 @@ export default function PromptBlockEditor({ labels }: PromptBlockEditorProps) {
         ),
       },
     ],
-    [t],
+    [exportBlock, startEdit, t],
   );
 
   const filters: DataTableFilter[] = [

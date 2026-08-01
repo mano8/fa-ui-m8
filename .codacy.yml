@@ -1,0 +1,15 @@
+engines:
+  eslint:
+    enabled: true
+  markdownlint:
+    enabled: true
+
+exclude_paths:
+  - "app/coverage/**"
+  - "app/dist/**"
+  - "app/node_modules/**"
+  - ".agents/**"
+  - ".codex/**"
+  - "AGENTS.md"
+  - "CLAUDE.md"
+  - "REPOSITORY_CONTEXT.md"

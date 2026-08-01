@@ -145,7 +145,7 @@ function formatDate(value: string | null | undefined, fallback: string): string 
 }
 
 export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> }) {
-  const t = { ...DEFAULT_LABELS, ...labels };
+  const t = React.useMemo(() => ({ ...DEFAULT_LABELS, ...labels }), [labels]);
   const {
     apiKeys: keys,
     loading,

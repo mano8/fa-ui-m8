@@ -48,7 +48,7 @@ function CallbackHandler({ locale }: { locale: Locale }) {
     } else {
       setError(t.missingCode);
     }
-  }, [complete, locale]);
+  }, [complete, locale, t.missingCode, t.payloadFailed]);
 
   if (error) {
     return (

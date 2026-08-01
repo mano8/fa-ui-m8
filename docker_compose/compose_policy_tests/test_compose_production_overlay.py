@@ -265,6 +265,14 @@ class TestDevBaseUnchanged:
 # ── unit coverage for the merge-tag-tolerant loader ──────────────────────────
 
 
+class TestParseEnv:
+    def test_skips_blank_comment_and_malformed_lines(self, tmp_path: Path):
+        env_file = tmp_path / ".env"
+        env_file.write_text("\n# comment\nMALFORMED\n VALID = value \n")
+
+        assert _parse_env(env_file) == {"VALID": "value"}
+
+
 class TestComposeLoaderToleratesMergeTags:
     """Exercise every branch of the `!reset` / `!override` constructor."""
 

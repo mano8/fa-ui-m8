@@ -3,7 +3,7 @@ FROM node:24-bookworm AS build
 WORKDIR /app
 
 # The Astro app lives in app/ at the repo root (build context is the repo root).
-COPY app/package*.json ./
+COPY app/package*.json app/.npmrc ./
 RUN npm ci
 
 COPY app/ ./

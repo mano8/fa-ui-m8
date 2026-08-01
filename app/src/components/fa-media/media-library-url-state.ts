@@ -9,7 +9,6 @@ import type {
   MediaObjectStatus,
   ObjectListParams,
   SortField,
-  SortOrder,
 } from "@mano8/astro-media-m8/schemas";
 
 const SORT_FIELDS = [

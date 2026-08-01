@@ -53,7 +53,7 @@ prepare_plugin "astro-media-m8" "$MEDIA_PLUGIN_DIR" "$NPM_BASE_FLAGS"
 
 NEEDS_APP_INSTALL=0
 APP_DEPS_STAMP="node_modules/.fa-ui-m8-deps.stamp"
-APP_DEPS_FINGERPRINT="$(sha256sum package.json package-lock.json 2>/dev/null | sha256sum | awk '{print $1}')"
+APP_DEPS_FINGERPRINT="$(sha256sum package.json package-lock.json .npmrc 2>/dev/null | sha256sum | awk '{print $1}')"
 
 # Handle first startup or dependency changes. The named node_modules volume
 # exists even when empty, so check for npm's installed package marker.
