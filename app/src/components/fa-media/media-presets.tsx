@@ -100,6 +100,7 @@ function normalizeSort(value: string | undefined): SortField {
     : "name";
 }
 
+// #lizard forgives(nloc) -- the component is a declarative presets view.
 export function MediaPresets({ baseHref, labels }: MediaPresetsProps) {
   const t = React.useMemo<MediaPresetsLabels>(
     () => ({

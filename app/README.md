@@ -46,7 +46,7 @@ All commands are run from the root of the project, from a terminal:
 
 ## add Tailwind
 
-(Installation guide)[https://tailwindcss.com/docs/installation/framework-guides/astro]
+[Installation guide](https://tailwindcss.com/docs/installation/framework-guides/astro)
 
 ```bash
 npm install tailwindcss @tailwindcss/vite
@@ -54,7 +54,7 @@ npm install tailwindcss @tailwindcss/vite
 
 ## Add Schadcn
 
-(Installation guide)[https://ui.shadcn.com/docs/installation/astro#scaffold-with-cli]
+[Installation guide](https://ui.shadcn.com/docs/installation/astro#scaffold-with-cli)
 
 Add the following code to the `tsconfig.json` file to resolve paths:
 
@@ -282,7 +282,7 @@ npm install zod
 
 ## Tests
 
-(Installation guide)[https://docs.astro.build/en/guides/testing/]
+[Installation guide](https://docs.astro.build/en/guides/testing/)
 
 Install Vitest, a DOM library for component rendering (such as happy-dom), and the testing library
 

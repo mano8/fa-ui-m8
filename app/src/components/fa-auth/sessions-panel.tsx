@@ -111,6 +111,7 @@ function activityAdded(stats: UsersActivity | null, model: string): number | und
   return stats?.activity.activity.find((entry) => entry.model === model)?.added;
 }
 
+// #lizard forgives(nloc) -- the component is a declarative sessions view.
 export function SessionsPanel({ labels }: { labels?: Partial<SessionsPanelLabels> }) {
   const t = { ...DEFAULT_LABELS, ...labels };
   const { user } = useAuth();

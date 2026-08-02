@@ -31,6 +31,7 @@ interface DataTablePaginationProps<TData> {
   hasRows: boolean;
 }
 
+// #lizard forgives(nloc, parameter_count) -- Lizard expands destructured table props.
 export function DataTablePagination<TData>({
   table,
   labels,

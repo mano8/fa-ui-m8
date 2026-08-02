@@ -259,7 +259,7 @@ What the overlay changes vs. the dev default:
   reset (`!reset []`) — all reachable only on the Docker network. (MinIO already
   has no host ports in the hardened base.)
 - **FQDN host rules.** `traefik/production_dynamic_conf.yml` replaces the dev
-  `Host(\`localhost\`)` rules with real FQDNs (`auth.example.com`,
+  ``Host(`localhost`)`` rules with real FQDNs (`auth.example.com`,
   `media.example.com`) and raises the TLS floor to 1.3. `Content-Security-Policy`
   and HSTS ship **commented out** in `security-headers-prod` — opt in only after
   TLS is stable on a trusted certificate (HSTS, once sent, makes browsers refuse

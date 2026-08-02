@@ -49,7 +49,7 @@
   flex-direction: column;
 }
 
-@media (min-width: 48rem) {
+@media (width >= 48rem) {
   .fa-media-filter-row {
     flex-direction: row;
     align-items: center;
@@ -207,6 +207,7 @@
   color: var(--muted-foreground);
 }
 
+/* stylelint-disable selector-class-pattern -- the plugin owns these BEM class names */
 .fa-media-badge--ready {
   background: color-mix(in oklab, var(--primary) 18%, transparent);
   color: var(--foreground);
@@ -224,6 +225,7 @@
   background: color-mix(in oklab, var(--ring) 22%, transparent);
   color: var(--foreground);
 }
+/* stylelint-enable selector-class-pattern */
 
 .fa-media-progress {
   display: flex;

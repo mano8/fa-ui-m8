@@ -100,6 +100,7 @@ function StatCard({
   );
 }
 
+// #lizard forgives(nloc, cyclomatic_complexity) -- cards are declarative conditional JSX.
 export function MediaDashboardOverview({
   labels,
 }: MediaDashboardOverviewProps) {

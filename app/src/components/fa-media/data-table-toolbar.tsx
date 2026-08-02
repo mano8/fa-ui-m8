@@ -28,6 +28,7 @@ interface DataTableToolbarProps<TData> {
   toolbarAction?: React.ReactNode;
 }
 
+// #lizard forgives(nloc, parameter_count) -- Lizard expands destructured table props.
 export function DataTableToolbar<TData>({
   table,
   labels,

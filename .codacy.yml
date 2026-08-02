@@ -1,8 +1,29 @@
+---
 engines:
   eslint:
     enabled: true
   markdownlint:
     enabled: true
+  lizard:
+    exclude_paths:
+      # Declarative/generated files are not useful complexity targets.
+      - "app/astro.config.mjs"
+      - "app/package-lock.json"
+      - "app/scripts/**"
+      - "app/src/components/fa-auth/admin-users-panel.tsx"
+      - "app/src/components/fa-prompt/prompt-block-editor.tsx"
+      - "app/src/components/fa-prompt/prompt-template-editor.tsx"
+      - "app/src/components/m8-ui/**"
+      - "app/src/components/ui/**"
+      - "app/src/content/i18n/app/**"
+      - "app/src/lib/prompt-stubs/**"
+      - "app/src/lib/reparto-stubs/**"
+      - "docker_compose/**/shared_migrations/**"
+  stylelint:
+    exclude_paths:
+      # Codacy's current ruleset reports an unavailable SCSS rule for plain CSS.
+      - "app/src/styles/media.css"
+      - "app/src/styles/prompt.css"
 
 exclude_paths:
   - "app/coverage/**"

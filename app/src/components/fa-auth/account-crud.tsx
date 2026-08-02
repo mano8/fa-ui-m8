@@ -218,6 +218,7 @@ export function EntityFormDialog({
 }
 
 // --- delete confirmation alert ----------------------------------------------
+// #lizard forgives(parameter_count) -- Lizard counts destructured props as parameters.
 export function ConfirmDeleteDialog({
   open,
   onOpenChange,

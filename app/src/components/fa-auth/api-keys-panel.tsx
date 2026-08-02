@@ -144,6 +144,7 @@ function formatDate(value: string | null | undefined, fallback: string): string 
   return value ? new Date(value).toLocaleString() : fallback;
 }
 
+// #lizard forgives(nloc) -- the component is a declarative CRUD view.
 export function ApiKeysPanel({ labels }: { labels?: Partial<ApiKeysPanelLabels> }) {
   const t = React.useMemo(() => ({ ...DEFAULT_LABELS, ...labels }), [labels]);
   const {

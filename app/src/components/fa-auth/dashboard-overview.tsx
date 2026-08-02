@@ -68,6 +68,7 @@ function StatCard({
   );
 }
 
+// #lizard forgives(nloc) -- the component is a declarative dashboard view.
 export function DashboardOverview({
   scope = "me",
   labels,

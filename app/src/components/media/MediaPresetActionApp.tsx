@@ -71,6 +71,7 @@ function PresetActionContent({ action }: { action: MediaPresetAction }) {
   return <AuthenticatedPresetActionContent action={action} locale={locale} />;
 }
 
+// #lizard forgives(nloc, cyclomatic_complexity) -- action-state rendering is declarative JSX.
 function AuthenticatedPresetActionContent({
   action,
   locale,

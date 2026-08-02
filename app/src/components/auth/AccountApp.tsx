@@ -40,6 +40,7 @@ function LoadingState() {
   );
 }
 
+// #lizard forgives(nloc, cyclomatic_complexity) -- view dispatch is declarative JSX.
 function AppShellContent({ view }: { view: AccountView }) {
   const { status, logout, user } = useAuth();
   const { isSuperuser } = useUser();

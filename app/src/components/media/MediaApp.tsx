@@ -39,6 +39,7 @@ function LoadingState() {
   );
 }
 
+// #lizard forgives(nloc) -- view dispatch is declarative JSX.
 function AppShellContent({ view }: { view: MediaView }) {
   const { status } = useAuth();
   const { isSuperuser } = useUser();

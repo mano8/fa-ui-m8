@@ -14,6 +14,7 @@ Asserts the security contract for the internal :9000 services entryPoint:
 from __future__ import annotations
 
 import re
+from ipaddress import ip_address
 from pathlib import Path
 
 import pytest
@@ -132,6 +133,16 @@ def _active_api_bind_ip(path: Path) -> str | None:
     return None
 
 
+def _is_unspecified_address(value: str | None) -> bool:
+    """Return whether a configured IP would listen on every interface."""
+    if value is None:
+        return False
+    try:
+        return ip_address(value).is_unspecified
+    except ValueError:
+        return False
+
+
 @pytest.mark.parametrize(
     "env_path",
     [pytest.param(p, id=str(p.relative_to(_COMPOSE_DIR))) for p in _ENV_EXAMPLES],
@@ -143,7 +154,7 @@ def test_env_example_does_not_set_api_bind_ip_to_0000(env_path: Path) -> None:
     LAN/public exposure must edit their real env file explicitly.
     """
     value = _active_api_bind_ip(env_path)
-    assert value != "0.0.0.0", (
+    assert not _is_unspecified_address(value), (
         f"{env_path.relative_to(_COMPOSE_DIR)}: must not set API_BIND_IP=0.0.0.0 — "
         "example files must document the safe default (127.0.0.1, commented) only"
     )
@@ -156,15 +167,21 @@ class TestComposeLoaderToleratesMergeTags:
     """Exercise every branch of the !reset / !override constructor."""
 
     def test_sequence_tag(self) -> None:
-        doc = yaml.load("ports: !override [80, 443]", Loader=_ComposeLoader)
+        doc = yaml.load(  # nosec B506 -- _ComposeLoader derives from SafeLoader.
+            "ports: !override [80, 443]", Loader=_ComposeLoader
+        )
         assert doc == {"ports": [80, 443]}
 
     def test_mapping_tag(self) -> None:
-        doc = yaml.load("env: !override {A: 1}", Loader=_ComposeLoader)
+        doc = yaml.load(  # nosec B506 -- _ComposeLoader derives from SafeLoader.
+            "env: !override {A: 1}", Loader=_ComposeLoader
+        )
         assert doc == {"env": {"A": 1}}
 
     def test_scalar_tag(self) -> None:
-        doc = yaml.load("name: !reset value", Loader=_ComposeLoader)
+        doc = yaml.load(  # nosec B506 -- _ComposeLoader derives from SafeLoader.
+            "name: !reset value", Loader=_ComposeLoader
+        )
         assert doc == {"name": "value"}
 
 

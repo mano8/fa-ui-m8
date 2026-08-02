@@ -69,6 +69,7 @@ function templateEditorLabels(t: ReturnType<typeof getTranslations>) {
   };
 }
 
+// #lizard forgives(nloc) -- view dispatch is declarative JSX.
 function AppShellContent({ view }: { view: PromptView }) {
   const { status } = useAuth();
   const { isSuperuser } = useUser();

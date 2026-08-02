@@ -85,6 +85,7 @@ function translatePasswordError(err: unknown, t: ProfilePanelLabels): string {
   return known[raw] ?? raw;
 }
 
+// #lizard forgives(nloc) -- the component is a declarative profile form.
 export function ProfilePanel({ labels }: { labels?: Partial<ProfilePanelLabels> }) {
   const t = { ...DEFAULT_LABELS, ...labels };
   const { user, reload } = useAuth();

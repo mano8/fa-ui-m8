@@ -22,12 +22,23 @@ Policy:
 
 from __future__ import annotations
 
+from ipaddress import ip_address
 from pathlib import Path
 
 import pytest
 import yaml
 
 _HARDENED = Path(__file__).parent.parent / "hardened_ui_m8"
+
+
+def _is_unspecified_address(value: str | None) -> bool:
+    """Return whether a configured IP would listen on every interface."""
+    if value is None:
+        return False
+    try:
+        return ip_address(value).is_unspecified
+    except ValueError:
+        return False
 
 OVERLAY = _HARDENED / "docker-compose.production.yml"
 BASE = _HARDENED / "docker-compose.yml"
@@ -206,7 +217,7 @@ class TestRootProductionEnv:
     def test_no_public_bind_and_fail_closed_secrets(self):
         env = _parse_env(ROOT_ENV)
         # API_BIND_IP is commented out (unused under the overlay); never 0.0.0.0.
-        assert env.get("API_BIND_IP") != "0.0.0.0"
+        assert not _is_unspecified_address(env.get("API_BIND_IP"))
         for field in ("DB_PASSWORD", "REDIS_PASSWORD", "MEDIA_REDIS_PASSWORD",
                       "MINIO_ROOT_PASSWORD"):
             assert env[field] == "changethis", f"{field} must be fail-closed"
@@ -277,13 +288,19 @@ class TestComposeLoaderToleratesMergeTags:
     """Exercise every branch of the `!reset` / `!override` constructor."""
 
     def test_sequence_tag(self):
-        doc = yaml.load("ports: !override [80, 443]", Loader=_ComposeLoader)
+        doc = yaml.load(  # nosec B506 -- _ComposeLoader derives from SafeLoader.
+            "ports: !override [80, 443]", Loader=_ComposeLoader
+        )
         assert doc == {"ports": [80, 443]}
 
     def test_mapping_tag(self):
-        doc = yaml.load("env: !override {A: 1}", Loader=_ComposeLoader)
+        doc = yaml.load(  # nosec B506 -- _ComposeLoader derives from SafeLoader.
+            "env: !override {A: 1}", Loader=_ComposeLoader
+        )
         assert doc == {"env": {"A": 1}}
 
     def test_scalar_tag(self):
-        doc = yaml.load("name: !reset value", Loader=_ComposeLoader)
+        doc = yaml.load(  # nosec B506 -- _ComposeLoader derives from SafeLoader.
+            "name: !reset value", Loader=_ComposeLoader
+        )
         assert doc == {"name": "value"}
