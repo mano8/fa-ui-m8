@@ -131,7 +131,6 @@ function mediaLabel(object: MediaObjectPublic): string {
 
 const EMPTY_INITIAL_PARAMS: ObjectListParams = {};
 
-// #lizard forgives(nloc) -- query, table, and dialog composition stays in one view boundary.
 export function MediaLibrary({
   objectHref,
   initial = EMPTY_INITIAL_PARAMS,

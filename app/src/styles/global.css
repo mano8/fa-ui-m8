@@ -1,7 +1,9 @@
+/* stylelint-disable import-notation -- Vite resolves these bare package imports. */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+/* stylelint-enable import-notation */
 
 @source "../../node_modules/@mano8/astro-reparto-m8/src/runtime/react";
 @source "../../node_modules/@mano8/astro-auth-m8/src/runtime/react";
@@ -130,7 +132,7 @@
   padding: 2.5rem 1rem;
 }
 
-@media (min-width: 50em) {
+@media (width >= 50em) {
   .fa-auth-login-centered {
     width: calc(100vw - var(--sl-content-inline-start, 0rem));
     margin-inline-start: calc((100% - (100vw - var(--sl-content-inline-start, 0rem))) / 2);
@@ -162,6 +164,7 @@ html:not([data-has-toc]) main > .content-panel > .sl-container {
   scrollbar-color: var(--sl-color-gray-5) transparent;
 }
 
+/* stylelint-disable-next-line selector-id-pattern -- Starlight owns this id. */
 #starlight__sidebar {
   overflow: hidden;
 }
@@ -255,7 +258,7 @@ html:not([data-has-toc]) main > .content-panel > .sl-container {
   display: none;
 }
 
-@media (min-width: 50rem) {
+@media (width >= 50rem) {
   .fa-sidebar-toggle {
     position: fixed;
     z-index: calc(var(--sl-z-index-menu) + 1);
@@ -286,6 +289,7 @@ html:not([data-has-toc]) main > .content-panel > .sl-container {
     --sl-content-inline-start: 0rem;
   }
 
+  /* stylelint-disable-next-line selector-id-pattern -- Starlight owns this id. */
   html[data-sidebar-collapsed='true'] #starlight__sidebar {
     visibility: hidden;
     pointer-events: none;
@@ -300,21 +304,26 @@ html:not([data-has-toc]) main > .content-panel > .sl-container {
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
+
   select {
     color-scheme: light;
   }
+
   :root[data-theme='dark'] select {
     color-scheme: dark;
   }
+
   select option {
     background-color: var(--popover);
     color: var(--popover-foreground);
   }
+
   body {
     @apply bg-background text-foreground;
-    }
+  }
+
   html {
     @apply font-sans;
-    }
+  }
 }

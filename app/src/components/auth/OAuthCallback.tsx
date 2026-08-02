@@ -5,7 +5,6 @@ import { AuthProvider } from "./AuthProvider";
 import { localePath } from "../../lib/locale";
 import { getTranslations, type Locale } from "../../content/i18n/app";
 
-// #lizard forgives(nloc) -- callback parsing keeps the OAuth validation sequence together.
 export function readOAuthCallback(location: Location): {
   code: string | null;
   error: string | null;
