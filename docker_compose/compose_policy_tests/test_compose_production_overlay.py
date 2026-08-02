@@ -31,15 +31,6 @@ import yaml
 _HARDENED = Path(__file__).parent.parent / "hardened_ui_m8"
 
 
-def _is_unspecified_address(value: str | None) -> bool:
-    """Return whether a configured IP would listen on every interface."""
-    if value is None:
-        return False
-    try:
-        return ip_address(value).is_unspecified
-    except ValueError:
-        return False
-
 OVERLAY = _HARDENED / "docker-compose.production.yml"
 BASE = _HARDENED / "docker-compose.yml"
 AUTH_ENV = _HARDENED / "auth.env.production.example"
@@ -217,7 +208,7 @@ class TestRootProductionEnv:
     def test_no_public_bind_and_fail_closed_secrets(self):
         env = _parse_env(ROOT_ENV)
         # API_BIND_IP is commented out (unused under the overlay); never 0.0.0.0.
-        assert not _is_unspecified_address(env.get("API_BIND_IP"))
+        assert not ip_address(env.get("API_BIND_IP") or "127.0.0.1").is_unspecified
         for field in ("DB_PASSWORD", "REDIS_PASSWORD", "MEDIA_REDIS_PASSWORD",
                       "MINIO_ROOT_PASSWORD"):
             assert env[field] == "changethis", f"{field} must be fail-closed"
