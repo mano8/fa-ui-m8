@@ -1,0 +1,9 @@
+---
+// Overrides Starlight's SocialIcons slot to add app entry points to the top bar.
+// Renders the default social icons and prepends locale-aware app entry points.
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+import SidebarToggle from './SidebarToggle';
+---
+
+<SidebarToggle client:only="react" />
+<Default><slot /></Default>

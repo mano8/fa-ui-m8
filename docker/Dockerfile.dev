@@ -1,0 +1,33 @@
+FROM node:24-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ---- Create app user (idempotent: node:* base already ships uid/gid 1000) ----
+ARG UID=1000
+ARG GID=1000
+RUN (getent group $GID  >/dev/null || groupadd -g $GID appgroup) && \
+    (getent passwd $UID >/dev/null || useradd -m -u $UID -g $GID appuser)
+
+WORKDIR /app
+
+# ---- Install system deps (as root) ----
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Dependencies are installed at container startup after the app has been mounted.
+# Published @mano8 plugin packages resolve from npm by default; mounted local
+# checkouts remain available as a dev override for live plugin work.
+RUN mkdir -p /app/node_modules /astro-auth-m8/node_modules /astro-media-m8/node_modules && \
+    chown -R $UID:$GID /app /astro-auth-m8 /astro-media-m8
+
+# ---- Entrypoint ----
+COPY docker/entrypoint.dev.sh /usr/local/bin/entrypoint.dev.sh
+RUN chmod +x /usr/local/bin/entrypoint.dev.sh
+
+USER $UID:$GID
+
+EXPOSE 4321
+
+ENTRYPOINT ["entrypoint.dev.sh"]

@@ -1,0 +1,26 @@
+version: 2
+
+updates:
+  # GitHub Actions — keep workflow action SHAs current
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+
+  # npm — Astro / React front-end dependencies
+  - package-ecosystem: "npm"
+    directory: "/app"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "deps"
+
+  # Docker — front-end image base
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "deps"

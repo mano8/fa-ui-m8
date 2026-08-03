@@ -1,0 +1,20 @@
+---
+// src/pages/en/auth/login.astro
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import LoginPageApp from '@/components/auth/LoginPageApp';
+import { getTranslations } from '@/content/i18n/app';
+
+const t = getTranslations('en');
+---
+<StarlightPage frontmatter={{
+  title: t.pages.loginTitle,
+  tableOfContents: false
+}}>
+  <LoginPageApp
+    client:only="react"
+    locale="en"
+  />
+  <p class="text-xs text-center text-muted-foreground mt-4">
+    {t.auth.login.newUser} <a href="/en/auth/signup" class="text-primary hover:underline font-medium">{t.auth.login.createAccount}</a>
+  </p>
+</StarlightPage>

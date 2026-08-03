@@ -1,0 +1,14 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import LogoutPageApp from '@/components/auth/LogoutPageApp';
+import { getTranslations } from '@/content/i18n/app';
+
+const t = getTranslations('en');
+---
+
+<StarlightPage frontmatter={{
+  title: t.pages.loginTitle,
+  tableOfContents: false
+}}>
+  <LogoutPageApp client:only="react" locale="en" />
+</StarlightPage>

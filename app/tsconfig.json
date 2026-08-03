@@ -1,0 +1,86 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["coverage", "dist", "node_modules"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@mano8/astro-media-m8": [
+        "./src/lib/media-stubs/integration.ts"
+      ],
+      "@mano8/astro-media-m8/api": [
+        "./src/lib/media-stubs/api.ts"
+      ],
+      "@mano8/astro-media-m8/auth-adapter": [
+        "./src/lib/media-stubs/auth-adapter.ts"
+      ],
+      "@mano8/astro-media-m8/hooks": [
+        "./src/lib/media-stubs/hooks.ts"
+      ],
+      "@mano8/astro-media-m8/list-params": [
+        "./src/lib/media-stubs/list-params.ts"
+      ],
+      "@mano8/astro-media-m8/react": [
+        "./src/lib/media-stubs/react.tsx"
+      ],
+      "@mano8/astro-media-m8/schemas": [
+        "./src/lib/media-stubs/schemas.ts"
+      ],
+      "@mano8/astro-prompt-m8": [
+        "./src/lib/prompt-stubs/integration.ts"
+      ],
+      "@mano8/astro-prompt-m8/api": [
+        "./src/lib/prompt-stubs/api.ts"
+      ],
+      "@mano8/astro-prompt-m8/auth-adapter": [
+        "./src/lib/prompt-stubs/auth-adapter.ts"
+      ],
+      "@mano8/astro-prompt-m8/hooks": [
+        "./src/lib/prompt-stubs/hooks.ts"
+      ],
+      "@mano8/astro-prompt-m8/list-params": [
+        "./src/lib/prompt-stubs/list-params.ts"
+      ],
+      "@mano8/astro-prompt-m8/react": [
+        "./src/lib/prompt-stubs/react.tsx"
+      ],
+      "@mano8/astro-prompt-m8/schemas": [
+        "./src/lib/prompt-stubs/schemas.ts"
+      ],
+      "@mano8/astro-reparto-m8": [
+        "./src/lib/reparto-stubs/integration.ts"
+      ],
+      "@mano8/astro-reparto-m8/api": [
+        "./src/lib/reparto-stubs/api.ts"
+      ],
+      "@mano8/astro-reparto-m8/auth-adapter": [
+        "./src/lib/reparto-stubs/auth-adapter.ts"
+      ],
+      "@mano8/astro-reparto-m8/client": [
+        "./src/lib/reparto-stubs/client.ts"
+      ],
+      "@mano8/astro-reparto-m8/compatibility": [
+        "./src/lib/reparto-stubs/compatibility.ts"
+      ],
+      "@mano8/astro-reparto-m8/default-ui": [
+        "./src/lib/reparto-stubs/default-ui.tsx"
+      ],
+      "@mano8/astro-reparto-m8/react": [
+        "./src/lib/reparto-stubs/react.tsx"
+      ],
+      "@mano8/astro-reparto-m8/routes": [
+        "./src/lib/reparto-stubs/routes.ts"
+      ],
+      "@mano8/astro-reparto-m8/schemas": [
+        "./src/lib/reparto-stubs/schemas.ts"
+      ],
+      "@mano8/astro-reparto-m8/ui": [
+        "./src/lib/reparto-stubs/ui.ts"
+      ]
+    }
+  }
+}

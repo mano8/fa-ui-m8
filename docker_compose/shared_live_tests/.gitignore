@@ -1,0 +1,7 @@
+# Local live-test config holds real credentials/secrets — never commit it.
+.env
+
+# Test artifacts
+.coverage
+.pytest_cache/
+__pycache__/

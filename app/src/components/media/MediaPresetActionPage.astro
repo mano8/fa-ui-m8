@@ -1,0 +1,34 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import MediaPresetActionApp, { type MediaPresetAction } from './MediaPresetActionApp';
+import { getTranslations, type Locale } from '@/content/i18n/app';
+import '../../styles/media.css';
+
+interface Props {
+  locale: Locale;
+  action: MediaPresetAction;
+}
+
+const { locale, action } = Astro.props;
+const t = getTranslations(locale);
+const titles: Record<MediaPresetAction, string> = {
+  new: t.media.presets.addTitle,
+  edit: t.media.presets.editTitle,
+  delete: t.media.presets.deleteTitle,
+};
+---
+
+<StarlightPage frontmatter={{
+  title: titles[action],
+  tableOfContents: false
+}}>
+  <MediaPresetActionApp action={action} client:only="react">
+    <div slot="fallback" class="w-full space-y-6 py-6 animate-pulse">
+      <div class="space-y-2 border-b pb-3 mb-3">
+        <div class="h-8 w-48 rounded bg-muted/60"></div>
+        <div class="h-4 w-72 rounded bg-muted/40"></div>
+      </div>
+      <div class="h-64 rounded-xl border bg-muted/20"></div>
+    </div>
+  </MediaPresetActionApp>
+</StarlightPage>

@@ -1,0 +1,21 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import AnchorHeading from '@astrojs/starlight/components/AnchorHeading.astro';
+import { getTranslations } from '@/content/i18n/app';
+
+const t = getTranslations('fr');
+---
+
+<StarlightPage frontmatter={{
+  title: t.pages.loginTitle,
+  tableOfContents: false
+}}>
+  <p>{t.pages.portfolioIntro}</p>
+
+  <AnchorHeading level="2" id="en-savoir-plus">{t.pages.portfolioHeading}</AnchorHeading>
+  <p>
+    <a href="https://starlight.astro.build/">
+      {t.pages.portfolioLink}
+    </a>
+  </p>
+</StarlightPage>

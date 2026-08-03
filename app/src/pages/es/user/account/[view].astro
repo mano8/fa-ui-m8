@@ -1,0 +1,22 @@
+---
+import AccountPage from '@/components/auth/AccountPage.astro';
+import type { AccountView } from '@/components/auth/AccountApp';
+
+export function getStaticPaths() {
+  const routes: { path: string; view: AccountView }[] = [
+    { path: 'profile', view: 'profile' },
+    { path: 'sessions', view: 'sessions' },
+    { path: 'api-keys', view: 'apiKeys' },
+    { path: 'admin', view: 'admin' },
+  ];
+
+  return routes.map(({ path, view }) => ({
+    params: { view: path },
+    props: { view },
+  }));
+}
+
+const { view } = Astro.props;
+---
+
+<AccountPage locale="es" view={view} />

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "radix-nova",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/global.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "registries": {
+    "@fa-m8-auth": "./node_modules/@mano8/astro-auth-m8/registry/r/{name}.json",
+    "@fa-m8-media": "./node_modules/@mano8/astro-media-m8/registry/r/{name}.json",
+    "@fa-m8-prompt": "./node_modules/@mano8/astro-prompt-m8/registry/r/{name}.json",
+    "@fa-m8-reparto": "./node_modules/@mano8/astro-reparto-m8/registry/r/{name}.json",
+    "@fa-m8-ui": "./node_modules/@mano8/astro-ui-m8/registry/r/{name}.json"
+  }
+}

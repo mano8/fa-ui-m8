@@ -1,0 +1,329 @@
+/* stylelint-disable import-notation -- Vite resolves these bare package imports. */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+/* stylelint-enable import-notation */
+
+@source "../../node_modules/@mano8/astro-reparto-m8/src/runtime/react";
+@source "../../node_modules/@mano8/astro-auth-m8/src/runtime/react";
+@source "../../node_modules/@mano8/astro-ui-m8/registry/blocks";
+
+@custom-variant dark (&:is([data-theme='dark'] *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: oklch(1 0 0deg);
+    --foreground: oklch(0.145 0 0deg);
+    --card: oklch(1 0 0deg);
+    --card-foreground: oklch(0.145 0 0deg);
+    --popover: oklch(1 0 0deg);
+    --popover-foreground: oklch(0.145 0 0deg);
+    --primary: oklch(0.205 0 0deg);
+    --primary-foreground: oklch(0.985 0 0deg);
+    --secondary: oklch(0.97 0 0deg);
+    --secondary-foreground: oklch(0.205 0 0deg);
+    --muted: oklch(0.97 0 0deg);
+    --muted-foreground: oklch(0.556 0 0deg);
+    --accent: oklch(0.97 0 0deg);
+    --accent-foreground: oklch(0.205 0 0deg);
+    --destructive: oklch(0.577 0.245 27.325deg);
+    --border: oklch(0.922 0 0deg);
+    --input: oklch(0.922 0 0deg);
+    --ring: oklch(0.708 0 0deg);
+    --chart-1: oklch(0.87 0 0deg);
+    --chart-2: oklch(0.556 0 0deg);
+    --chart-3: oklch(0.439 0 0deg);
+    --chart-4: oklch(0.371 0 0deg);
+    --chart-5: oklch(0.269 0 0deg);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0deg);
+    --sidebar-foreground: oklch(0.145 0 0deg);
+    --sidebar-primary: oklch(0.205 0 0deg);
+    --sidebar-primary-foreground: oklch(0.985 0 0deg);
+    --sidebar-accent: oklch(0.97 0 0deg);
+    --sidebar-accent-foreground: oklch(0.205 0 0deg);
+    --sidebar-border: oklch(0.922 0 0deg);
+    --sidebar-ring: oklch(0.708 0 0deg);
+}
+
+:root[data-theme='dark'] {
+    --background: oklch(0.145 0 0deg);
+    --foreground: oklch(0.985 0 0deg);
+    --card: oklch(0.205 0 0deg);
+    --card-foreground: oklch(0.985 0 0deg);
+    --popover: oklch(0.205 0 0deg);
+    --popover-foreground: oklch(0.985 0 0deg);
+    --primary: oklch(0.922 0 0deg);
+    --primary-foreground: oklch(0.205 0 0deg);
+    --secondary: oklch(0.269 0 0deg);
+    --secondary-foreground: oklch(0.985 0 0deg);
+    --muted: oklch(0.269 0 0deg);
+    --muted-foreground: oklch(0.708 0 0deg);
+    --accent: oklch(0.269 0 0deg);
+    --accent-foreground: oklch(0.985 0 0deg);
+    --destructive: oklch(0.704 0.191 22.216deg);
+    --border: oklch(1 0 0deg / 10%);
+    --input: oklch(1 0 0deg / 15%);
+    --ring: oklch(0.556 0 0deg);
+    --chart-1: oklch(0.87 0 0deg);
+    --chart-2: oklch(0.556 0 0deg);
+    --chart-3: oklch(0.439 0 0deg);
+    --chart-4: oklch(0.371 0 0deg);
+    --chart-5: oklch(0.269 0 0deg);
+    --sidebar: oklch(0.205 0 0deg);
+    --sidebar-foreground: oklch(0.985 0 0deg);
+    --sidebar-primary: oklch(0.488 0.243 264.376deg);
+    --sidebar-primary-foreground: oklch(0.985 0 0deg);
+    --sidebar-accent: oklch(0.269 0 0deg);
+    --sidebar-accent-foreground: oklch(0.985 0 0deg);
+    --sidebar-border: oklch(1 0 0deg / 10%);
+    --sidebar-ring: oklch(0.556 0 0deg);
+}
+
+.fa-auth-login-centered {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 2.5rem 1rem;
+}
+
+@media (width >= 50em) {
+  .fa-auth-login-centered {
+    width: calc(100vw - var(--sl-content-inline-start, 0rem));
+    margin-inline-start: calc((100% - (100vw - var(--sl-content-inline-start, 0rem))) / 2);
+  }
+}
+
+html:not([data-has-toc]) main > .content-panel > .sl-container {
+  max-width: none;
+  margin-inline: 0.75rem;
+}
+
+.fa-starlight-sidebar-shell {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: visible;
+  position: relative;
+}
+
+.fa-starlight-sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline-end: 0.25rem;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sl-color-gray-5) transparent;
+}
+
+/* stylelint-disable-next-line selector-id-pattern -- Starlight owns this id. */
+#starlight__sidebar {
+  overflow: hidden;
+}
+
+.fa-account-sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--sl-color-gray-6);
+  padding: 0.75rem 0 0.25rem;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fa-account-footer-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fa-account-footer-user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid var(--sl-color-gray-6);
+  color: var(--sl-color-white);
+  text-decoration: none;
+}
+
+.fa-account-footer-user:hover,
+.fa-account-footer-user:focus {
+  background: var(--sl-color-gray-6);
+}
+
+.fa-account-footer-logout {
+  flex: 1 1 auto;
+}
+
+/* Native Starlight account menu, rendered as the last sidebar item. */
+.fa-account-nav {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sl-color-gray-6);
+}
+
+.fa-account-nav[hidden] {
+  display: none;
+}
+
+.fa-account-sidebar-status,
+.fa-account-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fa-account-sidebar-link {
+  border-radius: 0.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+  line-height: 1.4;
+  padding: 0.3rem 0.5rem;
+  text-decoration: none;
+}
+
+.fa-account-sidebar-link:hover,
+.fa-account-sidebar-link:focus {
+  color: var(--sl-color-white);
+}
+
+.fa-account-sidebar-link[aria-current='page'] {
+  background-color: var(--sl-color-text-accent);
+  color: var(--sl-color-text-invert);
+  font-weight: 600;
+}
+
+.fa-account-sidebar-primary {
+  color: var(--sl-color-white);
+  font-weight: 600;
+}
+
+.fa-account-sidebar-status {
+  color: var(--sl-color-gray-3);
+  font-size: var(--sl-text-sm);
+  padding: 0.3rem 0.5rem;
+}
+
+.fa-sidebar-toggle {
+  display: none;
+}
+
+@media (width >= 50rem) {
+  .fa-sidebar-toggle {
+    position: fixed;
+    z-index: calc(var(--sl-z-index-menu) + 1);
+    inset-block-start: calc(var(--sl-nav-height) + 0.75rem);
+    inset-inline-start: calc(var(--sl-sidebar-width) - 1rem);
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-white);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 25%);
+    transition:
+      inset-inline-start 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .fa-sidebar-toggle:hover {
+    background: var(--sl-color-gray-6);
+    border-color: var(--sl-color-gray-4);
+  }
+
+  html[data-sidebar-collapsed='true'][data-has-sidebar] {
+    --sl-content-inline-start: 0rem;
+  }
+
+  /* stylelint-disable-next-line selector-id-pattern -- Starlight owns this id. */
+  html[data-sidebar-collapsed='true'] #starlight__sidebar {
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(calc(-1 * var(--sl-sidebar-width)));
+  }
+
+  html[data-sidebar-collapsed='true'] .fa-sidebar-toggle {
+    inset-inline-start: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  select {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] select {
+    color-scheme: dark;
+  }
+
+  select option {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}

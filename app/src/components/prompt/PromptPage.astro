@@ -1,0 +1,35 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import PromptApp, { type PromptView } from './PromptApp';
+import { getTranslations, type Locale } from '@/content/i18n/app';
+import '../../styles/prompt.css';
+
+interface Props {
+  locale: Locale;
+  view?: PromptView;
+}
+
+const { locale, view = 'templates' } = Astro.props;
+const t = getTranslations(locale);
+const titles: Record<PromptView, string> = {
+  templates: t.prompt.tabs.templates,
+  blocks: t.prompt.tabs.blocks,
+  composer: t.prompt.tabs.composer,
+  admin: t.prompt.tabs.admin,
+};
+---
+
+<StarlightPage frontmatter={{
+  title: titles[view],
+  tableOfContents: false
+}}>
+  <PromptApp view={view} client:only="react">
+    <div slot="fallback" class="w-full space-y-6 py-6 animate-pulse">
+      <div class="space-y-2 border-b pb-3 mb-3">
+        <div class="h-8 w-48 rounded bg-muted/60"></div>
+        <div class="h-4 w-72 rounded bg-muted/40"></div>
+      </div>
+      <div class="h-64 rounded-xl border bg-muted/20"></div>
+    </div>
+  </PromptApp>
+</StarlightPage>

@@ -1,0 +1,78 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import AccountApp, { type AccountView } from './AccountApp';
+import { getTranslations, type Locale } from '@/content/i18n/app';
+
+interface Props {
+  locale: Locale;
+  view?: AccountView;
+}
+
+const { locale, view = 'dashboard' } = Astro.props;
+const t = getTranslations(locale);
+const titles: Record<AccountView, string> = {
+  dashboard: t.pages.accountTitle,
+  profile: t.auth.profile.title,
+  sessions: t.auth.sessions.title,
+  apiKeys: t.auth.apiKeys.navLabel,
+  admin: t.auth.adminUsers.title,
+};
+---
+
+<StarlightPage frontmatter={{
+  title: titles[view],
+  tableOfContents: false
+}}>
+  <AccountApp view={view} client:only="react">
+    <div slot="fallback" class="w-full space-y-6 py-6 animate-pulse">
+      <div class="flex items-center justify-between border-b pb-6">
+        <div class="space-y-2">
+          <div class="h-8 w-48 rounded bg-muted/60"></div>
+          <div class="h-4 w-72 rounded bg-muted/40"></div>
+        </div>
+        <div class="h-10 w-28 rounded bg-muted/60"></div>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="h-64 rounded-xl border bg-muted/20"></div>
+        <div class="h-64 rounded-xl border bg-muted/20"></div>
+      </div>
+
+      <div class="h-48 rounded-xl border bg-muted/20"></div>
+    </div>
+  </AccountApp>
+
+  <script is:inline>
+    const ACCOUNT_ROUTE_EVENT = "fa-ui-m8:account-route";
+    const accountRoutePattern = /^\/(en|es|fr)\/user\/account(?:\/(profile|sessions|api-keys|admin(?:\/users\/(?:new|edit|delete))?))?\/?$/;
+    const viewBySegment = {
+      profile: "profile",
+      sessions: "sessions",
+      "api-keys": "apiKeys",
+      admin: "admin",
+      "admin/users/new": "admin",
+      "admin/users/edit": "admin",
+      "admin/users/delete": "admin",
+    };
+
+    document.addEventListener("click", (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      const anchor = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!anchor) return;
+
+      const url = new URL(anchor.href);
+      if (url.origin !== window.location.origin) return;
+
+      const match = url.pathname.match(accountRoutePattern);
+      if (!match) return;
+
+      event.preventDefault();
+      const view = viewBySegment[match[2]] ?? "dashboard";
+      window.history.pushState({}, "", `${url.pathname}${url.search}`);
+      window.dispatchEvent(new CustomEvent(ACCOUNT_ROUTE_EVENT, { detail: { view } }));
+    });
+  </script>
+</StarlightPage>

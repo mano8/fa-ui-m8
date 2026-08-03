@@ -1,0 +1,224 @@
+# dynamic_conf.yml — Development
+tls:
+  # options.default is applied automatically to every router that does not name
+  # an explicit tls.options, so all HTTPS routes inherit this hardened baseline.
+  options:
+    default:
+      minVersion: VersionTLS12        # reject SSLv3/TLS1.0/1.1
+      cipherSuites:                    # strong AEAD suites only (TLS 1.2; TLS 1.3 suites are fixed)
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+      curvePreferences:
+        - X25519
+        - CurveP256
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/traefik/certs/local.crt"
+        keyFile:  "/etc/traefik/certs/local.key"
+  certificates:
+    - certFile: "/etc/traefik/certs/local.crt"
+      keyFile:  "/etc/traefik/certs/local.key"
+http:
+
+  routers:
+    # Dashboard — localhost only: served on the built-in 'traefik' entrypoint
+    # (127.0.0.1:8080), Host-pinned and IP-restricted, over TLS.
+    # api.insecure is false, so this router is the ONLY way to reach api@internal.
+    traefik-dashboard:
+      entryPoints:
+        - traefik
+      rule: "Host(`localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      service: api@internal
+      middlewares:
+        - ip-allowlist
+      tls: {}
+
+    # Auth-User-Service: public routes on HTTPS.
+    # SECURITY CONTRACT — paths below are NEVER routed from the public internet:
+    #   /user/health   — internal readiness probe only
+    #   /user/metrics  — Prometheus scrape endpoint, internal only
+    #   /user/private  — inter-service API; app also requires X-Internal-Token,
+    #                    but Traefik must block it first so the route is invisible.
+    # If you add new internal paths, add them here AND write a live test in
+    # tests/live/test_security_live.py (see TestAuth_PrivateAPI / TestAuth_MetricsAPI).
+    auth-public-router:
+      entryPoints:
+        - websecure
+      # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
+      # host. TO EXPOSE /user ON THE LAN, delete the `Host(`localhost`) && ` prefix.
+      # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
+      rule: "Host(`localhost`) && PathPrefix(`/user`) && !(PathPrefix(`/user/health`) || PathPrefix(`/user/metrics`) || PathPrefix(`/user/private`))"
+      service: auth-service
+      middlewares:
+        - security-headers
+      tls: {}
+      priority: 2
+
+    # Auth-User-Service: all routes on the localhost-bound api entryPoint (port 9000)
+    auth-internal-router:
+      entryPoints:
+        - api
+      rule: "PathPrefix(`/user`)"
+      service: auth-service
+      middlewares:
+        - security-headers
+        - internal-only
+
+    # Media-Service: public routes on HTTPS.
+    # SECURITY CONTRACT — paths below are NEVER routed from the public internet:
+    #   /media/health  — internal readiness probe only
+    #   /media/metrics — Prometheus scrape endpoint, internal only
+    # If you add new internal paths, add them here AND write a live test in
+    # tests/live/test_security_live.py (see TestMedia_MetricsAPI).
+    media-public-router:
+      entryPoints:
+        - websecure
+      # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
+      # host. TO EXPOSE /media ON THE LAN, delete the `Host(`localhost`) && ` prefix.
+      # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
+      rule: "Host(`localhost`) && PathPrefix(`/media`) && !(PathPrefix(`/media/health`) || PathPrefix(`/media/metrics`))"
+      service: media-service
+      middlewares:
+        - security-headers
+      tls: {}
+
+    # Media-Service: all routes on the localhost-bound api entryPoint (port 9000)
+    media-internal-router:
+      entryPoints:
+        - api
+      rule: "PathPrefix(`/media`)"
+      service: media-service
+      middlewares:
+        - security-headers
+        - internal-only
+
+    # Static UI (fa-ui-m8): catch-all router for everything not matched above.
+    # No explicit priority needed — Traefik's default (rule length) already
+    # ranks this plain PathPrefix(`/`) below the more specific auth/media
+    # rules, but it's pinned to 1 anyway so that ordering can't drift silently
+    # if those rules are edited later.
+    ui-router:
+      entryPoints:
+        - websecure
+      rule: "Host(`localhost`) && PathPrefix(`/`)"
+      service: ui-service
+      middlewares:
+        - security-headers-ui
+      tls: {}
+      priority: 1
+
+    # MinIO S3 data-path: browser-direct presigned uploads/downloads over TLS.
+    # SECURITY CONTRACT:
+    #   - Only the S3 data path is routed — /minio (admin API + console) is EXPLICITLY
+    #     EXCLUDED by !PathPrefix(`/minio`). The console (:9001) gains NO router.
+    #   - Every successful op still requires a presigned URL minted by media-service
+    #     after fa-auth authentication; no raw credentials cross the public interface.
+    #   - passHostHeader: true on the backend is REQUIRED: GET SigV4 signatures bind
+    #     the Host header, so the reverse proxy MUST forward the original Host unchanged
+    #     for the signature to validate at MinIO.
+    media-storage-router:
+      entryPoints:
+        - websecure
+      # LOCALHOST-ONLY by default: Host(`storage.localhost`) limits this route to the
+      # Docker host. TO EXPOSE storage ON THE LAN/WAN, replace Host(`storage.localhost`)
+      # with your real storage FQDN (e.g. Host(`storage.example.com`)). The
+      # !PathPrefix(`/minio`) exclusion is the SECURITY CONTRACT and MUST stay regardless.
+      rule: "Host(`storage.localhost`) && !PathPrefix(`/minio`)"
+      service: minio-storage
+      tls: {}
+
+  services:
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://auth_user_service:8000"
+    media-service:
+      loadBalancer:
+        servers:
+          - url: "http://media_service:8000"
+    minio-storage:
+      loadBalancer:
+        passHostHeader: true   # REQUIRED — GET SigV4 signs the Host; proxy MUST forward it unchanged
+        servers:
+          - url: "http://minio:9000"
+    ui-service:
+      loadBalancer:
+        servers:
+          - url: "http://ui:8080"
+
+  middlewares:
+    ip-allowlist:
+      IPAllowList:
+        # Dashboard: localhost only. The host reaches the loopback-published :8080 via
+        # the bridge gateway (SNAT), so only the gateway + loopback are trusted. Sibling
+        # containers (172.16.0.x, x>1) and anything on the host's LAN are NOT allowed.
+        sourceRange:
+          - "127.0.0.1/32"
+          - "172.16.0.1/32"   # this stack's pinned bridge gateway == the Docker host
+          - "::1/128"
+
+    internal-only:
+      IPAllowList:
+        # Internal routes (health/metrics/private): host + sibling containers in this
+        # stack's pinned subnet only — never the host's LAN.
+        sourceRange:
+          - "127.0.0.1/32"
+          - "172.16.0.0/16"   # this stack's pinned Docker network (host + sibling containers)
+          - "::1/128"
+
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          X-Robots-Tag: "noindex,nofollow"
+          Server: ""
+          # Anti-clickjacking defense-in-depth alongside frameDeny (the modern
+          # replacement for X-Frame-Options). A frame-ancestors-only policy does
+          # NOT restrict script/style/connect, so Swagger/ReDoc and Astro HMR
+          # are unaffected. A full XSS-defense CSP (script-src/connect-src) must
+          # be applied per-route on the HTML frontend in production, not here,
+          # where it would break the docs UIs.
+          Content-Security-Policy: "frame-ancestors 'none'"
+        # ── HSTS — opt-in, public/production deployments only ────────────────
+        # WARNING: enabling HSTS instructs browsers to refuse all HTTP connections
+        # to this host for the duration of stsSeconds — even after you disable it.
+        # Do NOT enable unless:
+        #   - TLS is correctly configured with a stable, trusted certificate
+        #   - this hostname will remain HTTPS-only for the full stsSeconds period
+        # In self-hosted / LAN deployments, enabling HSTS prematurely can lock
+        # browsers out until the HSTS cache expires (up to 1 year).
+        # Uncomment the block below only when the above conditions are met:
+        #
+        # stsSeconds: 31536000       # 1 year
+        # stsIncludeSubdomains: true
+        # stsPreload: false          # only set true after submitting to HSTS preload list
+
+    # UI-layer headers. Deliberately NOT `security-headers`: this fronts a
+    # public Starlight docs/marketing site, not an internal JSON API, so it
+    # does not set X-Robots-Tag: noindex -- search engines should crawl it.
+    # frame-ancestors is set here (not by Astro) because CSP delivered via
+    # <meta> cannot carry frame-ancestors at all -- see the long comment in
+    # app/src/lib/csp.ts. Everything else (script/style/connect/img/...) is
+    # the per-page CSP Astro bakes into each build's HTML at build time.
+    security-headers-ui:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          Server: ""
+          Content-Security-Policy: "frame-ancestors 'none'"
+        # HSTS -- opt-in, public/production deployments only. See the warning
+        # on `security-headers` above; the same caveats apply here.
+        # stsSeconds: 31536000
+        # stsIncludeSubdomains: true
+        # stsPreload: false
