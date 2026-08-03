@@ -109,3 +109,14 @@ services:
     volumes: !override
       - ./media.env.production:/opt/media_service/.env:ro
       - ./shared_migrations:/opt/shared_migrations
+
+  # Static UI: same image build as the dev base, but the PUBLIC_SITE_URL
+  # build arg is pointed at the real production FQDN (set PUBLIC_SITE_URL in
+  # .env.production -- see .env.production.example) instead of the dev
+  # default (http://localhost:4321), so sitemap/canonical URLs are correct.
+  # To bake in an opt-in plugin (media/prompt/reparto) for this deployment,
+  # add its PUBLIC_*_API_BASE here too -- see app/.env.example.
+  ui:
+    build:
+      args:
+        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:4321}

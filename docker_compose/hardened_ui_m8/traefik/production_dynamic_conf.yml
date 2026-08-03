@@ -121,6 +121,21 @@ http:
         - security-headers-prod
         - internal-only
 
+    # Static UI (fa-ui-m8): catch-all router for everything not matched
+    # above. Pinned to priority 1 (lowest) so it can never shadow the
+    # auth/media routers even if their rules change later.
+    ui-router:
+      entryPoints:
+        - websecure
+      # Pinned to the real FQDN -- replace ui.example.com with your domain
+      # (must match PUBLIC_SITE_URL in .env.production).
+      rule: "Host(`ui.example.com`) && PathPrefix(`/`)"
+      service: ui-service
+      middlewares:
+        - security-headers-ui-prod
+      tls: {}
+      priority: 1
+
     # MinIO S3 data-path: browser-direct presigned uploads/downloads over TLS.
     # SECURITY CONTRACT:
     #   - Only the S3 data path is routed — /minio (admin API + console) is EXPLICITLY
@@ -153,6 +168,10 @@ http:
         passHostHeader: true   # REQUIRED — GET SigV4 signs the Host; proxy MUST forward it unchanged
         servers:
           - url: "http://minio:9000"
+    ui-service:
+      loadBalancer:
+        servers:
+          - url: "http://ui:8080"
 
   middlewares:
     ip-allowlist:
@@ -196,3 +215,25 @@ http:
         #stsSeconds: 31536000        # 1 year
         #stsIncludeSubdomains: true
         #stsPreload: false           # set true only after submitting to the HSTS preload list
+
+    # UI-layer headers (production). Deliberately NOT security-headers-prod:
+    # this fronts the public Starlight docs/marketing site, not an internal
+    # JSON API, so it does not set X-Robots-Tag: noindex -- search engines
+    # should crawl it. frame-ancestors is set here (not by Astro) because CSP
+    # delivered via <meta> cannot carry frame-ancestors at all -- see the long
+    # comment in app/src/lib/csp.ts. Everything else (script/style/connect/
+    # img/...) is the per-page CSP Astro bakes into each build's HTML.
+    security-headers-ui-prod:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          Server: ""
+          Content-Security-Policy: "frame-ancestors 'none'"
+        # HSTS -- opt-in. See the warning on security-headers-prod above; the
+        # same caveats apply here.
+        #stsSeconds: 31536000
+        #stsIncludeSubdomains: true
+        #stsPreload: false

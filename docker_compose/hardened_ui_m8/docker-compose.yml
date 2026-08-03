@@ -390,13 +390,41 @@ services:
       - app_net
       - data_net
 
+  # Static Astro/Starlight UI: built from source (see ../../docker/Dockerfile)
+  # and served by sirv-cli — no Node/npm/Astro CLI at runtime, non-root,
+  # read-only root filesystem. Default build is auth-only (PUBLIC_* build args
+  # unset, matching app/.env.example's defaults); to bake in an opt-in plugin,
+  # add the matching PUBLIC_*_API_BASE under `build.args` below and rebuild.
+  # No host port: reachable only via Traefik (ui-router in
+  # traefik/dynamic_conf.yml), same as auth_user_service/media_service.
+  ui:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    restart: unless-stopped
+    networks:
+      - app_net
+
 # app_net:       external-facing — Traefik, app services, observability.
 # data_net:      internal only (no gateway) — DB and Redis are not reachable from app_net.
 # scan_net:      internal — private media_worker↔clamav segment; clamd (:3310) is
 #                reachable by NO other service.
 # clamav_egress: clamav-only outbound net for freshclam DB updates (not shared).
 # App services sit on app_net + data_net; Traefik sits on app_net only and cannot reach
-# DB/Redis/clamav. media_worker + clamav are OFF app_net entirely.
+# DB/Redis/clamav. media_worker + clamav are OFF app_net entirely. ui is a static
+# file server with no backing store, so it sits on app_net only (no data_net).
 networks:
   app_net:
     driver: bridge

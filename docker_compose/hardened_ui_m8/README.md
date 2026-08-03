@@ -19,6 +19,7 @@ Browser / Frontend
        | app_net
        +--> /user/*  -> auth_user_service :8000  (RS256 issuer)
        +--> /media/* -> media_service :8000      (RS256 consumer via JWKS)
+       +--> /*       -> ui :8080                 (static Astro/Starlight build, catch-all)
 
   media_service
        +--> PostgreSQL on data_net
@@ -43,6 +44,7 @@ through that network.
 | traefik | `traefik:v3.7.5` | `:8000`, `:4430`, `127.0.0.1:9000`, `127.0.0.1:8080` |
 | auth_user_service | `tepochtli/fa-auth-m8:latest` | `/user` via Traefik |
 | media_service | local `../../media_service` build | `/media` via Traefik |
+| ui | local `../../` build (`docker/Dockerfile`) | `/` via Traefik, static build served by sirv-cli |
 | m8_db | `postgres:18.4-alpine` | internal data network |
 | redis_cache | `redis:8.8.0-alpine` | auth Redis — internal data network |
 | media_redis_cache | `redis:8.8.0-alpine` | media Redis — internal data network |
