@@ -54,7 +54,11 @@ The example includes:
 
 - universal auth security suites (against the `fa-auth-m8` issuer at `/user`)
 - stateful/stateless/hybrid contract suites
-- RS256/JWKS/cross-service JWT suites
+- RS256/JWKS JWT suites
+- cross-service JWT propagation, run once per service declared in
+  `LIVE_TEST_SVC_BASES` (here: `media`), on the route resolved from
+  `LIVE_TEST_CROSS_SERVICE_ENDPOINTS` or, by default, the first entry of that
+  service's `LIVE_TEST_PROTECTED_ENDPOINTS` list (here: `/category/`)
 - HS256 rejection and weak-key suites
 - protected-endpoint checks for the media-service read endpoints, configured via
   `LIVE_TEST_PROTECTED_ENDPOINTS` (all paths are relative to `/media`):
@@ -198,6 +202,7 @@ The example defaults are defined in `tests/live/conftest.py` and can be overridd
 | `LIVE_TEST_FAIL_FAST_PREFLIGHT` | `true` |
 | `LIVE_TEST_FORBID_BOOTSTRAP_SUPERUSER` | `true` |
 | `LIVE_TEST_PROTECTED_ENDPOINTS` | `{"media":["/category/","/dashboard/users/activity/","/v1/objects","/v1/presets","/v1/admin/storage/stats","/v1/admin/uploads/stale","/v1/admin/subscriptions"]}` |
+| `LIVE_TEST_CROSS_SERVICE_ENDPOINTS` | unset — Category I reuses the first protected endpoint per service |
 | `LIVE_TEST_REPO_ROOT` | `/workspace/fa-ui-m8/docker_compose/hardened_ui_m8` |
 | `LIVE_TEST_DEPLOYMENT_ROOT` | `/workspace/fa-ui-m8/docker_compose/hardened_ui_m8` |
 
@@ -218,7 +223,11 @@ Nothing in this folder is specific to `hardened_ui_m8` beyond the values in
    `LIVE_TEST_DEFAULT_SVC` → your `fastapi-m8` consumers (each service's
    `API_PREFIX` root). For media-service this is `/media`.
 3. **Protected endpoints** — `LIVE_TEST_PROTECTED_ENDPOINTS` → the real
-   authenticated read endpoints of each service, keyed by service name.
+   authenticated read endpoints of each service, keyed by service name. The
+   cross-service JWT suite reuses the first entry of each list as its probe
+   route; set `LIVE_TEST_CROSS_SERVICE_ENDPOINTS` to pin a different one. No
+   route is hardcoded — a service with no declared route skips Category I
+   instead of being probed on a guessed path.
 4. **Public entrypoint / TLS** — `LIVE_TEST_PUBLIC_BASE`, and
    `LIVE_TEST_PUBLIC_TLS_VERIFY=false` (or a CA bundle path) for self-signed
    local certs; leave verification on for a real CA.
