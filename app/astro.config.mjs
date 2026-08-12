@@ -363,8 +363,9 @@ if (repartoPluginEnabled) {
 				fr: 'Repartition docente',
 			},
 			items: [
-				repartoSidebarGroup(repartoNav.setup, repartoDictionaries),
-				repartoSidebarGroup(repartoNav.process, repartoDictionaries),
+				repartoSidebarGroup(repartoNav.configuration, repartoDictionaries),
+				repartoSidebarGroup(repartoNav.planning, repartoDictionaries),
+				repartoSidebarGroup(repartoNav.assignment, repartoDictionaries),
 			],
 		},
 	];
