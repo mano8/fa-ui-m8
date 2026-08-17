@@ -309,6 +309,33 @@ function repartoSidebarEntry(entry, dictionaries) {
 }
 
 /**
+ * Stage groups declared by the installed plugin's nav, in declaration order.
+ *
+ * The plugin owns its own stage grouping and has changed it across majors — 1.x
+ * ships two groups (`setup`/`process`), 2.x ships three
+ * (`configuration`/`planning`/`assignment`). Reading whatever groups the nav
+ * carries keeps the host rendering the *installed* plugin's navigation instead
+ * of hardcoding one version's key names, which throws on the other.
+ *
+ * @param {unknown} nav
+ * @returns {Array<{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }>}
+ */
+function repartoNavGroups(nav) {
+	if (!nav || typeof nav !== 'object') return [];
+	/** @type {Array<{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }>} */
+	const groups = [];
+	for (const value of Object.values(nav)) {
+		if (!value || typeof value !== 'object') continue;
+		const candidate = /** @type {{ labelKey?: unknown, entries?: unknown }} */ (value);
+		if (typeof candidate.labelKey !== 'string' || !Array.isArray(candidate.entries)) continue;
+		groups.push(
+			/** @type {{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }} */ (value),
+		);
+	}
+	return groups;
+}
+
+/**
  * @param {{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }} group
  * @param {{ en: Record<string, unknown>, es: Record<string, unknown>, fr: Record<string, unknown> }} dictionaries
  */
@@ -362,11 +389,9 @@ if (repartoPluginEnabled) {
 				es: 'Reparto docente',
 				fr: 'Repartition docente',
 			},
-			items: [
-				repartoSidebarGroup(repartoNav.configuration, repartoDictionaries),
-				repartoSidebarGroup(repartoNav.planning, repartoDictionaries),
-				repartoSidebarGroup(repartoNav.assignment, repartoDictionaries),
-			],
+			items: repartoNavGroups(repartoNav).map((group) =>
+				repartoSidebarGroup(group, repartoDictionaries),
+			),
 		},
 	];
 }
