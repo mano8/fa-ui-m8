@@ -237,7 +237,7 @@ Canonical env names (operator-facing — set these):
 | `PUBLIC_MEDIA_V1_BASE` | media | versioned media routes sub-prefix |
 | `PUBLIC_MEDIA_STORAGE_ORIGIN` | media | browser-direct storage origin for CSP `connect-src` (e.g. `https://storage.example.com`); unset for same-origin storage |
 | `PUBLIC_PROMPT_API_BASE` | prompt | backend prompt base path **and** the prompt on/off gate |
-| `PUBLIC_PROMPT_API_PREFIX` | prompt | FastAPI prefix on the prompt-engine-m8 contract (defaults to `/fastapi`) |
+| `PUBLIC_PROMPT_API_PREFIX` | prompt | optional API sub-prefix; leave unset for the current contract, where routes live directly below the base |
 | `PUBLIC_REPARTO_API_BASE` | reparto | backend reparto base path **and** the reparto on/off gate |
 | `PUBLIC_REPARTO_API_PREFIX` | reparto | optional API sub-prefix; leave unset for the current contract, where routes live directly below the base |
 

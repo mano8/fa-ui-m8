@@ -223,7 +223,10 @@ if (promptPluginEnabled) {
 	promptIntegrations.push(
 		faPrompt({
 			apiBase: promptApiBase,
-			apiPrefix: promptApiPrefix ?? '/fastapi',
+			// Empty by default: prompt-engine-m8 mounts every route under its own
+			// API_PREFIX, which PUBLIC_PROMPT_API_BASE already addresses. The old
+			// '/fastapi' fallback pointed at a segment the service never mounts.
+			apiPrefix: promptApiPrefix ?? '',
 			mode: 'headless',
 			auth: { provider: 'fa-auth-astro' },
 			locales: ['en', 'es', 'fr'],
@@ -427,7 +430,7 @@ export default defineConfig({
 				? {}
 				: {
 						'import.meta.env.PUBLIC_FA_PROMPT_API_BASE': JSON.stringify(''),
-						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify('/fastapi'),
+						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify(''),
 						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('is_superuser'),
 					}),
 			'import.meta.env.PUBLIC_FA_REPARTO_ENABLED': JSON.stringify(repartoPluginEnabled),

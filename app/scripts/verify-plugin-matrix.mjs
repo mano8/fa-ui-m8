@@ -65,7 +65,7 @@ function pluginEnv(enabled) {
     PUBLIC_MEDIA_V1_BASE: isEnabled("media") ? "/v1" : "",
     PUBLIC_MEDIA_STORAGE_ORIGIN: "",
     PUBLIC_PROMPT_API_BASE: isEnabled("prompt") ? "/prompt" : "",
-    PUBLIC_PROMPT_API_PREFIX: isEnabled("prompt") ? "/fastapi" : "",
+    PUBLIC_PROMPT_API_PREFIX: "",
     PUBLIC_REPARTO_API_BASE: isEnabled("reparto") ? "/reparto" : "",
     PUBLIC_REPARTO_API_PREFIX: "",
     PUBLIC_FA_MEDIA_ENABLED: isEnabled("media") ? "true" : "false",

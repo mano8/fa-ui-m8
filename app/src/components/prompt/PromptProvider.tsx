@@ -16,7 +16,7 @@ export function PromptProvider({ children }: { children: ReactNode }) {
       adapter={adapter}
       config={{
         apiBase: import.meta.env.PUBLIC_FA_PROMPT_API_BASE ?? "/prompt",
-        apiPrefix: import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX ?? "/fastapi",
+        apiPrefix: import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX ?? "",
         adminRole: import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE ?? "is_superuser"
       }}
     >
