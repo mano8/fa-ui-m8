@@ -66,6 +66,7 @@ function pluginEnv(enabled) {
     PUBLIC_MEDIA_STORAGE_ORIGIN: "",
     PUBLIC_PROMPT_API_BASE: isEnabled("prompt") ? "/prompt" : "",
     PUBLIC_PROMPT_API_PREFIX: "",
+    PUBLIC_PROMPT_ADMIN_ROLE: "",
     PUBLIC_REPARTO_API_BASE: isEnabled("reparto") ? "/reparto" : "",
     PUBLIC_REPARTO_API_PREFIX: "",
     PUBLIC_FA_MEDIA_ENABLED: isEnabled("media") ? "true" : "false",

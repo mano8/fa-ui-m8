@@ -17,7 +17,10 @@ export function PromptProvider({ children }: { children: ReactNode }) {
       config={{
         apiBase: import.meta.env.PUBLIC_FA_PROMPT_API_BASE ?? "/prompt",
         apiPrefix: import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX ?? "",
-        adminRole: import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE ?? "is_superuser"
+        // "admin", not "is_superuser": prompt-engine-m8 gates /dashboard/* on
+        // require_admin (D-C2) and the plugin reads any M8 role as a floor, so
+        // an ADMIN-tier user reaches the surface the service already serves.
+        adminRole: import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE ?? "admin"
       }}
     >
       {children}

@@ -106,7 +106,10 @@ Security model:
 - Access tokens are kept in memory only.
 - Refresh uses the HttpOnly `refresh_token` cookie with `credentials: "include"`.
 - The PKCE verifier is stored temporarily in `sessionStorage` and removed during callback handling.
-- Admin hooks check `user.is_superuser` before calling superuser endpoints.
+- Auth and media admin hooks check `user.is_superuser` before calling superuser endpoints.
+- The prompt admin surface gates on a role floor instead: `PUBLIC_PROMPT_ADMIN_ROLE`
+  (default `admin`), matching `require_admin` on `prompt-engine-m8`'s `/dashboard/*`.
+  An explicit `is_superuser` flag still passes.
 - API responses are validated with Zod schemas.
 
 Verification:
@@ -238,6 +241,7 @@ Canonical env names (operator-facing — set these):
 | `PUBLIC_MEDIA_STORAGE_ORIGIN` | media | browser-direct storage origin for CSP `connect-src` (e.g. `https://storage.example.com`); unset for same-origin storage |
 | `PUBLIC_PROMPT_API_BASE` | prompt | backend prompt base path **and** the prompt on/off gate |
 | `PUBLIC_PROMPT_API_PREFIX` | prompt | optional API sub-prefix; leave unset for the current contract, where routes live directly below the base |
+| `PUBLIC_PROMPT_ADMIN_ROLE` | prompt | minimum role for the prompt admin surface (defaults to `admin`, the `require_admin` floor the service enforces on `/dashboard/*`) |
 | `PUBLIC_REPARTO_API_BASE` | reparto | backend reparto base path **and** the reparto on/off gate |
 | `PUBLIC_REPARTO_API_PREFIX` | reparto | optional API sub-prefix; leave unset for the current contract, where routes live directly below the base |
 

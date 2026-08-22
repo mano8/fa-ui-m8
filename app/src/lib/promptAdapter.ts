@@ -10,20 +10,17 @@ import {
   type PromptAuthAdapter
 } from "@mano8/astro-prompt-m8/auth-adapter";
 
-type PromptUser = { is_superuser?: boolean } | null | undefined;
-
-function isSuperuser(user: unknown): boolean {
-  return Boolean((user as PromptUser)?.is_superuser);
-}
-
 /** Build and register the fa-auth-backed prompt adapter for the current auth user. */
 export function getPromptAdapter(getUser: () => unknown | Promise<unknown>): PromptAuthAdapter {
+  // No local `isSuperuser` binding on purpose. The plugin's own
+  // `defaultIsSuperuser` honours the explicit `is_superuser` flag *and* the
+  // configured `adminRole` floor (D-C2, admin and above); a host-side
+  // `Boolean(user.is_superuser)` override re-narrowed that to superusers only
+  // and forked plugin logic into the host, which this repository does not do.
   const adapter = createFaAuthAdapter({
     getToken,
     refreshToken,
-    getUser,
-    // Used only for client-side superuser gating of admin prompt operations.
-    isSuperuser
+    getUser
   });
   setPromptAuthAdapter(adapter);
   return adapter;

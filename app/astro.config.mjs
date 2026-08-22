@@ -39,6 +39,7 @@ const mediaV1Base = publicEnv('PUBLIC_MEDIA_V1_BASE');
 const mediaStorageOrigin = publicEnv('PUBLIC_MEDIA_STORAGE_ORIGIN');
 const promptApiBase = publicEnv('PUBLIC_PROMPT_API_BASE');
 const promptApiPrefix = publicEnv('PUBLIC_PROMPT_API_PREFIX');
+const promptAdminRole = publicEnv('PUBLIC_PROMPT_ADMIN_ROLE');
 const repartoApiBase = publicEnv('PUBLIC_REPARTO_API_BASE');
 const repartoApiPrefix = publicEnv('PUBLIC_REPARTO_API_PREFIX');
 const securityEnv = {
@@ -228,7 +229,11 @@ if (promptPluginEnabled) {
 			// '/fastapi' fallback pointed at a segment the service never mounts.
 			apiPrefix: promptApiPrefix ?? '',
 			mode: 'headless',
-			auth: { provider: 'fa-auth-astro' },
+			// 'admin', not the package's legacy 'is_superuser' default: the service
+			// gates /dashboard/* on require_admin (D-C2) and the plugin reads an M8
+			// role as a floor, so ADMIN and above pass. This define is what the
+			// provider actually reads when the plugin is enabled.
+			auth: { provider: 'fa-auth-astro', adminRole: promptAdminRole || 'admin' },
 			locales: ['en', 'es', 'fr'],
 			defaultLocale: 'en',
 		}),
@@ -431,7 +436,7 @@ export default defineConfig({
 				: {
 						'import.meta.env.PUBLIC_FA_PROMPT_API_BASE': JSON.stringify(''),
 						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify(''),
-						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('is_superuser'),
+						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('admin'),
 					}),
 			'import.meta.env.PUBLIC_FA_REPARTO_ENABLED': JSON.stringify(repartoPluginEnabled),
 			...(repartoPluginEnabled
