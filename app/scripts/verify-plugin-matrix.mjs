@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
@@ -46,6 +46,91 @@ const routeGroups = {
     `dist/${locale}/reparto/processes/current/audit/index.html`,
   ]),
 };
+
+/**
+ * Routes the host expects that an *installed* plugin below a known version does
+ * not generate yet.
+ *
+ * This is plugin-version drift, not a host regression: `astro-reparto-m8@2.0.0`
+ * adds the five process-scoped routes below and is not published, so `npm ci`
+ * resolves `1.0.0` and the host builds without them (`B6`/`B8` own the
+ * publish). Recorded here rather than deleted from `routeGroups`, because
+ * deleting them would lose the expectation entirely.
+ *
+ * The allowance retires itself twice over: it stops applying once the installed
+ * plugin reaches `sinceVersion`, and a listed route that *does* get generated
+ * is a hard failure telling whoever sees it to remove this block.
+ */
+const knownDrift = [
+  {
+    plugin: "reparto",
+    package: "@mano8/astro-reparto-m8",
+    sinceVersion: "2.0.0",
+    owner: "B6/B8",
+    routeSuffixes: [
+      "reparto/processes/current/allocation/index.html",
+      "reparto/processes/current/teaching-groups/index.html",
+      "reparto/processes/current/group-subjects/index.html",
+      "reparto/processes/current/settings/index.html",
+      "reparto/processes/current/planning/index.html",
+    ],
+  },
+];
+
+/**
+ * Installed version of a plugin, or null when it is not installed.
+ *
+ * Read from `node_modules` rather than resolved as `<pkg>/package.json`: a
+ * package with an `exports` map does not expose that subpath, so resolution
+ * throws and every plugin would look uninstalled.
+ */
+function installedVersion(packageName) {
+  const manifest = path.join(root, "node_modules", ...packageName.split("/"), "package.json");
+  if (!existsSync(manifest)) return null;
+  try {
+    return JSON.parse(readFileSync(manifest, "utf8")).version ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** True when `version` is at or past `floor`, comparing numeric release parts. */
+function atLeast(version, floor) {
+  const parts = (value) => value.split("-")[0].split(".").map((part) => Number(part) || 0);
+  const [left, right] = [parts(version), parts(floor)];
+  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
+    const difference = (left[index] ?? 0) - (right[index] ?? 0);
+    if (difference !== 0) return difference > 0;
+  }
+  return true;
+}
+
+/**
+ * Route suffixes currently excused, plus the note explaining each one. An entry
+ * whose plugin has reached `sinceVersion` excuses nothing.
+ */
+function resolveDrift() {
+  const excused = new Map();
+  for (const entry of knownDrift) {
+    const version = installedVersion(entry.package);
+    if (version !== null && atLeast(version, entry.sinceVersion)) continue;
+    const note =
+      `${entry.package} ${version ?? "not installed"} is below ${entry.sinceVersion}` +
+      ` (owner: ${entry.owner})`;
+    for (const suffix of entry.routeSuffixes) excused.set(suffix, note);
+  }
+  return excused;
+}
+
+const excusedRoutes = resolveDrift();
+
+/** Whether a `dist/<locale>/...` route is one of the excused suffixes. */
+function driftNoteFor(route) {
+  for (const [suffix, note] of excusedRoutes) {
+    if (route.endsWith(suffix)) return note;
+  }
+  return null;
+}
 
 const matrix = [
   { name: "auth-only", enabled: [] },
@@ -104,8 +189,31 @@ function assertRoutes({ name, enabled }) {
     const missing = routes.filter((route) => !existsSync(path.join(root, route)));
     const present = routes.filter((route) => existsSync(path.join(root, route)));
 
-    if (enabledSet.has(plugin) && missing.length > 0) {
-      throw new Error(`${name} did not generate expected ${plugin} routes: ${missing.join(", ")}`);
+    if (enabledSet.has(plugin)) {
+      const unexplained = missing.filter((route) => driftNoteFor(route) === null);
+      if (unexplained.length > 0) {
+        throw new Error(
+          `${name} did not generate expected ${plugin} routes: ${unexplained.join(", ")}`,
+        );
+      }
+
+      // An excused route that now builds means the drift is over. Failing here
+      // is what stops the allowance outliving the problem it describes.
+      const resolved = present.filter((route) => driftNoteFor(route) !== null);
+      if (resolved.length > 0) {
+        throw new Error(
+          `${name} generated routes recorded as known drift, so the allowance in ` +
+            `scripts/verify-plugin-matrix.mjs is stale and must be removed: ${resolved.join(", ")}`,
+        );
+      }
+
+      const excused = missing.filter((route) => driftNoteFor(route) !== null);
+      if (excused.length > 0) {
+        console.warn(
+          `  known drift: ${excused.length} ${plugin} route(s) not generated — ` +
+            `${driftNoteFor(excused[0])}`,
+        );
+      }
     }
 
     if (!enabledSet.has(plugin) && present.length > 0) {
@@ -120,4 +228,10 @@ for (const entry of matrix) {
   assertRoutes(entry);
 }
 
-console.log("\nPlugin matrix verification passed.");
+if (excusedRoutes.size > 0) {
+  console.log(
+    `\nPlugin matrix verification passed, with ${excusedRoutes.size} route(s) excused as known plugin-version drift.`,
+  );
+} else {
+  console.log("\nPlugin matrix verification passed.");
+}
