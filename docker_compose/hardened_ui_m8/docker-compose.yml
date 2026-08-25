@@ -353,7 +353,7 @@ services:
       - scan_net
 
   media_service:
-    image: tepochtli/media-service-m8:0.0.9
+    image: tepochtli/media-service-m8:2.0.0
     security_opt:
       - no-new-privileges:true
     cap_drop:
