@@ -16,7 +16,7 @@ Previously :latest service images now carry explicit version pins (both stacks
 track the same fleet versions):
   tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.0.3
   tepochtli/media-service-m8 → tepochtli/media-service-m8:0.0.9
-  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:0.2.0
+  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:0.4.0
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ _PREVIOUSLY_LATEST = {
     # fa-auth-m8 2.0.0, and the stacks are pinned to the published 2.0.3 patch.
     "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.0.3",
     "tepochtli/media-service-m8": "tepochtli/media-service-m8:0.0.9",
-    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.2.0",
+    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.4.0",
 }
 
 
