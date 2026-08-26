@@ -34,6 +34,7 @@ type MediaStaticPath = {
 const VIEW_ROUTES: { path: string | undefined; view: MediaView }[] = [
   { path: undefined, view: "library" },
   { path: "upload", view: "upload" },
+  { path: "categories", view: "categories" },
   { path: "presets", view: "presets" },
   { path: "admin", view: "admin" },
   { path: "maintenance", view: "maintenance" },

@@ -11,6 +11,7 @@ const routeGroups = {
   media: locales.flatMap((locale) => [
     `dist/${locale}/media/index.html`,
     `dist/${locale}/media/upload/index.html`,
+    `dist/${locale}/media/categories/index.html`,
     `dist/${locale}/media/presets/index.html`,
     `dist/${locale}/media/admin/index.html`,
     `dist/${locale}/media/maintenance/index.html`,

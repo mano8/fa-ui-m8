@@ -178,11 +178,11 @@ const mediaSidebarItems = mediaPluginEnabled
 						},
 					},
 					{
-						label: translations.en.media.tabs.upload,
-						link: '/media/upload',
+						label: translations.en.media.tabs.categories,
+						link: '/media/categories',
 						translations: {
-							es: translations.es.media.tabs.upload,
-							fr: translations.fr.media.tabs.upload,
+							es: translations.es.media.tabs.categories,
+							fr: translations.fr.media.tabs.categories,
 						},
 					},
 					{

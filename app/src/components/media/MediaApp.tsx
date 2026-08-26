@@ -2,7 +2,7 @@
 // Route-driven media studio island. It mirrors AccountApp so all media pages
 // share the auth/media providers while Starlight owns the page routes.
 import { useEffect, useState } from "react";
-import { MediaLibrary, MediaUploadDropzone } from "@mano8/astro-media-m8/react";
+import { CategoryManager, MediaLibrary } from "@mano8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
@@ -13,22 +13,18 @@ import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-ov
 import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
 import { MediaPresets } from "@/components/fa-media/media-presets";
 
-export type MediaView = "library" | "upload" | "presets" | "admin" | "maintenance";
+export type MediaView = "library" | "upload" | "categories" | "presets" | "admin" | "maintenance";
 const MEDIA_ROUTE_EVENT = "fa-ui-m8:media-route";
 
 function mediaViewFromPath(pathname: string): MediaView | null {
   const path = pathname.replace(/\/$/, "");
   if (/^\/(en|es|fr)\/media$/.test(path)) return "library";
   if (/^\/(en|es|fr)\/media\/upload$/.test(path)) return "upload";
+  if (/^\/(en|es|fr)\/media\/categories$/.test(path)) return "categories";
   if (/^\/(en|es|fr)\/media\/presets$/.test(path)) return "presets";
   if (/^\/(en|es|fr)\/media\/admin$/.test(path)) return "admin";
   if (/^\/(en|es|fr)\/media\/maintenance$/.test(path)) return "maintenance";
   return null;
-}
-
-function pathForMediaView(locale: string, view: MediaView): string {
-  if (view === "library") return `/${locale}/media`;
-  return `/${locale}/media/${view}`;
 }
 
 function LoadingState() {
@@ -47,10 +43,6 @@ function AppShellContent({ view }: { view: MediaView }) {
   const activeView: MediaView =
     !isSuperuser && (view === "admin" || view === "maintenance") ? "library" : view;
   const objectHref = (id: string) => `/${locale}/media/object?id=${encodeURIComponent(id)}`;
-
-  const navigateMediaView = (nextView: MediaView) => {
-    window.location.assign(pathForMediaView(locale, nextView));
-  };
 
   if (status === "loading") return <LoadingState />;
 
@@ -85,12 +77,10 @@ function AppShellContent({ view }: { view: MediaView }) {
       </div>
 
       <div className="space-y-4 pb-3">
-        {activeView === "library" ? (
-          <MediaLibrary objectHref={objectHref} />
+        {activeView === "library" || activeView === "upload" ? (
+          <MediaLibrary objectHref={objectHref} initialUploadOpen={activeView === "upload"} />
         ) : null}
-        {activeView === "upload" ? (
-          <MediaUploadDropzone onUploaded={() => navigateMediaView("library")} />
-        ) : null}
+        {activeView === "categories" ? <CategoryManager /> : null}
         {activeView === "presets" ? (
           <MediaPresets baseHref={`/${locale}/media/presets`} labels={t.media.presets} />
         ) : null}

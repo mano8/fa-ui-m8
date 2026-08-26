@@ -45,6 +45,14 @@
   justify-content: space-between;
 }
 
+.fa-media-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 .fa-media-filter-row {
   flex-direction: column;
 }
@@ -248,4 +256,102 @@
 
 .fa-media-panel [role="alert"] {
   color: var(--destructive);
+}
+
+/* Host skin for the plugin-owned upload dialog. */
+.fa-media-dialog-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--foreground) 55%, transparent);
+}
+
+.fa-media-dialog {
+  box-sizing: border-box;
+  width: min(42rem, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl, 0.75rem);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 1.5rem 4rem color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+
+.fa-media-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fa-media-dialog-header h2 {
+  margin: 0;
+}
+
+.fa-media-dialog > .fa-media-panel {
+  margin: 0;
+  padding: 1rem 0 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Host bridge for the plugin-owned category CRUD tree. */
+.fa-media-category-manager-tree,
+.fa-media-category-manager-children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fa-media-category-manager-children {
+  margin-left: 0.4rem;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--border);
+}
+
+.fa-media-category-manager-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.fa-media-category-manager-name {
+  font-weight: 500;
+}
+
+.fa-media-category-manager-reparent-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+}
+
+.fa-media-category-manager-sr-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fa-media-category-manager-error {
+  margin: 0.25rem 0 0;
+  color: var(--destructive);
+  font-size: 0.8125rem;
+}
+
+.fa-media-category-manager-create {
+  margin-top: 1rem;
 }

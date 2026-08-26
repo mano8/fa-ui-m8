@@ -235,6 +235,7 @@ export default {
     tabs: {
       library: "Biblioteca",
       upload: "Subir",
+      categories: "Categorías",
       presets: "Preajustes",
       admin: "Administración",
       maintenance: "Mantenimiento",

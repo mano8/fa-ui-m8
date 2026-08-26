@@ -235,6 +235,7 @@ export default {
     tabs: {
       library: "Médiathèque",
       upload: "Téléverser",
+      categories: "Catégories",
       presets: "Préréglages",
       admin: "Administration",
       maintenance: "Maintenance",
