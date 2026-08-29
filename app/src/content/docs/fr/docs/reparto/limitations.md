@@ -27,7 +27,7 @@ depuis le tableau d'affectation, et par le chef de département. La séance de s
 direct — où les enseignants prennent eux-mêmes leurs postes à tour de rôle — ne peut pas être
 pilotée depuis ces écrans.
 
-Quatre problèmes distincts s'y conjuguent :
+Cinq problèmes distincts s'y conjuguent :
 
 #### Les enseignants ne peuvent pas être liés à leur compte (L1)
 
@@ -91,15 +91,6 @@ autorisée**. Les données agrégées que reçoit l'écran partagé n'en portent
 
 Les deux seraient des décomptes sans noms : c'est donc une véritable lacune et non une occultation
 pour raison de confidentialité.
-
-#### Le vidéoprojecteur a besoin d'un compte participant (L6)
-
-L'accès en lecture à un processus découle de la participation. Un simple « compte de projection »
-qui ne participe pas voit *« Aucun processus pour le moment. »* et n'interroge même pas le serveur
-sur le processus.
-
-**En pratique :** le vidéoprojecteur doit tourner sur la session du chef de département ou sur
-celle d'un participant.
 
 ### La compilation de production est inutilisable telle quelle
 
@@ -249,6 +240,18 @@ Reparto ne peut pas l'élargir.
 Comme le champ n'autorise absolument rien
 ([pourquoi](/fr/docs/reparto/roles/#le-rôle-de-chef-de-département)), cela ne change rien à qui
 peut piloter un département.
+
+### Le vidéoprojecteur tourne sur la session d'un participant
+
+L'accès en lecture à un processus suit la participation. Un compte qui ne participe à aucun
+processus d'un département n'obtient aucun accès en lecture à son processus — pas même l'écran
+partagé, qui pourtant est en lecture seule.
+
+**En pratique :** un simple « compte de projection », qui ne participe pas, voit *« Aucun
+processus pour le moment. »* et n'interroge même pas le serveur sur le processus. C'est accepté
+comme une limite permanente plutôt que poursuivi comme un correctif : il n'existe pas de
+permission de projection en lecture seule indépendante de la participation. Faites tourner
+l'écran partagé sur la session du chef de département ou sur celle d'un participant.
 
 ### La révision de schéma est générée au premier démarrage
 

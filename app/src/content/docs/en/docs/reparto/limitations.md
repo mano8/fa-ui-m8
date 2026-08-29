@@ -26,7 +26,7 @@ This is the largest gap in the current version. Stage 3 can be completed **only*
 department head, from the assignment board. The live selection meeting — where teachers
 take their own positions in turn — cannot be driven from these screens.
 
-Four distinct problems combine to that:
+Five distinct problems combine to that:
 
 #### Teachers cannot be linked to their accounts (L1)
 
@@ -88,15 +88,6 @@ balanced versus still pending**, and **how many are carrying an authorized overl
 aggregate data the shared screen receives does not carry either number.
 
 Both would be nameless counts, so this is a genuine gap rather than a privacy redaction.
-
-#### The projector needs a participating account (L6)
-
-Read access to a process is derived from participation. A "plain projector account" that
-is not a participant sees *"No processes yet."* and does not even ask the server about the
-process.
-
-**In practice:** the projector must run on the department head's session or on a
-participant's session.
 
 ### The production build is unusable as shipped
 
@@ -243,6 +234,18 @@ is not something Reparto can widen.
 Since the field authorizes nothing at all
 ([why](/en/docs/reparto/roles/#who-is-the-department-head)), this changes nothing about who
 can run a department.
+
+### The projector runs on a participant's session
+
+Read access to a process follows participation. An account that takes part in no process in a
+department gets no read access to that department's process at all — not even the read-only
+shared screen.
+
+**In practice:** a "plain projector account" that is not a participant sees *"No processes
+yet."* and does not even ask the server about the process. This is accepted as a permanent
+boundary rather than pursued as a fix: a dedicated read-only projector permission, separate
+from participation, does not exist. Run the shared screen from the department head's session
+or from a participant's session.
 
 ### The schema revision is generated at first start-up
 

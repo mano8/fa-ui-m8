@@ -28,7 +28,7 @@ tablero de reparto y por la jefatura de departamento. La sesión de selección e
 la que el profesorado coge sus propios puestos por turnos— no se puede gobernar desde estas
 pantallas.
 
-Se combinan cuatro problemas distintos:
+Se combinan cinco problemas distintos:
 
 #### El profesorado no puede vincularse a sus cuentas (L1)
 
@@ -93,15 +93,6 @@ pantalla compartida no llevan ninguna de las dos.
 
 Ambas serían cuentas sin nombres, así que es una carencia real y no una ocultación por
 privacidad.
-
-#### El proyector necesita una cuenta participante (L6)
-
-El acceso de lectura a un proceso se deriva de la participación. Una «cuenta de proyector» sin
-más, que no participe, ve *«Todavía no hay procesos.»* y ni siquiera pregunta al servidor por el
-proceso.
-
-**En la práctica:** el proyector tiene que funcionar con la sesión de la jefatura de departamento
-o con la de un participante.
 
 ### La compilación de producción no sirve tal y como se entrega
 
@@ -249,6 +240,18 @@ Reparto no puede ampliarla.
 Como el campo no autoriza absolutamente nada
 ([por qué](/es/docs/reparto/roles/#quién-es-la-jefatura-de-departamento)), esto no cambia nada
 sobre quién puede dirigir un departamento.
+
+### El proyector funciona con la sesión de un participante
+
+El acceso de lectura a un proceso sigue la participación. Una cuenta que no participa en ningún
+proceso de un departamento no obtiene ningún acceso de lectura a su proceso —ni siquiera a la
+pantalla compartida, que es de solo lectura.
+
+**En la práctica:** una «cuenta de proyector» sin más, que no participe, ve *«Todavía no hay
+procesos.»* y ni siquiera pregunta al servidor por el proceso. Se acepta como un límite
+permanente y no se persigue como algo que arreglar: no existe un permiso de proyector de solo
+lectura independiente de la participación. Use la sesión de la jefatura de departamento o la de
+un participante para la pantalla compartida.
 
 ### La revisión de esquema se genera en el primer arranque
 
