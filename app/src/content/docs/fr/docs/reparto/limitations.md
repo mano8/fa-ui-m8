@@ -113,19 +113,6 @@ avec le serveur de développement, où cette politique est délibérément inert
 correction, utilisez le serveur de développement pour le travail réel, ou corrigez la politique
 avant de déployer.
 
-### On peut perdre sa session sur une page de planification
-
-Le paquet d'authentification détient deux garde-fous de renouvellement d'identifiants non
-coordonnés entre eux. Si une page de planification monte les deux chemins sur un identifiant
-expiré, le service de comptes interprète la rotation qui se chevauche comme une réutilisation
-d'identifiant et révoque **toutes** les sessions — ce qui déconnecte l'utilisateur.
-
-Il subsiste aussi un renouvellement refusé par chargement de page, sans conséquence, et une
-requête d'identité en double à chaque montage d'écran.
-
-**Contournement :** reconnectez-vous. Laisser un onglet ouvert longtemps sans activité rend la
-chose plus probable ; rechargez donc *avant* une séance, pas pendant.
-
 ### La révision de schéma de la base est créée au démarrage
 
 Aucun fichier de révision de schéma n'est livré dans le dépôt. La révision est générée à partir des
@@ -178,6 +165,25 @@ motif d'heures supplémentaires des autres participants.
 tant le flux d'événements de l'enseignant que l'écran partagé sont correctement expurgés. Mais la
 permission sous-jacente est plus large que les écrans, et les deux règles qui la régissent n'ont
 pas été harmonisées. C'est consigné comme question ouverte, pas comme décision arrêtée.
+
+### Deux chemins de renouvellement ne sont pas coordonnés
+
+Le paquet d'authentification détient deux garde-fous de renouvellement à vol unique non
+coordonnés entre eux : l'un utilisé par le client d'API, l'autre par la vérification de
+démarrage propre au fournisseur. Si une page monte les deux chemins sur un identifiant
+expiré, les deux peuvent déclencher une rotation au lieu d'une seule, ce qui est du travail
+gaspillé et, latente, une condition de course.
+
+En pratique, cela se traduit surtout par un renouvellement refusé par chargement de page,
+sans conséquence, et une requête d'identité en double à chaque montage d'écran.
+
+**Remarque opérationnelle :** se connecter manuellement sur un compte pendant qu'une
+exécution automatisée (une suite de tests, une session scriptée) détient déjà ce même compte
+fait révoquer toutes ses sessions par le service de comptes — deux clients présentant un même
+identifiant de renouvellement rotatif correspondent exactement au schéma de réutilisation
+qu'il est conçu pour détecter. C'est le service d'identité qui fonctionne correctement, pas
+cette rugosité ; ne vous connectez pas manuellement sur un compte déjà utilisé par une
+exécution automatisée.
 
 ## Limites délibérées
 

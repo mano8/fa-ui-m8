@@ -109,19 +109,6 @@ content. Separately, the site root returns a 404 from the built output.
 occur under the development server, where the policy is deliberately inert. Until it is
 fixed, run the development server for real use, or fix the policy before deploying.
 
-### Signing in can be lost on a planning page
-
-The authentication package holds two uncoordinated single-flight token-refresh guards. If
-a planning page mounts both paths on one expired token, the accounts service reads the
-overlapping rotation as token reuse and revokes **every** session — which signs the user
-out.
-
-There is also one refused refresh per page load that survives harmlessly, and one
-duplicate identity lookup per screen mount.
-
-**Workaround:** sign in again. Keeping a tab open across a long idle period makes this more
-likely, so reload before a meeting rather than during one.
-
 ### The database schema revision is created on start-up
 
 No schema revision file ships in the repository. The revision is generated from the models
@@ -175,6 +162,23 @@ the extra-hours reason field.
 the teacher's live-update stream and the shared screen are correctly redacted. But the
 underlying permission is broader than the screens are, and the two rules that govern it
 have not been reconciled. This is recorded as an open question, not a fixed decision.
+
+### Two refresh paths are not coordinated
+
+The authentication package holds two uncoordinated single-flight token-refresh guards, one
+used by the API client and one used by the provider's own start-up check. If a page mounts
+both against one expired token, both can issue a rotation instead of one, which is wasted
+work and, latently, a race.
+
+In practice this mostly shows up as one refused refresh per page load that survives
+harmlessly, and one duplicate identity lookup per screen mount.
+
+**Operational note:** signing in manually on an account while an automated run (a test
+suite, a scripted session) already holds that same account open causes the accounts service
+to revoke every session for it — two clients presenting one rotating refresh token is
+exactly the reuse pattern it is built to catch. That is the identity service working
+correctly, not this rough edge; do not sign in manually on an account an automated run is
+using.
 
 ## Deliberate limits
 

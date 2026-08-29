@@ -115,19 +115,6 @@ desde la salida compilada.
 servidor de desarrollo, donde esa política es deliberadamente inerte. Hasta que se corrija, use
 el servidor de desarrollo para trabajo real, o corrija la política antes de desplegar.
 
-### Se puede perder la sesión iniciada en una página de planificación
-
-El paquete de autenticación mantiene dos guardas de renovación de credenciales no coordinadas
-entre sí. Si una página de planificación monta ambos caminos sobre una credencial caducada, el
-servicio de cuentas interpreta la rotación solapada como reutilización de credencial y revoca
-**todas** las sesiones, lo que cierra la sesión del usuario.
-
-También hay una renovación rechazada por carga de página que sobrevive sin consecuencias, y una
-consulta de identidad duplicada por cada montaje de pantalla.
-
-**Solución alternativa:** vuelva a iniciar sesión. Dejar una pestaña abierta mucho tiempo
-inactiva lo hace más probable, así que recargue *antes* de una sesión y no durante.
-
 ### La revisión de esquema de la base de datos se crea al arrancar
 
 El repositorio no incluye ningún fichero de revisión de esquema. La revisión se genera a partir
@@ -180,6 +167,25 @@ motivo de horas extra de otros participantes.
 el flujo de eventos del docente como la pantalla compartida están correctamente depurados. Pero
 el permiso subyacente es más amplio que las pantallas, y las dos reglas que lo gobiernan no se han
 conciliado. Está registrado como pregunta abierta, no como decisión cerrada.
+
+### Dos caminos de renovación no están coordinados
+
+El paquete de autenticación mantiene dos guardas de renovación de credenciales de vuelo único
+sin coordinar entre sí: una la usa el cliente de la API y otra la usa la comprobación de
+arranque del propio proveedor. Si una página monta ambos caminos sobre una credencial caducada,
+los dos pueden lanzar una rotación en vez de una sola, lo que es trabajo desperdiciado y, en
+potencia, una condición de carrera.
+
+En la práctica esto suele notarse como una renovación rechazada por carga de página que
+sobrevive sin consecuencias, y una consulta de identidad duplicada por cada montaje de
+pantalla.
+
+**Nota operativa:** iniciar sesión a mano en una cuenta mientras una ejecución automatizada
+(una batería de pruebas, una sesión con guion) ya mantiene abierta esa misma cuenta hace que
+el servicio de cuentas revoque todas sus sesiones: dos clientes presentando una misma
+credencial de renovación rotatoria es exactamente el patrón de reutilización que está
+diseñado para detectar. Eso es el servicio de identidad funcionando correctamente, no esta
+aspereza; no inicie sesión a mano en una cuenta que ya esté usando una ejecución automatizada.
 
 ## Límites deliberados
 
