@@ -183,7 +183,28 @@ function run(command, args, env) {
   });
 }
 
+/**
+ * `dist/index.html` (W2.1): the site root has no route of its own under
+ * `output: static`, so this only exists because Starlight's i18n routing
+ * config resolves it through Astro's built-in redirect fallback — which fires
+ * only when a page is registered at `/` (`src/pages/index.astro`). Checked in
+ * every matrix combination since it does not depend on any optional plugin.
+ */
+function assertRootRedirect(name) {
+  const indexPath = path.join(root, "dist/index.html");
+  if (!existsSync(indexPath)) {
+    throw new Error(`${name} did not generate dist/index.html (the static root redirect).`);
+  }
+
+  const html = readFileSync(indexPath, "utf8");
+  if (!/http-equiv="refresh"/.test(html) || !/rel="canonical"/.test(html)) {
+    throw new Error(`${name} generated dist/index.html without a redirect/canonical to the default locale.`);
+  }
+}
+
 function assertRoutes({ name, enabled }) {
+  assertRootRedirect(name);
+
   const enabledSet = new Set(enabled);
 
   for (const [plugin, routes] of Object.entries(routeGroups)) {

@@ -1,0 +1,22 @@
+---
+// Static root redirect (plan item W2.1).
+//
+// With `output: static`, Astro's route table decides what gets emitted to
+// `dist/`. Middleware only runs for routes already registered in that table
+// (see `src/middleware.ts` / `src/lib/localeRedirect.ts` for the `dev` and
+// `preview` redirect), and prior to this file `/` was never registered, so no
+// `dist/index.html` was emitted and the built site 404'd at its own root.
+//
+// This file's own rendered markup below is never what ships: Starlight
+// configures Astro's core i18n routing (`prefixDefaultLocale: true`, no root
+// locale — see `@astrojs/starlight/utils/i18n.ts`), and once a route exists at
+// `/` in a prefixed-locale site, Astro's static build resolves it through its
+// own i18n fallback and emits its built-in redirect document (canonical link
+// + zero-delay meta-refresh to the default locale root) instead of this
+// component's output — verified by building with a marker string appended
+// here and confirming it does not reach `dist/index.html`. What matters is
+// only that a page exists at this route at all, so `dist/index.html` gets
+// generated; do not rely on this component's own markup being served.
+---
+
+<meta http-equiv="refresh" content="0; url=/" />
