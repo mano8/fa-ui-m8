@@ -42,7 +42,11 @@ const titles: Record<AccountView, string> = {
     </div>
   </AccountApp>
 
-  <script is:inline>
+  <script>
+    // Deliberately *not* `is:inline`: an Astro-processed script is bundled and
+    // covered by the build-time CSP hash (`security.csp`), while an inline one
+    // is emitted verbatim and refused under `script-src` (W2.2). This only
+    // installs a delegated click listener, so deferred execution is fine.
     const ACCOUNT_ROUTE_EVENT = "fa-ui-m8:account-route";
     const accountRoutePattern = /^\/(en|es|fr)\/user\/account(?:\/(profile|sessions|api-keys|admin(?:\/users\/(?:new|edit|delete))?))?\/?$/;
     const viewBySegment = {

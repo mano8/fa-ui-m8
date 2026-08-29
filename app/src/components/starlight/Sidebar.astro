@@ -74,7 +74,12 @@ const accountSublist: SidebarEntry[] = [
   </div>
 </div>
 
-<script is:inline>
+<script>
+  // Deliberately *not* `is:inline`: an Astro-processed script is bundled and
+  // covered by the build-time CSP hash (`security.csp`), while an inline one is
+  // emitted verbatim and refused under `script-src` (W2.2). Nothing here has to
+  // run before paint, so a module's deferred execution is the correct timing.
+  //
   // The account settings pages navigate client-side (history.pushState via the
   // account page script) without a full reload, so Starlight's server-rendered
   // `aria-current` never moves off the entry point. Re-sync the active account

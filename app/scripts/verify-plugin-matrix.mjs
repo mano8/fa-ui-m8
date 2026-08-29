@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { assertNoBlockedInlineScripts } from "./verify-csp.mjs";
 
 const root = process.cwd();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -204,6 +205,9 @@ function assertRootRedirect(name) {
 
 function assertRoutes({ name, enabled }) {
   assertRootRedirect(name);
+  // W2.2: run per combination, not once — an optional plugin can add an inline
+  // script of its own, and only the build that enables it would ship the page.
+  assertNoBlockedInlineScripts(path.join(root, "dist"), name);
 
   const enabledSet = new Set(enabled);
 
