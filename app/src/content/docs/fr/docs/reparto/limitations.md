@@ -131,17 +131,6 @@ qu'il ne peut plus prouver — mais cela survient sans prévenir au milieu d'une
 Relancez l'évaluation depuis la page de Planification et poursuivez. Voir
 [Dépannage](/fr/docs/reparto/troubleshooting/#la-sélection-est-bloquée-car-le-témoin-déterministe-na-pas-pu-être-réparé).
 
-### Les enseignants peuvent atteindre plus de données que leurs écrans n'en montrent
-
-Un enseignant participant reçoit actuellement une réponse valide des points d'accès du tableau de
-bord du processus et de la liste des participants, qui portent les noms, les heures et le champ de
-motif d'heures supplémentaires des autres participants.
-
-**Aucun écran destiné aux enseignants ne demande ces points d'accès**, rien n'est donc affiché, et
-tant le flux d'événements de l'enseignant que l'écran partagé sont correctement expurgés. Mais la
-permission sous-jacente est plus large que les écrans, et les deux règles qui la régissent n'ont
-pas été harmonisées. C'est consigné comme question ouverte, pas comme décision arrêtée.
-
 ### Deux chemins de renouvellement ne sont pas coordonnés
 
 Le paquet d'authentification détient deux garde-fous de renouvellement à vol unique non

@@ -128,17 +128,6 @@ can no longer prove — but it arrives without warning in the middle of a run of
 assignments. Re-run the evaluation from the Planning page and continue. See
 [Troubleshooting](/en/docs/reparto/troubleshooting/#selection-is-blocked-because-the-deterministic-witness-could-not-be-repaired).
 
-### Teachers can reach more data than their screens show
-
-A teacher who is a participant currently receives a successful response from the process
-dashboard and participant-list endpoints, which carry other participants' names, hours and
-the extra-hours reason field.
-
-**No teacher-facing screen requests those endpoints**, so nothing is displayed, and both
-the teacher's live-update stream and the shared screen are correctly redacted. But the
-underlying permission is broader than the screens are, and the two rules that govern it
-have not been reconciled. This is recorded as an open question, not a fixed decision.
-
 ### Two refresh paths are not coordinated
 
 The authentication package holds two uncoordinated single-flight token-refresh guards, one

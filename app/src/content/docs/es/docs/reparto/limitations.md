@@ -133,17 +133,6 @@ no puede demostrar— pero llega sin aviso en mitad de una tanda de asignaciones
 la evaluación desde la página de Planificación y continúe. Consulte
 [Solución de problemas](/es/docs/reparto/troubleshooting/#la-selección-está-bloqueada-porque-el-testigo-determinista-no-se-pudo-reparar).
 
-### El profesorado puede alcanzar más datos de los que muestran sus pantallas
-
-Un docente que es participante recibe actualmente una respuesta correcta de los puntos de acceso
-del panel del proceso y de la lista de participantes, que llevan nombres, horas y el campo de
-motivo de horas extra de otros participantes.
-
-**Ninguna pantalla dirigida al profesorado pide esos datos**, así que no se muestra nada, y tanto
-el flujo de eventos del docente como la pantalla compartida están correctamente depurados. Pero
-el permiso subyacente es más amplio que las pantallas, y las dos reglas que lo gobiernan no se han
-conciliado. Está registrado como pregunta abierta, no como decisión cerrada.
-
 ### Dos caminos de renovación no están coordinados
 
 El paquete de autenticación mantiene dos guardas de renovación de credenciales de vuelo único
