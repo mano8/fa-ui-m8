@@ -117,13 +117,6 @@ oversight — but it means a deployment must complete a successful first start-u
 application is usable, and an operator who expects a pre-written migration will not find
 one.
 
-### Sibling plugins pin an older authentication package
-
-The media and prompt plugins pin a version range of the shared authentication package that
-**excludes** the version Reparto Docente requires, and both still read the
-super-user claim in the old single-claim way. On a site that enables all three plugins,
-that combination needs resolving by whoever maintains the deployment.
-
 ## Rough edges
 
 These are smaller. They do not stop you working.

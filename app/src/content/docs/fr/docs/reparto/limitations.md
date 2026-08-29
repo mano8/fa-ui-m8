@@ -121,13 +121,6 @@ politique, pas un oubli, mais cela implique qu'une installation doit réussir un
 avant que l'application soit utilisable, et que quiconque s'attend à trouver une migration déjà
 écrite n'en trouvera pas.
 
-### Les plugins voisins figent une version d'authentification plus ancienne
-
-Les plugins médias et prompts figent une plage de versions du paquet d'authentification partagé
-qui **exclut** la version exigée par Reparto Docente, et tous deux lisent encore l'indicateur de
-super-utilisateur à l'ancienne, comme une propriété unique. Sur un site qui active les trois
-plugins, cette combinaison doit être résolue par la personne qui maintient l'installation.
-
 ## Rugosités
 
 Elles sont mineures. Elles ne vous empêchent pas de travailler.

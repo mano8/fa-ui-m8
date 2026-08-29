@@ -123,13 +123,6 @@ una decisión de política, no un descuido, pero implica que una instalación ti
 primer arranque correcto antes de que la aplicación sea utilizable, y que quien espere encontrar
 una migración ya escrita no la encontrará.
 
-### Los complementos hermanos fijan una versión antigua de autenticación
-
-Los complementos de medios y de prompts fijan un rango de versiones del paquete compartido de
-autenticación que **excluye** la versión que exige Reparto Docente, y ambos siguen leyendo el
-indicador de superusuario a la manera antigua, como una única propiedad. En un sitio que active
-los tres complementos, esa combinación tiene que resolverla quien mantenga la instalación.
-
 ## Asperezas
 
 Son menores. No le impiden trabajar.
