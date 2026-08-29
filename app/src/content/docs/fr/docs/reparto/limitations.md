@@ -113,14 +113,6 @@ avec le serveur de développement, où cette politique est délibérément inert
 correction, utilisez le serveur de développement pour le travail réel, ou corrigez la politique
 avant de déployer.
 
-### La révision de schéma de la base est créée au démarrage
-
-Aucun fichier de révision de schéma n'est livré dans le dépôt. La révision est générée à partir des
-modèles au premier démarrage de l'infrastructure, et appliquée à ce moment-là. C'est un choix de
-politique, pas un oubli, mais cela implique qu'une installation doit réussir un premier démarrage
-avant que l'application soit utilisable, et que quiconque s'attend à trouver une migration déjà
-écrite n'en trouvera pas.
-
 ## Rugosités
 
 Elles sont mineures. Elles ne vous empêchent pas de travailler.
@@ -257,6 +249,18 @@ Reparto ne peut pas l'élargir.
 Comme le champ n'autorise absolument rien
 ([pourquoi](/fr/docs/reparto/roles/#le-rôle-de-chef-de-département)), cela ne change rien à qui
 peut piloter un département.
+
+### La révision de schéma est générée au premier démarrage
+
+Aucun fichier de révision de schéma n'est livré dans le dépôt. Les migrations sont générées à
+partir des métadonnées de modèles déclarées, et jamais rédigées déconnectées de celles-ci : la
+révision est produite au premier démarrage de l'infrastructure, à partir des modèles tels
+qu'ils sont à ce moment-là, et appliquée alors. C'est une politique délibérée, pas un oubli.
+
+**Remarque pour l'exploitant :** une installation doit réussir un premier démarrage avant que
+l'application soit utilisable. Si vous vous attendez à trouver dans le dépôt un fichier de
+migration déjà écrit, vous ne le trouverez pas ; cette absence est la conception, pas un
+manque.
 
 ## Limites opérationnelles
 

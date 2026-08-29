@@ -109,14 +109,6 @@ content. Separately, the site root returns a 404 from the built output.
 occur under the development server, where the policy is deliberately inert. Until it is
 fixed, run the development server for real use, or fix the policy before deploying.
 
-### The database schema revision is created on start-up
-
-No schema revision file ships in the repository. The revision is generated from the models
-when the stack is first brought up, and applied then. This is a policy choice, not an
-oversight — but it means a deployment must complete a successful first start-up before the
-application is usable, and an operator who expects a pre-written migration will not find
-one.
-
 ## Rough edges
 
 These are smaller. They do not stop you working.
@@ -251,6 +243,17 @@ is not something Reparto can widen.
 Since the field authorizes nothing at all
 ([why](/en/docs/reparto/roles/#who-is-the-department-head)), this changes nothing about who
 can run a department.
+
+### The schema revision is generated at first start-up
+
+No schema revision file ships in the repository. Migrations are generated from the declared
+model metadata, and never authored disconnected from them: the revision is produced the
+first time the stack is brought up, from the models as they stand at that moment, and
+applied then. This is a deliberate policy, not an oversight.
+
+**Operator note:** a deployment must complete one successful first start-up before the
+application is usable. If you expect a pre-written migration file in the repository, you
+will not find one — that absence is the design, not a gap.
 
 ## Operational limits
 

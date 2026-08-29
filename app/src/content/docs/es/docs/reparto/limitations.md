@@ -115,14 +115,6 @@ desde la salida compilada.
 servidor de desarrollo, donde esa política es deliberadamente inerte. Hasta que se corrija, use
 el servidor de desarrollo para trabajo real, o corrija la política antes de desplegar.
 
-### La revisión de esquema de la base de datos se crea al arrancar
-
-El repositorio no incluye ningún fichero de revisión de esquema. La revisión se genera a partir
-de los modelos la primera vez que se levanta la infraestructura, y se aplica en ese momento. Es
-una decisión de política, no un descuido, pero implica que una instalación tiene que completar un
-primer arranque correcto antes de que la aplicación sea utilizable, y que quien espere encontrar
-una migración ya escrita no la encontrará.
-
 ## Asperezas
 
 Son menores. No le impiden trabajar.
@@ -257,6 +249,18 @@ Reparto no puede ampliarla.
 Como el campo no autoriza absolutamente nada
 ([por qué](/es/docs/reparto/roles/#quién-es-la-jefatura-de-departamento)), esto no cambia nada
 sobre quién puede dirigir un departamento.
+
+### La revisión de esquema se genera en el primer arranque
+
+El repositorio no incluye ningún fichero de revisión de esquema. Las migraciones se generan a
+partir de los metadatos declarados de los modelos, y nunca se escriben desconectadas de ellos:
+la revisión se produce la primera vez que se levanta la infraestructura, a partir de los
+modelos tal y como están en ese momento, y se aplica entonces. Es una política deliberada, no
+un descuido.
+
+**Nota para quien opera el sistema:** una instalación tiene que completar un primer arranque
+correcto antes de que la aplicación sea utilizable. Si espera encontrar en el repositorio un
+fichero de migración ya escrito, no lo encontrará; esa ausencia es el diseño, no una carencia.
 
 ## Límites operativos
 
