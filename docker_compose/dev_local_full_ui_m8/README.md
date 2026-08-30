@@ -193,20 +193,28 @@ The stack serves the APIs only. Run the Astro host from
 cd ../../app
 cp .env.example .env     # then set the PUBLIC_* bases below
 npm install
-npm run dev              # http://localhost:4321
+npm run dev              # https://<LAN-IP>:4321 when DEV_HTTPS_* is configured
 ```
 
 Because the dev server has no proxy, point each plugin at Traefik's absolute
-origin — `reparto.env`'s `BACKEND_CORS_ORIGINS` already allows
-`http://localhost:4321`:
+LAN TLS origin. Set `M8_LAN_IP` in this directory's `.env`, rotate the local
+certificate, and use the same address in each service's `FRONTEND_HOST` and
+`BACKEND_CORS_ORIGINS`:
 
 ```ini
-PUBLIC_SITE_URL=http://localhost:4321
-PUBLIC_AUTH_API_BASE=http://localhost:9000/user
-PUBLIC_MEDIA_API_BASE=http://localhost:9000/media
-PUBLIC_PROMPT_API_BASE=http://localhost:9000/prompt
-PUBLIC_REPARTO_API_BASE=http://localhost:9000/reparto
+PUBLIC_SITE_URL=https://192.168.1.36:4321
+DEV_HTTPS_CERT_FILE=../docker_compose/dev_local_full_ui_m8/traefik/certs/local.crt
+DEV_HTTPS_KEY_FILE=../docker_compose/dev_local_full_ui_m8/traefik/certs/local.key
+PUBLIC_AUTH_API_BASE=https://192.168.1.36:4430/user
+PUBLIC_MEDIA_API_BASE=https://192.168.1.36:4430/media
+PUBLIC_MEDIA_STORAGE_ORIGIN=https://192.168.1.36:4430
+PUBLIC_PROMPT_API_BASE=https://192.168.1.36:4430/prompt
+PUBLIC_REPARTO_API_BASE=https://192.168.1.36:4430/reparto
 ```
+
+After changing `M8_LAN_IP`, run `bash init.sh --rotate-certs`, then recreate
+the API services so they reload their env files. A LAN client must trust the
+mkcert development CA (or explicitly accept the self-signed certificate).
 
 Each `PUBLIC_*_API_BASE` is also that plugin's **on/off gate**: unset it and the
 integration is never loaded, so the routes and nav entries do not exist. Enabling
@@ -221,7 +229,7 @@ reparto route map and the three-stage workflow.
 
 | What | URL |
 | --- | --- |
-| UI (dev server) | `http://localhost:4321` |
+| UI (dev server) | `https://192.168.1.36:4321` |
 | Auth docs | `http://localhost:9000/user/docs` |
 | Media docs | `http://localhost:9000/media/docs` |
 | Prompt docs | `http://localhost:9000/prompt/docs` |
@@ -235,12 +243,10 @@ reparto route map and the three-stage workflow.
 | Grafana | `http://localhost:3000` |
 | MinIO console | `http://127.0.0.1:9006` |
 
-The public routers for `/prompt` and `/reparto` are pinned to
-`Host(`localhost`)` (plus one LAN host) in
-[`traefik/dynamic_conf.yml`](traefik/dynamic_conf.yml). To reach them from the
-LAN — which reparto's meeting and shared-screen surfaces need — drop the `Host`
-prefix on that router, set `API_BIND_IP=0.0.0.0` in `.env`, and add the LAN
-origin to `BACKEND_CORS_ORIGINS` in `reparto.env`.
+The public `/user`, `/media`, `/prompt`, and `/reparto` routers accept LAN
+hostnames on port 4430 while retaining their private/metrics path exclusions.
+Presigned MinIO object transfers also use that TLS origin; MinIO management and
+health paths remain excluded from the public router.
 
 ## Observability
 

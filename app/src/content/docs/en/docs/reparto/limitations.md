@@ -1,285 +1,123 @@
 ---
-title: Limitations and blockers
-description: An honest list of what Reparto Docente cannot do yet — the live meeting that cannot be run from the interface, the production build problem, and the design limits that are deliberate.
+title: Limits and operational notes
+description: The deliberate product boundaries and operating limits that remain after the live meeting, authentication refresh and production-build remediations.
 sidebar:
-  label: Limitations and blockers
+  label: Limits and operations
   order: 11
 ---
 
-This page is deliberately blunt. It separates **blockers** — things that are meant to work
-and currently do not — from **deliberate limits**, which are design decisions you should
-not expect to change.
+The current codebase has no known Reparto workflow blocker documented here. The previous
+live-meeting, account-linking, duplicate-refresh, root-route and inline-script gaps were
+remediated before the `2.0.0` service/client release pair. This page now records the
+boundaries that are intentional and the operational behavior an administrator must plan
+for.
 
-Read the blockers before you plan a real meeting.
-
-**On this page:** [blockers](#blockers) · [rough edges](#rough-edges) ·
+**On this page:** [closed gaps](#closed-gaps) · [expected intervention](#expected-intervention) ·
 [deliberate limits](#deliberate-limits) · [operational limits](#operational-limits) ·
-[what this means in practice](#what-this-means-in-practice)
+[first start](#first-start-up-and-schema-revisions)
 
 ---
 
-## Blockers
+## Closed gaps
 
-### The live meeting cannot be run from the interface
+These statements are no longer limitations:
 
-This is the largest gap in the current version. Stage 3 can be completed **only** by the
-department head, from the assignment board. The live selection meeting — where teachers
-take their own positions in turn — cannot be driven from these screens.
+- An Administrator can open and close a meeting session and run all five turn actions.
+- Teachers can link their own profile with a single-use claim code, choose a position and
+  pass their own turn.
+- Turn controls stay closed until a meeting session is open and show their disabled reason.
+- Meeting-only edits do not reset feasibility.
+- The shared screen shows balanced, pending and overloaded participant counts.
+- Authentication bootstrap and API retries share one refresh flight; a page does not race
+  two rotations of the same refresh token.
+- Static output contains the root redirect and every executable inline script is admitted
+  by its CSP hash without `unsafe-inline`.
+- Server-composed validation and recovery messages name the affected participant.
 
-Five distinct problems combine to that:
+## Expected intervention
 
-#### Teachers cannot be linked to their accounts (L1)
+### Assignment may pause for a feasibility re-evaluation
 
-The teacher roster's **Link user** button links the account that is **currently signed
-in**. A department head pressing it links *themselves*, not the teacher. There is no
-control anywhere for linking a colleague's account.
-
-Because *My view* is reached through that link, **no teacher can reach their own screen in
-a deployment as shipped**. Opening *My view* as an unlinked account shows:
-
-> *No teacher profile is linked to this auth user.*
-
-![My view refusing an unlinked account](../../../../../assets/reparto/en/my-view.png)
-
-A fix is not a one-line change: the accounts service restricts its user directory to super
-administrators, so any working "link this colleague" control needs a directory that the
-host supplies.
-
-**Workaround:** none from the interface. The department head assigns every position from
-the assignment board.
-
-#### A meeting session cannot be opened or closed (L2)
-
-Creating and closing a meeting session, and recording a participant's **selection
-position** during the meeting, all exist underneath — with their data shapes, labels and
-error messages — but no screen offers them. There is no button and no form field.
-
-The direct consequence is that turn initialisation always fails, because there is no
-session for it to initialise.
-
-#### The turn controls do nothing (L3)
-
-The meeting's five turn buttons — *Initialize Turns*, *Start Turn*, *Complete Turn*, *Skip
-Turn*, *Override Turn* — and the teacher's *choose* and *pass turn* buttons are rendered
-but **carry no action**. Pressing them has no effect.
-
-Worse for a first-time user: the readiness panel does not check whether a meeting session
-exists at all, so **Initialize Turns renders enabled** when there is nothing to
-initialise.
-
-![The meeting control room, where Initialize Turns and Start Turn appear enabled with no session open](../../../../../assets/reparto/en/meeting.png)
-
-#### Feasibility goes "Not evaluated" mid-meeting (L4)
-
-Any edit to a participant invalidates the feasibility result. Recording something as
-ordinary as a selection order drops the plan to **Not evaluated** and puts *"Assignment
-feasibility: Not evaluated"* on the head's meeting screen in the middle of a meeting.
-
-It is a **false alarm** — the live assignment path uses cheap checks and does not depend
-on the stored evaluation — but it is alarming to read, and the invalidation is broader
-than it needs to be.
-
-**Workaround:** re-run the evaluation from the Planning page. Nothing is wrong.
-
-#### The shared screen is missing two aggregates (L5)
-
-Two figures the design asks the projector to show are absent: **how many teachers are
-balanced versus still pending**, and **how many are carrying an authorized overload**. The
-aggregate data the shared screen receives does not carry either number.
-
-Both would be nameless counts, so this is a genuine gap rather than a privacy redaction.
-
-### The production build is unusable as shipped
-
-When this site is built as a static production bundle, its Content Security Policy blocks
-about six of the documentation framework's own inline scripts. The result is a **collapsed
-layout**: the sidebar overlays the main column and intercepts clicks meant for the page
-content. Separately, the site root returns a 404 from the built output.
-
-**In practice:** this affects the *host site*, not the Reparto plugin, and it does not
-occur under the development server, where the policy is deliberately inert. Until it is
-fixed, run the development server for real use, or fix the policy before deploying.
-
-## Rough edges
-
-These are smaller. They do not stop you working.
-
-### Participants are sometimes named by identifier
-
-Some validation messages composed by the server address a participant by a long internal
-code rather than by name:
-
-> *Participant 54d3f552-5e39-4f2c-a171-d88126972414 is 21.00 hours below the target of
-> 21.00.*
-
-The rule being reported is correct; only the label is unhelpful. Cross-reference the code
-on the participants page, or read the same information from the dashboard's participant
-balances panel, which does use names.
-
-### Assignment can pause for a feasibility re-evaluation
-
-While assigning, you may be refused with:
+During assignment, the stored deterministic witness may be impossible to repair cheaply.
+The service then blocks the next choice and names the recovery:
 
 > *Selection is blocked because the deterministic witness could not be repaired
-> (local_repair_not_found); administrative feasibility evaluation is required.*
+> (local_repair_not_found); run the administrative feasibility evaluation, then retry.*
 
-This is the system working as designed — it will not let you continue on an arrangement it
-can no longer prove — but it arrives without warning in the middle of a run of
-assignments. Re-run the evaluation from the Planning page and continue. See
-[Troubleshooting](/en/docs/reparto/troubleshooting/#selection-is-blocked-because-the-deterministic-witness-could-not-be-repaired).
-
-### Two refresh paths are not coordinated
-
-The authentication package holds two uncoordinated single-flight token-refresh guards, one
-used by the API client and one used by the provider's own start-up check. If a page mounts
-both against one expired token, both can issue a rotation instead of one, which is wasted
-work and, latently, a race.
-
-In practice this mostly shows up as one refused refresh per page load that survives
-harmlessly, and one duplicate identity lookup per screen mount.
-
-**Operational note:** signing in manually on an account while an automated run (a test
-suite, a scripted session) already holds that same account open causes the accounts service
-to revoke every session for it — two clients presenting one rotating refresh token is
-exactly the reuse pattern it is built to catch. That is the identity service working
-correctly, not this rough edge; do not sign in manually on an account an automated run is
-using.
+This is not data loss or a failed meeting. Open **Planning**, run feasibility again, and
+continue. The service deliberately refuses to guess when it can no longer prove that the
+remaining indivisible positions still fit.
 
 ## Deliberate limits
 
-These are decisions, not defects. Do not expect them to change.
-
 ### No teacher qualifications or eligibility rules
 
-**Any active participant may take any position.** There is no concept of a teacher being
-qualified for a subject, restricted to a stage or grade, tied to particular classes, or
-flagged as a bilingual or specialist.
-
-Legality depends only on: the participant being active; their exact remaining hours; the
-positions they already hold; the rule that two positions of one activity go to different
-teachers; and the meeting and turn rules.
-
-Restricted eligibility is a documented future extension. Adding it is a large change — it
-would need new data, a different feasibility calculation and revised interfaces — so it is
-not something that can be switched on.
-
-:::caution
-Because there are no qualifications, the application will happily let you give a
-Bachillerato statistics position to any participant. Deciding *who should* teach *what* is
-your judgement, not the application's.
-:::
+Any active participant may take any position if the hours, uniqueness, lifecycle and turn
+rules allow it. The application does not model subject qualifications, grade restrictions,
+bilingual credentials or preferred classes. Deciding who *should* teach what remains a
+human decision.
 
 ### No automatic optimiser
 
-Reparto Docente does **not** solve the plan for you. It gives you live balances, hard
-limits and immediate validation, and you make the decisions. Secondary activities in
-particular are added manually, because choosing them is the planning work.
+The application validates and proves feasibility; it does not construct the department's
+preferred plan automatically. Secondary activities and final choices are made by the
+department.
 
-### No manual editing of generated positions
+### Generated positions are indivisible and not edited by hand
 
-There is no create, edit, bulk-create or delete for requirement slots. Their identity and
-hours change only through generation or explicit reconciliation. This is what makes a
-position safe to hand to a teacher.
+A generated requirement goes to one teacher in full. There is no partial assignment,
+shared assignment, manual position editor or over-assignment override. Position changes
+come through generation or explicit reconciliation. Authorized extra hours are a separate,
+reasoned and audited change to the participant's target.
 
-### No partial or shared assignments
+### Lifecycle and history are server-owned
 
-A position goes to one teacher in full. There is no hour box, no share type and no
-over-assignment override anywhere in the application. A teacher who needs more hours gets
-**authorized extra hours** first — a separate, reasoned, audited act that raises their
-target.
+There is no arbitrary status selector. Opening and closing sessions and the documented
+transition actions move the process. A **final** process may be reopened with a reason;
+**archived** is terminal. Activities and matrix cells are retired, assignments are undone
+or reassigned, and allocation revisions are superseded rather than erased.
 
-### No status control
+### Naming a department head uses the protected accounts directory
 
-The process status is owned by the server. There is no transition control anywhere, and a
-request that tries to set a status is refused. Opening a meeting session sets the status
-itself.
+The department's **Department head** field is descriptive and grants no permission.
+Looking up a different account in the identity-service directory is restricted to Super
+administrators, so an Administrator can normally clear this field but not name a colleague.
+Reparto cannot widen another service's directory policy.
 
-### Archived is terminal
+### The projector uses an existing participant or administrator session
 
-A **final** process can be reopened, with a written reason. An **archived** process cannot
-— the screen explains this and offers no control. The final assignment export archives the
-process, which is why it asks for an explicit confirmation.
+There is no head-issued projector grant. An Administrator can see every process; a Reader
+or Writer sees processes through their participation. A plain non-participant projector
+account therefore has no process to open. The shared-screen payload is still aggregate-only
+and contains no names or per-teacher hours.
 
-### Nothing is deleted
+### Development databases reset across the old two-stage contract
 
-Activities and matrix cells are **retired**, assignments are **undone** or **reassigned**,
-and allocation figures are **superseded**. If you were looking for a delete button, there
-isn't one, and that is the point.
-
-### Development databases are reset, not migrated
-
-There is no backward data migration and no compatibility layer for the older two-stage
-assignment semantics. A development database from an earlier version is reset rather than
-upgraded.
-
-### Naming a department head requires the accounts directory
-
-Setting a department's **Department head** field requires looking the target account up in
-the accounts directory, and that lookup is restricted to super administrators. An
-administrator can *clear* the field but usually cannot *set* it. This is the identity
-service's own decision about who may use its directory, not a Reparto restriction, and it
-is not something Reparto can widen.
-
-Since the field authorizes nothing at all
-([why](/en/docs/reparto/roles/#who-is-the-department-head)), this changes nothing about who
-can run a department.
-
-### The projector runs on a participant's session
-
-Read access to a process follows participation. An account that takes part in no process in a
-department gets no read access to that department's process at all — not even the read-only
-shared screen.
-
-**In practice:** a "plain projector account" that is not a participant sees *"No processes
-yet."* and does not even ask the server about the process. This is accepted as a permanent
-boundary rather than pursued as a fix: a dedicated read-only projector permission, separate
-from participation, does not exist. Run the shared screen from the department head's session
-or from a participant's session.
-
-### The schema revision is generated at first start-up
-
-No schema revision file ships in the repository. Migrations are generated from the declared
-model metadata, and never authored disconnected from them: the revision is produced the
-first time the stack is brought up, from the models as they stand at that moment, and
-applied then. This is a deliberate policy, not an oversight.
-
-**Operator note:** a deployment must complete one successful first start-up before the
-application is usable. If you expect a pre-written migration file in the repository, you
-will not find one — that absence is the design, not a gap.
+There is no compatibility layer that migrates an old two-stage development database into
+the three-stage domain. Development data from that obsolete contract is reset.
 
 ## Operational limits
 
-The feasibility check solves a genuinely hard problem, so it is bounded rather than
-unlimited:
+The feasibility solver is bounded because the underlying indivisible-allocation problem is
+hard:
 
-- It may answer **Unknown** when it runs out of its allowed effort. Unknown is treated as
-  *not proven* and blocks the same way *Infeasible* does.
-- The validated operating target is roughly **30 participants and 100 active positions**.
-  Larger departments are not refused, but Unknown becomes likelier.
-- The full solver runs only on administrative paths. It is never triggered by a teacher and
-  never runs during the live assignment path, which uses cheap checks and a stored
-  arrangement instead.
+- **Unknown** means the effort limit was reached without a proof. It blocks just like
+  **Infeasible** until a feasible result exists.
+- The validated operating target is about **30 participants and 100 active positions**.
+  Larger processes are accepted, but an Unknown result becomes more likely.
+- The full solver runs only on administrative paths. Teacher choices use cheap checks plus
+  the stored witness and may ask for an administrative re-evaluation.
 
-## What this means in practice
+## First start-up and schema revisions
 
-For a department running a reparto **today**:
+The service does not ship a hand-authored Alembic revision disconnected from its model
+metadata. On first Compose start, it checks for model drift, generates the revision when
+needed, then upgrades the database. A deployment must complete that first start successfully
+before the application is ready.
 
-| You want to… | Can you? |
-| --- | --- |
-| Configure a department and its matrix | ✅ Yes, fully. |
-| Build, balance, validate and lock a plan | ✅ Yes, fully. |
-| Generate the teacher positions | ✅ Yes, fully. |
-| Assign every position as department head | ✅ Yes, fully, including undo and reassign. |
-| Record allocation changes and reconcile them | ✅ Yes, fully. |
-| Produce draft, provisional and final documents | ✅ Yes. |
-| Capture versions, compare, back up and audit | ✅ Yes. |
-| Let teachers pick their own positions live | ❌ No — see [the meeting blockers](#the-live-meeting-cannot-be-run-from-the-interface). |
-| Run an ordered turn-based meeting | ❌ No — the controls carry no action. |
-| Project a screen from a non-participant account | ❌ No — use the head's or a participant's session. |
-| Deploy as a static production build | ⚠️ Not as shipped — the layout collapses. |
-
-In short: **the whole reparto can be completed by the department head today. The live,
-teacher-driven meeting cannot.**
+This is why a clean installation may take longer on its first run and why no pre-written
+revision file appears in the repository. Operators should back up persistent data, inspect
+the generated migration output and wait for the Reparto health check before opening the UI.
 
 ---
 

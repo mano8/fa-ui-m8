@@ -94,6 +94,17 @@ PUBLIC_AUTH_API_BASE=/user
 PUBLIC_SITE_URL=http://localhost:4321
 ```
 
+For direct LAN development over HTTPS, set `PUBLIC_SITE_URL` and every enabled
+plugin API base to the host's LAN address, then point Vite at a certificate that
+contains that IP in its SAN list:
+
+```ini
+PUBLIC_SITE_URL=https://192.168.1.36:4321
+DEV_HTTPS_CERT_FILE=../docker_compose/dev_local_full_ui_m8/traefik/certs/local.crt
+DEV_HTTPS_KEY_FILE=../docker_compose/dev_local_full_ui_m8/traefik/certs/local.key
+PUBLIC_AUTH_API_BASE=https://192.168.1.36:4430/user
+```
+
 Auth routes are localized through Starlight locales:
 
 - `/en/auth/login`, `/fr/auth/login`, `/es/auth/login`

@@ -76,6 +76,10 @@ A **Writer** may create, edit or delete only data that identifies them as its ow
 Everything else — participants, subjects, groups, the matrix, the plan, other people's
 assignments — is department-head work and needs Administrator or above.
 
+Redeeming a **claim code** is a narrow Reader-floor exception: the code can bind only the
+profile named by the code to the account that is currently signed in. It cannot choose a
+different account or profile. Issuing the code remains Administrator work.
+
 Note that "Writer" is a *floor*, not a grant. It says the account tier may hold such a
 control at all. Whether *this particular record* belongs to you is checked separately,
 row by row.

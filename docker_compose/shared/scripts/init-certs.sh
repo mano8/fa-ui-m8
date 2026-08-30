@@ -19,6 +19,24 @@ fi
 CERT="${CERTS_DIR}/local.crt"
 KEY="${CERTS_DIR}/local.key"
 
+# M8_LAN_IP may be exported by the caller or declared in the deployment's .env.
+# Read only this one non-secret key; never source the Compose environment file.
+LAN_IP="${M8_LAN_IP:-}"
+if [[ -z "$LAN_IP" ]] && [[ -f .env ]]; then
+    LAN_IP="$(sed -n 's/^M8_LAN_IP=//p' .env | tail -n 1 | tr -d '\r')"
+fi
+if [[ -n "$LAN_IP" ]] && [[ ! "$LAN_IP" =~ ^[0-9]+(\.[0-9]+){3}$ ]]; then
+    echo "ERROR: M8_LAN_IP must be an IPv4 address (got: $LAN_IP)"
+    exit 1
+fi
+
+CERT_NAMES=(localhost 127.0.0.1 ::1)
+OPENSSL_LAN_SAN=""
+if [[ -n "$LAN_IP" ]]; then
+    CERT_NAMES+=("$LAN_IP")
+    OPENSSL_LAN_SAN=",IP:$LAN_IP"
+fi
+
 if [[ -f "$CERT" ]] && [[ "$ROTATE" != "true" ]]; then
     echo "==> init-certs: certs exist, skipping (--rotate to regenerate)"; exit 0
 fi
@@ -26,7 +44,7 @@ fi
 if command -v mkcert &>/dev/null; then
     echo "==> Generating mkcert TLS certificate (trusted by OS/browsers)"
     echo "    Tip: run 'mkcert -install' once to register the local CA system-wide."
-    mkcert -cert-file "$CERT" -key-file "$KEY" localhost 127.0.0.1 ::1 192.168.1.35
+    mkcert -cert-file "$CERT" -key-file "$KEY" "${CERT_NAMES[@]}"
     chmod 600 "$KEY" && chmod 644 "$CERT"
     echo "==> init-certs done (mkcert — trusted cert)"
     echo "    Chrome, Edge, Safari: trusted automatically."
@@ -63,7 +81,7 @@ prompt             = no
 CN = localhost
 
 [v3_req]
-subjectAltName = DNS:localhost,IP:127.0.0.1,IP:192.168.1.35
+subjectAltName = DNS:localhost,IP:127.0.0.1${OPENSSL_LAN_SAN}
 CONF
 
     openssl req -x509 -newkey rsa:2048 \

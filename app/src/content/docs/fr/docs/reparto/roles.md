@@ -77,6 +77,11 @@ leur propriétaire :
 Tout le reste — participants, matières, classes, matrice, plan, affectations des autres — est
 du travail de chef de département et exige Administrateur ou plus.
 
+L'utilisation d'un **code de rattachement** est une exception étroite accessible à partir
+de Lecteur : le code ne peut lier que la fiche qu'il désigne au compte actuellement
+connecté. Il ne permet de choisir ni un autre compte ni une autre fiche. Émettre le code
+reste une action Administrateur.
+
 Notez que « Rédacteur » est un *seuil*, pas une attribution : il dit que ce niveau de compte
 peut détenir un tel contrôle. Que *cet enregistrement précis* vous appartienne est vérifié
 séparément, ligne par ligne.

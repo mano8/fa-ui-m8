@@ -1,5 +1,7 @@
 // @ts-check
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
@@ -42,6 +44,20 @@ const promptApiPrefix = publicEnv('PUBLIC_PROMPT_API_PREFIX');
 const promptAdminRole = publicEnv('PUBLIC_PROMPT_ADMIN_ROLE');
 const repartoApiBase = publicEnv('PUBLIC_REPARTO_API_BASE');
 const repartoApiPrefix = publicEnv('PUBLIC_REPARTO_API_PREFIX');
+const devHttpsCertFile = publicEnv('DEV_HTTPS_CERT_FILE');
+const devHttpsKeyFile = publicEnv('DEV_HTTPS_KEY_FILE');
+const devApiProxyTarget = publicEnv('DEV_API_PROXY_TARGET');
+
+if (Boolean(devHttpsCertFile) !== Boolean(devHttpsKeyFile)) {
+	throw new Error('DEV_HTTPS_CERT_FILE and DEV_HTTPS_KEY_FILE must be set together.');
+}
+
+const devHttps = process.argv[2] === 'dev' && devHttpsCertFile && devHttpsKeyFile
+	? {
+			cert: readFileSync(resolve(devHttpsCertFile)),
+			key: readFileSync(resolve(devHttpsKeyFile)),
+		}
+	: undefined;
 const securityEnv = {
 	PUBLIC_SITE_URL: siteUrl,
 	PUBLIC_AUTH_API_BASE: authApiBase,
@@ -414,6 +430,24 @@ export default defineConfig({
 	// under `astro dev`; takes effect in `build`/`preview`. See src/lib/csp.ts.
 	security: buildSecurityConfig(securityEnv),
 	vite: {
+		server: {
+			strictPort: true,
+			...(devHttps ? { https: devHttps } : {}),
+			...(devApiProxyTarget
+				? {
+						proxy: Object.fromEntries(
+							['/user', '/media', '/prompt', '/reparto'].map((prefix) => [
+								prefix,
+								{
+									target: devApiProxyTarget,
+									changeOrigin: true,
+									secure: false,
+								},
+							]),
+						),
+					}
+				: {}),
+		},
 		cacheDir: process.env.VITE_CACHE_DIR ?? '.astro/vite',
 		ssr: {
 			// Local plugin junctions otherwise externalize Sonner from the plugin's
@@ -521,6 +555,31 @@ export default defineConfig({
 ...mediaSidebarItems,
 			...promptSidebarItems,
 			...repartoSidebarItems,
+			// End-user documentation, grouped under one "Docs" entry kept last in
+			// the sidebar. The reparto guide is plain content shipped whether or
+			// not the plugin itself is enabled — a reader deciding whether to turn
+			// it on is exactly who needs it. Future doc sets are added here as
+			// sibling submenus. Order within each submenu comes from each page's
+			// `sidebar.order`, per locale.
+			{
+				label: 'Docs',
+				collapsed: true,
+				translations: {
+					es: 'Documentación',
+					fr: 'Documentation',
+				},
+				items: [
+					{
+						label: 'Reparto Docente guide',
+						collapsed: true,
+						translations: {
+							es: 'Guía de Reparto Docente',
+							fr: 'Guide Reparto Docente',
+						},
+						items: [{ autogenerate: { directory: 'docs/reparto' } }],
+					},
+				],
+			},
 		],
 	}),
 		react(),

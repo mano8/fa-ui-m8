@@ -4,6 +4,8 @@ services:
   # For browser-trusted certs: install mkcert, then run: bash init.sh --rotate-certs
   cert-init:
     image: alpine:3.21.3
+    environment:
+      M8_LAN_IP: ${M8_LAN_IP:-}
     volumes:
       - ./traefik/certs:/certs
     command:
@@ -14,10 +16,15 @@ services:
           echo "==> cert-init: certs found, skipping"; exit 0
         fi
         apk add --no-cache --quiet openssl
+        LAN_IP_SAN=""
+        if [ -n "$${M8_LAN_IP:-}" ]; then
+          case "$${M8_LAN_IP}" in *[!0-9.]*) echo "ERROR: M8_LAN_IP must be an IPv4 address"; exit 1;; esac
+          LAN_IP_SAN=",IP:$${M8_LAN_IP}"
+        fi
         openssl req -x509 -newkey rsa:2048 -nodes \
           -keyout /certs/local.key -out /certs/local.crt \
           -days 365 -subj "/CN=localhost" \
-          -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:192.168.1.35"
+          -addext "subjectAltName=DNS:localhost,IP:127.0.0.1$${LAN_IP_SAN}"
         chmod 600 /certs/local.key && chmod 644 /certs/local.crt
         echo "==> cert-init: self-signed cert ready (browsers will warn)"
         echo "    For trusted certs: mkcert -install, then bash init.sh --rotate-certs"
@@ -221,7 +228,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:4321,http://localhost:5173,http://localhost:9000"
+      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:4321,http://localhost:5173,http://localhost:9000,https://${M8_LAN_IP:-127.0.0.1}:4321"
     volumes:
       - ./minio/data:/data
     command: server /data --console-address ":9001"

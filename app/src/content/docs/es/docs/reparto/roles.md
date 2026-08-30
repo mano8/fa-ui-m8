@@ -78,6 +78,10 @@ propietario:
 Todo lo demás —participantes, materias, grupos, la matriz, el plan, las asignaciones de
 otras personas— es trabajo de jefatura de departamento y exige Administrador o superior.
 
+Canjear un **código de vinculación** es una excepción estrecha con suelo Lector: el código
+solo puede unir la ficha que nombra con la cuenta que tiene la sesión iniciada. No permite
+elegir otra cuenta ni otra ficha. Emitir el código sigue siendo trabajo de Administrador.
+
 Tenga en cuenta que «Editor» es un *umbral*, no una concesión: dice que ese nivel de cuenta
 puede llegar a tener ese control. Que *ese registro concreto* sea suyo se comprueba aparte,
 fila a fila.
