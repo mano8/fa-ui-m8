@@ -358,26 +358,17 @@
   margin-top: 1rem;
 }
 
-/* Document-explorer skin for the plugin-owned tree view. Keep the category
-   rail compact and contain wide result columns inside the principal pane so
-   the table can never widen the Starlight page or escape the library card. */
-.fa-media-tree-layout {
-  display: grid;
-  grid-template-columns: 10rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.75rem;
-  width: 100%;
-  min-width: 0;
-}
-
+/* Document-explorer *skin* for the plugin-owned tree view — colour, elevation
+   and scrollbar only. The geometry that used to live here (a two-column grid
+   with a 10rem rail, `align-items: start`, and a pane max-height) has been
+   removed: it silently beat every Tailwind class the plugin sets, because
+   Tailwind v4 emits utilities inside `@layer` and unlayered rules win over
+   layered ones regardless of specificity or order. The rail was pinned to
+   10rem and the pane could never stretch to the results column, no matter what
+   the plugin asked for. Layout is the plugin's to own; this file maps its
+   look onto the host's shadcn tokens. */
 .fa-media-tree-pane {
-  box-sizing: border-box;
-  width: auto;
-  max-width: 100%;
-  max-height: min(70vh, 42rem);
-  overflow: auto;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
+  border-color: var(--border);
   border-radius: var(--radius-xl, 0.75rem);
   background: color-mix(in oklab, var(--card) 94%, var(--muted));
   color: var(--card-foreground);
@@ -393,19 +384,6 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.fa-media-tree-nodes,
-.fa-media-tree-children {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.fa-media-tree-children {
-  margin-left: 0.55rem;
-  padding-left: 0.65rem;
-  border-left: 1px solid var(--border);
 }
 
 .fa-media-tree-node {
@@ -439,24 +417,16 @@
   font-weight: 600;
 }
 
-.fa-media-tree-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .fa-media-category-count {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
 
+/* `container-type` stays — it is the query container the column-folding rules
+   below resolve against, not geometry the plugin duplicates. The width/overflow
+   sizing is gone: the plugin's own `min-w-0 flex-1` and its
+   `.fa-media-table-scroll` wrapper handle both. */
 .fa-media-tree-results {
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
   container-type: inline-size;
   border: 1px solid var(--border);
   border-radius: var(--radius-xl, 0.75rem);
@@ -524,38 +494,45 @@
 
 /* The regular List view uses the same compact document columns when its host
    card is narrow. Grid and Masonry already reflow through their Tailwind
-   breakpoints; this closes the table-specific responsive gap. */
+   breakpoints; this closes the table-specific responsive gap.
+
+   The `> .fa-media-table-scroll >` hop is not decoration: the plugin now wraps
+   every table in an `overflow-x-auto` box, so the table is a grandchild of the
+   panel rather than a child. Kept as a strict path rather than relaxed to a
+   descendant selector on purpose — a descendant match would also catch the
+   tree view's table, whose columns must fold against the narrow results pane
+   (`.fa-media-tree-results`, below) and not against the full-width panel. */
 @container (width < 40rem) {
-  .fa-media-panel > .fa-media-table {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table {
     width: 100%;
     min-width: 0;
     table-layout: fixed;
   }
 
-  .fa-media-panel > .fa-media-table th,
-  .fa-media-panel > .fa-media-table td {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table th,
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table td {
     padding: 0.5rem;
   }
 
-  .fa-media-panel > .fa-media-table th:first-child {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table th:first-child {
     width: 4rem;
   }
 
-  .fa-media-panel > .fa-media-table th:nth-child(2),
-  .fa-media-panel > .fa-media-table td:nth-child(2) {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table th:nth-child(2),
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table td:nth-child(2) {
     min-width: 10rem;
   }
 
-  .fa-media-panel > .fa-media-table th:nth-child(3) {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table th:nth-child(3) {
     width: 5.5rem;
   }
 
-  .fa-media-panel > .fa-media-table th:nth-child(n + 4),
-  .fa-media-panel > .fa-media-table td:nth-child(n + 4) {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table th:nth-child(n + 4),
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table td:nth-child(n + 4) {
     display: none;
   }
 
-  .fa-media-panel > .fa-media-table .fa-media-preview {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table .fa-media-preview {
     width: 3rem !important;
     height: 3rem !important;
     max-width: 3rem !important;
@@ -564,19 +541,9 @@
 }
 
 @container (width < 20rem) {
-  .fa-media-panel > .fa-media-table th:first-child,
-  .fa-media-panel > .fa-media-table td:first-child {
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table th:first-child,
+  .fa-media-panel > .fa-media-table-scroll > .fa-media-table td:first-child {
     display: none;
   }
 }
 
-@media (width < 48rem) {
-  .fa-media-tree-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .fa-media-tree-pane {
-    width: 100%;
-    max-height: 18rem;
-  }
-}
