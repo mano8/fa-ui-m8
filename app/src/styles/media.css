@@ -7,7 +7,9 @@
 
 .fa-media-panel {
   width: 100%;
-  max-width: none;
+  min-width: 0;
+  max-width: 100%;
+  container-type: inline-size;
   margin: 0;
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--border);
@@ -354,4 +356,227 @@
 
 .fa-media-category-manager-create {
   margin-top: 1rem;
+}
+
+/* Document-explorer skin for the plugin-owned tree view. Keep the category
+   rail compact and contain wide result columns inside the principal pane so
+   the table can never widen the Starlight page or escape the library card. */
+.fa-media-tree-layout {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.fa-media-tree-pane {
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
+  max-height: min(70vh, 42rem);
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl, 0.75rem);
+  background: color-mix(in oklab, var(--card) 94%, var(--muted));
+  color: var(--card-foreground);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 8%, transparent);
+  scrollbar-width: thin;
+}
+
+.fa-media-tree-pane h3 {
+  margin: 0 0 0.5rem;
+  padding: 0 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fa-media-tree-nodes,
+.fa-media-tree-children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fa-media-tree-children {
+  margin-left: 0.55rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid var(--border);
+}
+
+.fa-media-tree-node {
+  border-radius: var(--radius-md, 0.5rem);
+  outline: none;
+}
+
+.fa-media-panel .fa-media-tree-select {
+  display: flex;
+  width: 100%;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: var(--radius-md, 0.5rem);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fa-media-panel .fa-media-tree-select:hover {
+  background: var(--muted);
+}
+
+.fa-media-tree-node[aria-selected='true'] > .fa-media-tree-select {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 600;
+}
+
+.fa-media-tree-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fa-media-category-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.fa-media-tree-results {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  container-type: inline-size;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl, 0.75rem);
+  background: var(--card);
+  scrollbar-width: thin;
+}
+
+.fa-media-tree-results .fa-media-table {
+  width: 100%;
+  min-width: 38rem;
+  margin: 0;
+}
+
+.fa-media-tree-results .fa-media-table th,
+.fa-media-tree-results .fa-media-table td {
+  white-space: nowrap;
+}
+
+.fa-media-tree-results .fa-media-table td:nth-child(2) {
+  min-width: 10rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* A narrow principal pane behaves like a compact document explorer: retain
+   the thumbnail, filename, and actions while folding secondary metadata out
+   of the row. This avoids requiring a page-level horizontal scrollbar when
+   Starlight's navigation is open. */
+@container (width < 34rem) {
+  .fa-media-tree-results .fa-media-table {
+    min-width: 19.5rem;
+    table-layout: fixed;
+  }
+
+  .fa-media-tree-results .fa-media-table th,
+  .fa-media-tree-results .fa-media-table td {
+    padding: 0.5rem;
+  }
+
+  .fa-media-tree-results .fa-media-table th:first-child {
+    width: 4rem;
+  }
+
+  .fa-media-tree-results .fa-media-table th:nth-child(3) {
+    width: 5.5rem;
+  }
+
+  .fa-media-tree-results .fa-media-table th:nth-child(2),
+  .fa-media-tree-results .fa-media-table td:nth-child(2) {
+    min-width: 10rem;
+  }
+
+  .fa-media-tree-results .fa-media-table th:nth-child(n + 4),
+  .fa-media-tree-results .fa-media-table td:nth-child(n + 4) {
+    display: none;
+  }
+
+  .fa-media-tree-results .fa-media-preview {
+    width: 3rem !important;
+    height: 3rem !important;
+    max-width: 3rem !important;
+    max-height: 3rem !important;
+  }
+}
+
+/* The regular List view uses the same compact document columns when its host
+   card is narrow. Grid and Masonry already reflow through their Tailwind
+   breakpoints; this closes the table-specific responsive gap. */
+@container (width < 40rem) {
+  .fa-media-panel > .fa-media-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .fa-media-panel > .fa-media-table th,
+  .fa-media-panel > .fa-media-table td {
+    padding: 0.5rem;
+  }
+
+  .fa-media-panel > .fa-media-table th:first-child {
+    width: 4rem;
+  }
+
+  .fa-media-panel > .fa-media-table th:nth-child(2),
+  .fa-media-panel > .fa-media-table td:nth-child(2) {
+    min-width: 10rem;
+  }
+
+  .fa-media-panel > .fa-media-table th:nth-child(3) {
+    width: 5.5rem;
+  }
+
+  .fa-media-panel > .fa-media-table th:nth-child(n + 4),
+  .fa-media-panel > .fa-media-table td:nth-child(n + 4) {
+    display: none;
+  }
+
+  .fa-media-panel > .fa-media-table .fa-media-preview {
+    width: 3rem !important;
+    height: 3rem !important;
+    max-width: 3rem !important;
+    max-height: 3rem !important;
+  }
+}
+
+@container (width < 20rem) {
+  .fa-media-panel > .fa-media-table th:first-child,
+  .fa-media-panel > .fa-media-table td:first-child {
+    display: none;
+  }
+}
+
+@media (width < 48rem) {
+  .fa-media-tree-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fa-media-tree-pane {
+    width: 100%;
+    max-height: 18rem;
+  }
 }

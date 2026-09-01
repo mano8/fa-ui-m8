@@ -2,7 +2,7 @@
 // Route-driven media studio island. It mirrors AccountApp so all media pages
 // share the auth/media providers while Starlight owns the page routes.
 import { useEffect, useState } from "react";
-import { CategoryManager, MediaLibrary } from "@mano8/astro-media-m8/react";
+import { MediaLibrary } from "@mano8/astro-media-m8/react";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { useUser } from "../../hooks/auth/useUser";
@@ -12,6 +12,7 @@ import { PluginProviders } from "../app/PluginProviders";
 import { MediaDashboardOverview } from "@/components/fa-media/media-dashboard-overview";
 import { MediaMaintenancePanel } from "@/components/fa-media/media-maintenance-panel";
 import { MediaPresets } from "@/components/fa-media/media-presets";
+import { MediaCategories } from "@/components/fa-media/media-categories";
 
 export type MediaView = "library" | "upload" | "categories" | "presets" | "admin" | "maintenance";
 const MEDIA_ROUTE_EVENT = "fa-ui-m8:media-route";
@@ -78,9 +79,13 @@ function AppShellContent({ view }: { view: MediaView }) {
 
       <div className="space-y-4 pb-3">
         {activeView === "library" || activeView === "upload" ? (
-          <MediaLibrary objectHref={objectHref} initialUploadOpen={activeView === "upload"} />
+          <MediaLibrary
+            objectHref={objectHref}
+            initialUploadOpen={activeView === "upload"}
+            labels={t.media.library}
+          />
         ) : null}
-        {activeView === "categories" ? <CategoryManager /> : null}
+        {activeView === "categories" ? <MediaCategories labels={t.media.categories} /> : null}
         {activeView === "presets" ? (
           <MediaPresets baseHref={`/${locale}/media/presets`} labels={t.media.presets} />
         ) : null}

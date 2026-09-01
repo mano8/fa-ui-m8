@@ -22,11 +22,22 @@ vi.mock("../app/PluginProviders", () => ({
 }));
 
 vi.mock("@mano8/astro-media-m8/react", () => ({
-  MediaLibrary({ initialUploadOpen = false }: { initialUploadOpen?: boolean }) {
-    return <div data-testid="media-library" data-upload-open={String(initialUploadOpen)} />;
-  },
-  CategoryManager() {
-    return <div data-testid="category-manager" />;
+  MediaLibrary({
+    initialUploadOpen = false,
+    labels,
+  }: {
+    initialUploadOpen?: boolean;
+    labels?: { title?: string; searchPlaceholder?: string; uploadMedia?: string };
+  }) {
+    return (
+      <div
+        data-testid="media-library"
+        data-upload-open={String(initialUploadOpen)}
+        data-title={labels?.title}
+        data-search={labels?.searchPlaceholder}
+        data-upload={labels?.uploadMedia}
+      />
+    );
   },
 }));
 
@@ -39,6 +50,9 @@ vi.mock("@/components/fa-media/media-maintenance-panel", () => ({
 }));
 vi.mock("@/components/fa-media/media-presets", () => ({
   MediaPresets: () => <div data-testid="media-presets" />,
+}));
+vi.mock("@/components/fa-media/media-categories", () => ({
+  MediaCategories: () => <div data-testid="media-categories" />,
 }));
 
 import MediaApp from "./MediaApp";
@@ -57,15 +71,30 @@ describe("MediaApp route composition", () => {
     render(<MediaApp view="upload" />);
 
     expect(screen.getByTestId("media-library").getAttribute("data-upload-open")).toBe("true");
-    expect(screen.queryByTestId("category-manager")).toBeNull();
+    expect(screen.queryByTestId("media-categories")).toBeNull();
   });
 
-  it("mounts the plugin-owned category CRUD manager on /media/categories", () => {
+  it("mounts the host shadcn category manager on /media/categories", () => {
     window.history.replaceState({}, "", "/fr/media/categories");
 
     render(<MediaApp view="categories" />);
 
-    expect(screen.getByTestId("category-manager")).toBeTruthy();
+    expect(screen.getByTestId("media-categories")).toBeTruthy();
     expect(screen.queryByTestId("media-library")).toBeNull();
+  });
+
+  it.each([
+    ["en", "Media library", "Search filename", "Upload media"],
+    ["fr", "Médiathèque", "Rechercher un fichier", "Téléverser un média"],
+    ["es", "Biblioteca multimedia", "Buscar archivo", "Subir archivo"],
+  ])("passes the %s media labels to every plugin-owned library form", (locale, title, search, upload) => {
+    window.history.replaceState({}, "", `/${locale}/media/`);
+
+    render(<MediaApp view="library" />);
+
+    const library = screen.getByTestId("media-library");
+    expect(library.getAttribute("data-title")).toBe(title);
+    expect(library.getAttribute("data-search")).toBe(search);
+    expect(library.getAttribute("data-upload")).toBe(upload);
   });
 });

@@ -3,7 +3,7 @@
 // dynamic [id] route — it's read from the `?id=` query param at hydration time.
 // Same AuthProvider + MediaProvider + auth gate as the studio.
 import { ArrowLeft } from "lucide-react";
-import { ObjectDetail } from "@mano8/astro-media-m8/react";
+import { MediaObjectDetail } from "@/components/fa-media/media-object-detail";
 import { LoginForm } from "../auth/LoginForm";
 import { useAuth } from "../../hooks/auth/useAuth";
 import { getTranslations } from "../../content/i18n/app";
@@ -61,8 +61,13 @@ function ObjectShell() {
         {t.media.object.back}
       </a>
       {objectId ? (
-        <ObjectDetail
+        <MediaObjectDetail
           objectId={objectId}
+          locale={locale}
+          labels={t.media.object}
+          categoryTableLabels={t.media.categories}
+          statusLabels={t.media.library.statuses}
+          categoryTypeLabels={t.media.library.categories}
           onDeleted={() => {
             window.location.href = libraryHref;
           }}

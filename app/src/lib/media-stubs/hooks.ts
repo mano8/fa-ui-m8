@@ -1,9 +1,17 @@
 import type {
   AdminDashboardPublic,
+  CategoryCreate,
+  CategoryNode,
+  CategoryPublic,
+  CategoryUpdate,
+  DownloadUrlResponse,
   ImagePresetPublic,
   MediaObjectPublic,
+  MediaObjectUpdate,
   ObjectListParams,
   SubscriptionPublic,
+  VariantJobPublic,
+  VariantPublic,
 } from "./schemas";
 
 function disabled(): Error {
@@ -31,6 +39,82 @@ export function useMediaObjects(_params?: ObjectListParams): {
     hasMore: false,
     refresh: rejectDisabled,
     loadMore: rejectDisabled,
+  };
+}
+
+export function useMediaObject(_objectId: string | null): {
+  object: MediaObjectPublic | null;
+  loading: boolean;
+  error: Error;
+  reload: () => Promise<void>;
+  update: (_patch: MediaObjectUpdate) => Promise<MediaObjectPublic>;
+  remove: () => Promise<void>;
+} {
+  return {
+    object: null,
+    loading: false,
+    error: disabled(),
+    reload: rejectDisabled,
+    update: rejectDisabled,
+    remove: rejectDisabled,
+  };
+}
+
+export function useDownloadUrl(_objectId: string | null): {
+  data: DownloadUrlResponse | null;
+  loading: boolean;
+  error: Error | null;
+  request: () => Promise<DownloadUrlResponse>;
+  resolve: (_token: string) => Promise<DownloadUrlResponse>;
+} {
+  return {
+    data: null,
+    loading: false,
+    error: disabled(),
+    request: rejectDisabled,
+    resolve: rejectDisabled,
+  };
+}
+
+export function useMediaVariants(_objectId: string | null): {
+  items: VariantPublic[];
+  loading: boolean;
+  error: Error;
+  job: VariantJobPublic | null;
+  reload: () => Promise<void>;
+  generate: (_presets: string[]) => Promise<VariantJobPublic>;
+  remove: (_variantId: string) => Promise<void>;
+} {
+  return {
+    items: [],
+    loading: false,
+    error: disabled(),
+    job: null,
+    reload: rejectDisabled,
+    generate: rejectDisabled,
+    remove: rejectDisabled,
+  };
+}
+
+export function useCategoryTree(): {
+  tree: CategoryNode[];
+  count: number;
+  loading: boolean;
+  error: Error;
+  reload: () => Promise<void>;
+  create: (_body: CategoryCreate) => Promise<CategoryPublic>;
+  update: (_id: number, _body: CategoryUpdate) => Promise<CategoryPublic>;
+  remove: (_id: number) => Promise<void>;
+} {
+  return {
+    tree: [],
+    count: 0,
+    loading: false,
+    error: disabled(),
+    reload: rejectDisabled,
+    create: rejectDisabled,
+    update: rejectDisabled,
+    remove: rejectDisabled,
   };
 }
 

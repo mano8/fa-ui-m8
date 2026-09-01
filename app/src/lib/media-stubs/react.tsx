@@ -19,7 +19,11 @@ export function MediaUploadDropzone(_props: { onUploaded?: () => void }) {
   return <DisabledMedia />;
 }
 
-export function MediaLibrary(_props: { objectHref?: (id: string) => string; initialUploadOpen?: boolean }) {
+export function MediaLibrary(_props: {
+  objectHref?: (id: string) => string;
+  initialUploadOpen?: boolean;
+  labels?: unknown;
+}) {
   return <DisabledMedia />;
 }
 

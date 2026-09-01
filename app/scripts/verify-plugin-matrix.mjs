@@ -53,31 +53,19 @@ const routeGroups = {
  * Routes the host expects that an *installed* plugin below a known version does
  * not generate yet.
  *
- * This is plugin-version drift, not a host regression: `astro-reparto-m8@2.0.0`
- * adds the five process-scoped routes below and is not published, so `npm ci`
- * resolves `1.0.0` and the host builds without them (`B6`/`B8` own the
- * publish). Recorded here rather than deleted from `routeGroups`, because
- * deleting them would lose the expectation entirely.
+ * This is plugin-version drift, not a host regression. Record an entry rather
+ * than deleting the route from `routeGroups`, because deleting it would lose
+ * the expectation entirely.
  *
  * The allowance retires itself twice over: it stops applying once the installed
  * plugin reaches `sinceVersion`, and a listed route that *does* get generated
- * is a hard failure telling whoever sees it to remove this block.
+ * is a hard failure telling whoever sees it to remove the entry.
+ *
+ * Empty: the `astro-reparto-m8@2.0.0` entry retired when that version published
+ * and the host pinned it, and the build now generates all five process-scoped
+ * routes it excused.
  */
-const knownDrift = [
-  {
-    plugin: "reparto",
-    package: "@mano8/astro-reparto-m8",
-    sinceVersion: "2.0.0",
-    owner: "B6/B8",
-    routeSuffixes: [
-      "reparto/processes/current/allocation/index.html",
-      "reparto/processes/current/teaching-groups/index.html",
-      "reparto/processes/current/group-subjects/index.html",
-      "reparto/processes/current/settings/index.html",
-      "reparto/processes/current/planning/index.html",
-    ],
-  },
-];
+const knownDrift = [];
 
 /**
  * Installed version of a plugin, or null when it is not installed.

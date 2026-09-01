@@ -215,7 +215,7 @@ export function DataTableServer<TData, TValue, TFilter extends string = string>(
     ) : null;
 
   return (
-    <div className="flex flex-col gap-6 py-2">
+    <div className="flex min-w-0 max-w-full flex-col gap-6 py-2">
       <DataTableServerToolbar
         table={table}
         addButton={addButton}
@@ -232,7 +232,7 @@ export function DataTableServer<TData, TValue, TFilter extends string = string>(
         pageSizeOptions={pageSizeOptions}
       />
       {renderSelectionActions("top")}
-      <div className="overflow-x-auto rounded-md border">
+      <div className="min-w-0 max-w-full overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
