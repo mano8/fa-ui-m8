@@ -49,7 +49,7 @@
     "zod": "^4.5.4"
   },
   "optionalDependencies": {
-    "@mano8/astro-media-m8": "file:../../astro-media-m8",
+    "@mano8/astro-media-m8": "^2.0.0",
     "@mano8/astro-prompt-m8": "^2.1.0",
     "@mano8/astro-reparto-m8": "^2.0.0"
   },
