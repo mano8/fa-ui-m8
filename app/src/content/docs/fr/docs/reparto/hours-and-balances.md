@@ -10,8 +10,8 @@ C'est la page à lire si un nombre à l'écran vous semble faux. Neuf fois sur d
 pas : c'est *l'autre* total.
 
 **Sur cette page :** [deux équilibres](#deux-équilibres-jamais-un) ·
-[l'exemple](#lexemple-120-et-124) · [le tutorat](#deuxième-exemple-le-tutorat) ·
-[plusieurs classes](#troisième-exemple-une-activité-plusieurs-classes) ·
+[l'exemple](#lexemple--120-et-124) · [le tutorat](#deuxième-exemple--le-tutorat) ·
+[plusieurs classes](#troisième-exemple--une-activité-plusieurs-classes) ·
 [postes indivisibles](#postes-indivisibles) ·
 [cibles exactes](#cibles-exactes-et-heures-supplémentaires-autorisées) ·
 [faisabilité](#la-faisabilité-troisième-vérification) ·

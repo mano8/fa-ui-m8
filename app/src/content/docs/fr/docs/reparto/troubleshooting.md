@@ -15,7 +15,7 @@ Cette page traduit ceux que vous rencontrerez le plus souvent.
 [impossible d'affecter](#je-narrive-pas-à-attribuer-un-poste) ·
 [changements de dotation](#jai-changé-la-dotation-et-tout-sest-arrêté) ·
 [heures fausses](#les-heures-semblent-fausses) ·
-[la séance](#les-contrôles-de-séance-ne-font-rien)
+[la séance](#les-contrôles-de-séance-sont-désactivés)
 
 ---
 

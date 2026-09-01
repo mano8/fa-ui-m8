@@ -61,36 +61,36 @@ vous cherchez un point précis, allez-y directement.
 
 ### Les trois étapes, pas à pas
 
-4. **[Étape 1 — Configuration](/fr/docs/reparto/stage-1-configuration/)** —
+1. **[Étape 1 — Configuration](/fr/docs/reparto/stage-1-configuration/)** —
    établissements, années, départements, niveaux scolaires, liste du personnel enseignant,
    dotation de la direction, participants, matières, classes, matrice classe-matière et
    paramètres du processus.
-5. **[Étape 2 — Planification](/fr/docs/reparto/stage-2-planning/)** — créer le plan,
+2. **[Étape 2 — Planification](/fr/docs/reparto/stage-2-planning/)** — créer le plan,
    matérialiser les activités principales, ajouter le tutorat et la co-intervention, lire
    les validations, verrouiller et générer les postes.
-6. **[Étape 3 — Affectation](/fr/docs/reparto/stage-3-assignment/)** — le tableau
+3. **[Étape 3 — Affectation](/fr/docs/reparto/stage-3-assignment/)** — le tableau
    d'affectation, attribuer un poste à un enseignant, annuler et déplacer un poste.
 
 ### Notions et référence
 
-7. **[Heures, équilibres et faisabilité](/fr/docs/reparto/hours-and-balances/)** — pourquoi
+1. **[Heures, équilibres et faisabilité](/fr/docs/reparto/hours-and-balances/)** — pourquoi
    il existe **deux** totaux d'heures tous deux corrects, qu'il ne faut jamais additionner,
    et ce que « faisable » veut dire.
-8. **[La séance, l'espace enseignant et l'écran partagé](/fr/docs/reparto/meeting-and-lan/)** —
+2. **[La séance, l'espace enseignant et l'écran partagé](/fr/docs/reparto/meeting-and-lan/)** —
    comment se déroule la séance de sélection en direct, et ce que voient les enseignants et
    le vidéoprojecteur.
-9. **[Versions, exports et audit](/fr/docs/reparto/versions-exports-audit/)** — enregistrer
+3. **[Versions, exports et audit](/fr/docs/reparto/versions-exports-audit/)** — enregistrer
    des instantanés, comparer des années, produire des documents, et la trace de qui a fait
    quoi.
-10. **[Référence](/fr/docs/reparto/reference/)** — toutes les adresses de page, la
-    permission exigée par chacune, et un glossaire de tous les termes de l'application.
+4. **[Référence](/fr/docs/reparto/reference/)** — toutes les adresses de page, la
+   permission exigée par chacune, et un glossaire de tous les termes de l'application.
 
 ### Quand quelque chose ne va pas
 
-11. **[Limites et notes d'exploitation](/fr/docs/reparto/limitations/)** — les frontières
-    délibérées du produit, les bornes du solveur et le premier démarrage.
-12. **[Dépannage](/fr/docs/reparto/troubleshooting/)** — les messages que vous pouvez
-    rencontrer et ce que chacun signifie réellement.
+1. **[Limites et notes d'exploitation](/fr/docs/reparto/limitations/)** — les frontières
+   délibérées du produit, les bornes du solveur et le premier démarrage.
+2. **[Dépannage](/fr/docs/reparto/troubleshooting/)** — les messages que vous pouvez
+   rencontrer et ce que chacun signifie réellement.
 
 :::tip[La séance en direct est disponible]
 Le chef peut ouvrir et fermer la séance, piloter les cinq actions de tour et suivre les

@@ -13,7 +13,7 @@ page translates the ones you are most likely to meet.
 [empty pages](#a-page-is-empty) · [cannot lock](#i-cannot-lock-the-plan) ·
 [cannot assign](#i-cannot-assign-a-position) ·
 [allocation changes](#i-changed-the-allocation-and-everything-stopped) ·
-[hours look wrong](#the-hours-look-wrong) · [meeting](#the-meeting-controls-do-nothing)
+[hours look wrong](#the-hours-look-wrong) · [meeting](#the-meeting-controls-are-disabled)
 
 ---
 

@@ -12,9 +12,9 @@ détient un poste complet, en entier.
 **Sur cette page :** [le tableau](#le-tableau-daffectation) ·
 [attribuer](#attribuer-un-poste-à-un-enseignant) ·
 [pourquoi un choix est bloqué](#pourquoi-un-choix-est-proposé-bloqué-ou-absent) ·
-[annuler](#annuler-une-affectation) · [réaffecter](#réaffecter-déplacer-un-poste) ·
+[annuler](#annuler-une-affectation) · [réaffecter](#réaffecter--déplacer-un-poste) ·
 [annulation groupée](#annuler-plusieurs-lignes-à-la-fois) ·
-[terminer](#quand-létape-3-est-elle-terminée)
+[terminer](#quand-létape-3-est-elle-terminée-)
 
 ---
 

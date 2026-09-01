@@ -13,7 +13,7 @@ fallo. Esta página traduce los que más probablemente encontrará.
 [páginas vacías](#una-página-está-vacía) · [no puedo bloquear](#no-puedo-bloquear-el-plan) ·
 [no puedo asignar](#no-puedo-asignar-un-puesto) ·
 [cambios de dotación](#he-cambiado-la-dotación-y-se-ha-parado-todo) ·
-[las horas no cuadran](#las-horas-parecen-mal) · [la sesión](#los-controles-de-sesión-no-hacen-nada)
+[las horas no cuadran](#las-horas-parecen-mal) · [la sesión](#los-controles-de-sesión-están-deshabilitados)
 
 ---
 

@@ -15,9 +15,9 @@ exige **Administrateur** ou **Super administrateur**. *Mon espace* et *Écran pa
 restent accessibles à partir de **Lecteur**, car ils ne reçoivent jamais les chiffres d'un
 autre enseignant.
 
-**Sur cette page :** [rattacher les enseignants](#avant-la-séance-rattacher-chaque-enseignant) ·
+**Sur cette page :** [rattacher les enseignants](#avant-la-séance--rattacher-chaque-enseignant) ·
 [ouvrir la séance](#ouvrir-la-séance) · [gérer les tours](#conduire-les-tours) ·
-[Mon espace](#mon-espace-la-vue-enseignant) · [écran partagé](#lécran-partagé) ·
+[Mon espace](#mon-espace--la-vue-enseignant) · [écran partagé](#lécran-partagé) ·
 [temps réel](#mises-à-jour-en-direct)
 
 ---

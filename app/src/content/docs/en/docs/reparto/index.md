@@ -57,35 +57,35 @@ If you are looking for one specific thing, jump straight to it.
 
 ### The three stages, step by step
 
-4. **[Stage 1 — Configuration](/en/docs/reparto/stage-1-configuration/)** — schools,
+1. **[Stage 1 — Configuration](/en/docs/reparto/stage-1-configuration/)** — schools,
    years, departments, class levels, the teacher roster, the leadership allocation,
    participants, subjects, teaching groups, the group-subject matrix, and the process
    settings.
-5. **[Stage 2 — Planning](/en/docs/reparto/stage-2-planning/)** — creating the plan,
+2. **[Stage 2 — Planning](/en/docs/reparto/stage-2-planning/)** — creating the plan,
    materialising the main activities, adding tutoring and co-teaching, reading the
    validations, locking, and generating the positions.
-6. **[Stage 3 — Assignment](/en/docs/reparto/stage-3-assignment/)** — the assignment
+3. **[Stage 3 — Assignment](/en/docs/reparto/stage-3-assignment/)** — the assignment
    board, giving a position to a teacher, undoing, and moving a position.
 
 ### Concepts and reference
 
-7. **[Hours, balances and feasibility](/en/docs/reparto/hours-and-balances/)** — why
+1. **[Hours, balances and feasibility](/en/docs/reparto/hours-and-balances/)** — why
    there are **two** hour totals that are both correct and must never be added
    together, and what "feasible" means.
-8. **[The meeting, teacher view and shared screen](/en/docs/reparto/meeting-and-lan/)** —
+2. **[The meeting, teacher view and shared screen](/en/docs/reparto/meeting-and-lan/)** —
    running the live selection meeting, and what teachers and the projector see.
-9. **[Versions, exports and audit](/en/docs/reparto/versions-exports-audit/)** — saving
+3. **[Versions, exports and audit](/en/docs/reparto/versions-exports-audit/)** — saving
    snapshots, comparing years, producing documents, and the trail of who did what.
-10. **[Reference](/en/docs/reparto/reference/)** — every page address, the permission
-    each one needs, and a glossary of every term this application uses.
+4. **[Reference](/en/docs/reparto/reference/)** — every page address, the permission
+   each one needs, and a glossary of every term this application uses.
 
 ### When something goes wrong
 
-11. **[Limits and operational notes](/en/docs/reparto/limitations/)** — the deliberate
-    product boundaries, first-start deployment rule and solver limits that remain after
-    the live-meeting remediation.
-12. **[Troubleshooting](/en/docs/reparto/troubleshooting/)** — the messages you may see
-    and what each one actually means.
+1. **[Limits and operational notes](/en/docs/reparto/limitations/)** — the deliberate
+   product boundaries, first-start deployment rule and solver limits that remain after
+   the live-meeting remediation.
+2. **[Troubleshooting](/en/docs/reparto/troubleshooting/)** — the messages you may see
+   and what each one actually means.
 
 :::note[The live meeting is available]
 An Administrator can open and close a meeting session, initialise and drive the turn

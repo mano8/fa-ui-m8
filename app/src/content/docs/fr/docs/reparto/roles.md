@@ -11,7 +11,7 @@ possède déjà sur ce site et en déduit tout le reste.
 
 **Sur cette page :** [les cinq rôles](#les-cinq-rôles) ·
 [chef de département](#le-rôle-de-chef-de-département) ·
-[enregistrements propres](#enregistrements-propres-ce-quun-rédacteur-peut-faire) ·
+[enregistrements propres](#enregistrements-propres--ce-quun-rédacteur-peut-faire) ·
 [boutons absents](#pourquoi-un-bouton-est-absent-plutôt-que-grisé) ·
 [les trois niveaux de vue](#les-trois-niveaux-de-vue)
 

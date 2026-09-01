@@ -59,35 +59,35 @@ algo concreto, vaya directamente a ello.
 
 ### Las tres etapas, paso a paso
 
-4. **[Etapa 1 — Configuración](/es/docs/reparto/stage-1-configuration/)** — centros,
+1. **[Etapa 1 — Configuración](/es/docs/reparto/stage-1-configuration/)** — centros,
    cursos, departamentos, etapas educativas, listado del profesorado, dotación de
    dirección, participantes, materias, grupos, la matriz grupo-materia y los ajustes del
    proceso.
-5. **[Etapa 2 — Planificación](/es/docs/reparto/stage-2-planning/)** — crear el plan,
+2. **[Etapa 2 — Planificación](/es/docs/reparto/stage-2-planning/)** — crear el plan,
    materializar las actividades principales, añadir tutoría y docencia compartida, leer
    las validaciones, bloquear y generar los puestos.
-6. **[Etapa 3 — Asignación](/es/docs/reparto/stage-3-assignment/)** — el tablero de
+3. **[Etapa 3 — Asignación](/es/docs/reparto/stage-3-assignment/)** — el tablero de
    reparto, entregar un puesto a un docente, deshacer y mover un puesto.
 
 ### Conceptos y referencia
 
-7. **[Horas, balances y viabilidad](/es/docs/reparto/hours-and-balances/)** — por qué hay
+1. **[Horas, balances y viabilidad](/es/docs/reparto/hours-and-balances/)** — por qué hay
    **dos** totales de horas que son correctos a la vez y que nunca deben sumarse, y qué
    significa «viable».
-8. **[La sesión, la vista del docente y la pantalla compartida](/es/docs/reparto/meeting-and-lan/)** —
+2. **[La sesión, la vista del docente y la pantalla compartida](/es/docs/reparto/meeting-and-lan/)** —
    cómo se celebra la sesión de selección en directo y qué ven el profesorado y el
    proyector.
-9. **[Versiones, exportaciones y auditoría](/es/docs/reparto/versions-exports-audit/)** —
+3. **[Versiones, exportaciones y auditoría](/es/docs/reparto/versions-exports-audit/)** —
    guardar instantáneas, comparar cursos, generar documentos y el rastro de quién hizo qué.
-10. **[Referencia](/es/docs/reparto/reference/)** — todas las direcciones de página, el
-    permiso que exige cada una y un glosario de todos los términos de la aplicación.
+4. **[Referencia](/es/docs/reparto/reference/)** — todas las direcciones de página, el
+   permiso que exige cada una y un glosario de todos los términos de la aplicación.
 
 ### Cuando algo va mal
 
-11. **[Límites y notas operativas](/es/docs/reparto/limitations/)** — las fronteras
-    deliberadas del producto, los límites del solver y el primer arranque.
-12. **[Solución de problemas](/es/docs/reparto/troubleshooting/)** — los mensajes que
-    puede encontrarse y qué significa realmente cada uno.
+1. **[Límites y notas operativas](/es/docs/reparto/limitations/)** — las fronteras
+   deliberadas del producto, los límites del solver y el primer arranque.
+2. **[Solución de problemas](/es/docs/reparto/troubleshooting/)** — los mensajes que
+   puede encontrarse y qué significa realmente cada uno.
 
 :::tip[La sesión en directo está disponible]
 La jefatura puede abrir y cerrar la sesión, dirigir las cinco acciones de turno y seguir
