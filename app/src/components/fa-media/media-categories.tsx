@@ -60,13 +60,8 @@ export function MediaCategories({ labels }: { labels?: Partial<MediaCategoriesLa
       />
 
       <CategoryEditorDialog
-        open={editor.open}
-        onOpenChange={editor.setOpen}
-        editor={editor.editor}
-        setEditor={editor.setEditor}
+        controller={editor}
         parentOptions={parentOptions}
-        saving={editor.saving}
-        formError={editor.formError}
         onSubmit={(event) => void editor.submit(event)}
         t={t}
       />

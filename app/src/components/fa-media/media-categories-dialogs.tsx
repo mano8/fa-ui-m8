@@ -32,30 +32,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ROOT_VALUE, type CategoryEditorState, type CategoryRow } from "./media-categories-data";
+import { ROOT_VALUE, type CategoryRow } from "./media-categories-data";
+import type { CategoryEditorController } from "./media-categories-state";
 import type { MediaCategoriesLabels } from "./media-categories-labels";
 
 export function CategoryEditorDialog({
-  open,
-  onOpenChange,
-  editor,
-  setEditor,
+  controller,
   parentOptions,
-  saving,
-  formError,
   onSubmit,
   t,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  editor: CategoryEditorState;
-  setEditor: React.Dispatch<React.SetStateAction<CategoryEditorState>>;
+  controller: CategoryEditorController;
   parentOptions: readonly CategoryRow[];
-  saving: boolean;
-  formError: string | null;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   t: MediaCategoriesLabels;
 }) {
+  const {
+    open,
+    setOpen: onOpenChange,
+    editor,
+    setEditor,
+    saving,
+    formError,
+  } = controller;
   const creating = editor.mode === "create";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

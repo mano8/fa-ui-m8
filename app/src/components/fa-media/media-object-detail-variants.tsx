@@ -169,25 +169,27 @@ function useVariantDeletion(
 }
 
 /** The card shell: heading, the generate action, and the variants table or its empty states. */
+interface VariantsFeed {
+  items: readonly VariantPublic[];
+  loading: boolean;
+  error: unknown;
+  job: { variants_created: number; variants_expected: number } | null | undefined;
+}
+
 function VariantsCard({
-  items,
-  loading,
-  error,
-  job,
+  feed,
   locale,
   labels,
   onGenerate,
   onDelete,
 }: {
-  items: readonly VariantPublic[];
-  loading: boolean;
-  error: unknown;
-  job: { variants_created: number; variants_expected: number } | null | undefined;
+  feed: VariantsFeed;
   locale: string;
   labels: MediaObjectLabels;
   onGenerate: () => void;
   onDelete: (variant: VariantPublic) => void;
 }) {
+  const { items, loading, error, job } = feed;
   return (
     <Card>
       <CardHeader>
@@ -246,10 +248,7 @@ export function ImageVariants({
   return (
     <>
       <VariantsCard
-        items={items}
-        loading={loading}
-        error={error}
-        job={job}
+        feed={{ items, loading, error, job }}
         locale={locale}
         labels={labels}
         onGenerate={() => setSelectorOpen(true)}

@@ -17,6 +17,7 @@ import {
 } from "./media-categories-data";
 
 export type CategoryTableState = ReturnType<typeof useCategoryTable>;
+export type CategoryEditorController = ReturnType<typeof useCategoryEditor>;
 
 /** Search, hierarchy filter, sort and pagination over the flattened rows. */
 export function useCategoryTable(rows: readonly CategoryRow[]) {
