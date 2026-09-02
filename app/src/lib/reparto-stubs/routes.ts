@@ -11,8 +11,12 @@ export type RepartoRouteFragments = {
   departments?: string | false;
   teacherRoster?: string | false;
   subjects?: string | false;
-  classrooms?: string | false;
+  teachingGroups?: string | false;
   classroomStages?: string | false;
+  groupSubjects?: string | false;
+  processSettings?: string | false;
+  allocation?: string | false;
+  planning?: string | false;
   requirements?: string | false;
   participants?: string | false;
   assignments?: string | false;
@@ -32,8 +36,12 @@ export type BuiltRepartoRoutes = {
   departments: string | false;
   teacherRoster: string | false;
   subjects: string | false;
-  classrooms: string | false;
+  teachingGroups: string | false;
   classroomStages: string | false;
+  groupSubjects: string | false;
+  processSettings: string | false;
+  allocation: string | false;
+  planning: string | false;
   requirements: string | false;
   participants: string | false;
   assignments: string | false;
@@ -61,8 +69,12 @@ export function buildRepartoRoutes(routes: RepartoRouteFragments = {}): BuiltRep
     departments: routes.departments ?? "/reparto/setup/departments",
     teacherRoster: routes.teacherRoster ?? "/reparto/setup/teacher-roster",
     subjects: routes.subjects ?? "/reparto/processes/[processId]/subjects",
-    classrooms: routes.classrooms ?? "/reparto/processes/[processId]/classrooms",
+    teachingGroups: routes.teachingGroups ?? "/reparto/processes/[processId]/teaching-groups",
     classroomStages: routes.classroomStages ?? "/reparto/setup/classroom-stages",
+    groupSubjects: routes.groupSubjects ?? "/reparto/processes/[processId]/group-subjects",
+    processSettings: routes.processSettings ?? "/reparto/processes/[processId]/settings",
+    allocation: routes.allocation ?? "/reparto/processes/[processId]/allocation",
+    planning: routes.planning ?? "/reparto/processes/[processId]/planning",
     requirements: routes.requirements ?? "/reparto/processes/[processId]/requirements",
     participants: routes.participants ?? "/reparto/processes/[processId]/participants",
     assignments: routes.assignments ?? "/reparto/processes/[processId]/assignments",

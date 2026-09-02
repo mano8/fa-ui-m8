@@ -1,0 +1,147 @@
+{
+ "dashboard": {
+  "en": "dist/_astro/dashboard.9cZH1N_X_weS2N.webp",
+  "es": "dist/_astro/dashboard.CVTZtu3z_1cwOv6.webp",
+  "fr": "dist/_astro/dashboard.BN7W8sqG_Z1Do7GX.webp"
+ },
+ "processes": {
+  "en": "dist/_astro/processes.CQDwuEum_zi50r.webp",
+  "es": "dist/_astro/processes.Ou5ProMx_Z1fzB29.webp",
+  "fr": "dist/_astro/processes.DILbKc7v_Zk7f8K.webp"
+ },
+ "dashboard-progress": {
+  "en": "dist/_astro/dashboard-progress.HwlJ7Ss8_ZKtnJO.webp",
+  "es": "dist/_astro/dashboard-progress.CA979y9g_iiAyx.webp",
+  "fr": "dist/_astro/dashboard-progress.B_PEJthM_XFbe3.webp"
+ },
+ "planning-balance": {
+  "en": "dist/_astro/planning-balance.dBkHWySx_ZGjHGv.webp",
+  "es": "dist/_astro/planning-balance.DfJ9a2h__ZBYKBk.webp",
+  "fr": "dist/_astro/planning-balance.BAVOCTFV_ZMHfjL.webp"
+ },
+ "requirements": {
+  "en": "dist/_astro/requirements.Bng15YnK_ZHGYyz.webp",
+  "es": "dist/_astro/requirements.B--RsKzR_Zim2Rs.webp",
+  "fr": "dist/_astro/requirements.CgnIOZWV_iofYb.webp"
+ },
+ "dashboard-participants": {
+  "en": "dist/_astro/dashboard-participants.R5OLeJvZ_1xsQ7m.webp",
+  "es": "dist/_astro/dashboard-participants.Cm17cPSB_1B63gh.webp",
+  "fr": "dist/_astro/dashboard-participants.CTBz5gKT_22znsu.webp"
+ },
+ "dashboard-invariants": {
+  "en": "dist/_astro/dashboard-invariants.CMyqqpLG_Z26uC9.webp",
+  "es": "dist/_astro/dashboard-invariants.ClZjm_xB_Z24g8hr.webp",
+  "fr": "dist/_astro/dashboard-invariants.C9qZtlqb_ZShOLN.webp"
+ },
+ "planning-feasibility": {
+  "en": "dist/_astro/planning-feasibility.Bos3NYwt_Z1CvR3D.webp",
+  "es": "dist/_astro/planning-feasibility.CWqZuiRE_2h28iN.webp",
+  "fr": "dist/_astro/planning-feasibility.DB-Hl6HC_1xTWml.webp"
+ },
+ "allocation": {
+  "en": "dist/_astro/allocation.BBsOP8VO_17bJ8G.webp",
+  "es": "dist/_astro/allocation.BMxACLjz_Z17mhKJ.webp",
+  "fr": "dist/_astro/allocation.BQlNZTje_ZDvx0I.webp"
+ },
+ "meeting": {
+  "en": "dist/_astro/meeting.CakbbOzr_aWFWX.webp",
+  "es": "dist/_astro/meeting.CYpbOofK_OySHS.webp",
+  "fr": "dist/_astro/meeting.ByZn2EfV_GGr6V.webp"
+ },
+ "shared": {
+  "en": "dist/_astro/shared.D6FABrXv_Z2kzubz.webp",
+  "es": "dist/_astro/shared.C2t7lWnw_Z1AHI8s.webp",
+  "fr": "dist/_astro/shared.DNh4D_dN_ZsTHIv.webp"
+ },
+ "setup-schools": {
+  "en": "dist/_astro/setup-schools.ClWeFLcp_ZVDYlp.webp",
+  "es": "dist/_astro/setup-schools.CXZ0pxmc_1iAkz1.webp",
+  "fr": "dist/_astro/setup-schools.heK8ze96_1og9r1.webp"
+ },
+ "setup-classroom-stages": {
+  "en": "dist/_astro/setup-classroom-stages.DBS9PFd2_Z2aa4Dn.webp",
+  "es": "dist/_astro/setup-classroom-stages.Bg7C4MCN_ZxAKca.webp",
+  "fr": "dist/_astro/setup-classroom-stages.AH6Mr6Ax_UQVYa.webp"
+ },
+ "setup-teacher-roster": {
+  "en": "dist/_astro/setup-teacher-roster.B10_eAlS_Z20LtYs.webp",
+  "es": "dist/_astro/setup-teacher-roster.u28QTfUQ_27OIPJ.webp",
+  "fr": "dist/_astro/setup-teacher-roster.CNkzJpuM_Z1dhdwR.webp"
+ },
+ "participants": {
+  "en": "dist/_astro/participants.D1-ECS8t_ZTnkqM.webp",
+  "es": "dist/_astro/participants.B_t5c-C-_Z1rnSVb.webp",
+  "fr": "dist/_astro/participants.CvKkw74K_NIupT.webp"
+ },
+ "subjects": {
+  "en": "dist/_astro/subjects.BBvLu4Hj_ZGa1gq.webp",
+  "es": "dist/_astro/subjects.Dlgt64KL_MgMYo.webp",
+  "fr": "dist/_astro/subjects.Dk03jpB8_1xmaBb.webp"
+ },
+ "teaching-groups": {
+  "en": "dist/_astro/teaching-groups.ebUnXaH__X6avF.webp",
+  "es": "dist/_astro/teaching-groups.syxIj_bu_2gFs0P.webp",
+  "fr": "dist/_astro/teaching-groups.CnGubNkN_RQ5Ds.webp"
+ },
+ "group-subjects": {
+  "en": "dist/_astro/group-subjects.BOZUih2Z_HXXdV.webp",
+  "es": "dist/_astro/group-subjects.B1JGO-dY_2iQHa2.webp",
+  "fr": "dist/_astro/group-subjects.D9A64evZ_Z2oNhJM.webp"
+ },
+ "settings": {
+  "en": "dist/_astro/settings.BbtrRTn1_15EUeF.webp",
+  "es": "dist/_astro/settings.C9wBy-x4_ZuVNrG.webp",
+  "fr": "dist/_astro/settings.vmBheDbv_Z2bOkst.webp"
+ },
+ "planning": {
+  "en": "dist/_astro/planning.BQy8hpdC_174cw5.webp",
+  "es": "dist/_astro/planning.51lVpXn9_r2zr6.webp",
+  "fr": "dist/_astro/planning.AEEeHrfO_Z3cJIV.webp"
+ },
+ "planning-materialization": {
+  "en": "dist/_astro/planning-materialization.FtxKP9Em_Z1i3gRB.webp",
+  "es": "dist/_astro/planning-materialization.COEqyN1p_ZlY8l4.webp",
+  "fr": "dist/_astro/planning-materialization.Cj8TIvtr_ZOh8Qd.webp"
+ },
+ "planning-secondary": {
+  "en": "dist/_astro/planning-secondary.De8pEfaa_1thDeP.webp",
+  "es": "dist/_astro/planning-secondary.DF5mfsmk_Z17mXtC.webp",
+  "fr": "dist/_astro/planning-secondary.CuuGtbFW_Z2t7TV4.webp"
+ },
+ "planning-lock": {
+  "en": "dist/_astro/planning-lock.CyAdmADz_ZoxpBw.webp",
+  "es": "dist/_astro/planning-lock.U8oiNZFS_Z1f1NbV.webp",
+  "fr": "dist/_astro/planning-lock.BEROfWo4_10f6gw.webp"
+ },
+ "planning-reconciliation": {
+  "en": "dist/_astro/planning-reconciliation.C4dmGyHD_2oMOOU.webp",
+  "es": "dist/_astro/planning-reconciliation.8fPUe6lX_Z25CXqM.webp",
+  "fr": "dist/_astro/planning-reconciliation.DQJeWun8_Z1WLhmV.webp"
+ },
+ "assignments": {
+  "en": "dist/_astro/assignments.BMyOYAU7_3QM90.webp",
+  "es": "dist/_astro/assignments.CeZYoFNH_Z1Ck3dg.webp",
+  "fr": "dist/_astro/assignments.HgHBNsRd_Zor3I3.webp"
+ },
+ "assignments-occupancy": {
+  "en": "dist/_astro/assignments-occupancy.G6CjHrB2_ZgK0SR.webp",
+  "es": "dist/_astro/assignments-occupancy.DbFtd1wZ_QDYrF.webp",
+  "fr": "dist/_astro/assignments-occupancy.DK97g9ze_lYHi7.webp"
+ },
+ "versions": {
+  "en": "dist/_astro/versions.YzxgNeeP_Z1Hg6Se.webp",
+  "es": "dist/_astro/versions.Czmo5bBA_2q8yLO.webp",
+  "fr": "dist/_astro/versions.DJJnoy0D_Zd08G9.webp"
+ },
+ "exports": {
+  "en": "dist/_astro/exports.CB4eypSU_1smo2u.webp",
+  "es": "dist/_astro/exports.DsQr7ZLh_Z1v3hsL.webp",
+  "fr": "dist/_astro/exports.BuNMvd8u_cHbD2.webp"
+ },
+ "audit": {
+  "en": "dist/_astro/audit.CpTeyCTB_FFSk6.webp",
+  "es": "dist/_astro/audit.BgQWBoVW_h9j7L.webp",
+  "fr": "dist/_astro/audit.BCqpZud1_Z2kGb2v.webp"
+ }
+}

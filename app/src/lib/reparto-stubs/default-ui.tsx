@@ -58,7 +58,27 @@ export function RepartoSubjectsView(_props: ViewProps) {
   return <DisabledReparto />;
 }
 
-export function RepartoClassroomsView(_props: ViewProps) {
+export function RepartoTeachingGroupsView(_props: ViewProps) {
+  return <DisabledReparto />;
+}
+
+export function RepartoClassroomStagesView(_props: ViewProps) {
+  return <DisabledReparto />;
+}
+
+export function RepartoGroupSubjectsView(_props: ViewProps) {
+  return <DisabledReparto />;
+}
+
+export function RepartoAllocationView(_props: ViewProps) {
+  return <DisabledReparto />;
+}
+
+export function RepartoProcessSettingsView(_props: ViewProps) {
+  return <DisabledReparto />;
+}
+
+export function RepartoPlanningView(_props: ViewProps) {
   return <DisabledReparto />;
 }
 

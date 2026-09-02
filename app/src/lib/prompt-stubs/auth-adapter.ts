@@ -12,7 +12,10 @@ type FaAuthAdapterOptions = {
   getToken: () => string | null | Promise<string | null>;
   refreshToken: () => RefreshResult | Promise<RefreshResult>;
   getUser: () => unknown | Promise<unknown>;
-  isSuperuser: (user: unknown) => boolean;
+  // Optional, mirroring the real package: when the host does not bind one, the
+  // plugin's own admin detection applies. Here that reduces to the flag, since
+  // a stub has no runtime config to read an adminRole floor from.
+  isSuperuser?: (user: unknown) => boolean;
 };
 
 let currentAdapter: PromptAuthAdapter | null = null;
@@ -31,7 +34,8 @@ export function createFaAuthAdapter(options: FaAuthAdapterOptions): PromptAuthAd
       return options.getUser();
     },
     isSuperuser(user?: unknown) {
-      return options.isSuperuser(user);
+      if (options.isSuperuser) return options.isSuperuser(user);
+      return Boolean((user as { is_superuser?: boolean } | null | undefined)?.is_superuser);
     }
   };
 }

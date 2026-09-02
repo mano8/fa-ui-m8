@@ -51,12 +51,12 @@ http:
     auth-public-router:
       entryPoints:
         - websecure
-      # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
-      # host. TO EXPOSE /user ON THE LAN, delete the `Host(`localhost`) && ` prefix.
+      # LAN-enabled for this development stack. Path exclusions remain the
+      # security boundary regardless of the requested hostname.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless —
       # /user/metrics + /user/private are never public on ANY host. /user/health is
       # public-shallow (its deep detail stays app-gated, fail-closed).
-      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/user`) && !(PathPrefix(`/user/metrics`) || PathPrefix(`/user/private`))"
+      rule: "PathPrefix(`/user`) && !(PathPrefix(`/user/metrics`) || PathPrefix(`/user/private`))"
       service: auth-service
       middlewares:
         - security-headers
@@ -84,10 +84,9 @@ http:
     media-public-router:
       entryPoints:
         - websecure
-      # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
-      # host. TO EXPOSE /media ON THE LAN, delete the `Host(`localhost`) && ` prefix.
+      # LAN-enabled for this development stack. The metrics exclusion remains.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
-      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/media`) && !PathPrefix(`/media/metrics`)"
+      rule: "PathPrefix(`/media`) && !PathPrefix(`/media/metrics`)"
       service: media-service
       middlewares:
         - security-headers
@@ -114,10 +113,9 @@ http:
     prompt-public-router:
       entryPoints:
         - websecure
-      # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
-      # host. TO EXPOSE /prompt ON THE LAN, delete the `Host(`localhost`) && ` prefix.
+      # LAN-enabled for this development stack. The metrics exclusion remains.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
-      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/prompt`) && !PathPrefix(`/prompt/metrics`)"
+      rule: "PathPrefix(`/prompt`) && !PathPrefix(`/prompt/metrics`)"
       service: prompt-engine-service
       middlewares:
         - security-headers
@@ -142,10 +140,9 @@ http:
     reparto-public-router:
       entryPoints:
         - websecure
-      # LOCALHOST-ONLY by default: Host(`localhost`) limits this route to the Docker
-      # host. TO EXPOSE /reparto ON THE LAN, delete the `Host(`localhost`) && ` prefix.
+      # LAN-enabled for this development stack. The metrics exclusion remains.
       # The path exclusions are the SECURITY CONTRACT and MUST stay regardless.
-      rule: "(Host(`localhost`) || Host(`192.168.1.35`)) && PathPrefix(`/reparto`) && !PathPrefix(`/reparto/metrics`)"
+      rule: "PathPrefix(`/reparto`) && !PathPrefix(`/reparto/metrics`)"
       service: reparto-service
       middlewares:
         - security-headers
@@ -160,6 +157,19 @@ http:
       middlewares:
         - security-headers
         - internal-only
+
+    # Browser-facing S3 endpoint for presigned media transfers. Service routers
+    # win on their longer path rules; MinIO management and health paths stay
+    # unavailable through the LAN TLS entrypoint.
+    minio-public-router:
+      entryPoints:
+        - websecure
+      rule: "!PathPrefix(`/user`) && !PathPrefix(`/media`) && !PathPrefix(`/prompt`) && !PathPrefix(`/reparto`) && !PathPrefix(`/minio`)"
+      service: minio-service
+      middlewares:
+        - security-headers
+      tls: {}
+      priority: 1
 
   services:
     auth-service:
@@ -178,6 +188,10 @@ http:
       loadBalancer:
         servers:
           - url: "http://reparto_service:8000"
+    minio-service:
+      loadBalancer:
+        servers:
+          - url: "http://minio:9000"
 
   middlewares:
     ip-allowlist:

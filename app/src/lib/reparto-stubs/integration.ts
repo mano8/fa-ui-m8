@@ -13,7 +13,12 @@ export type RepartoRouteFragments = {
   departments?: string | false;
   teacherRoster?: string | false;
   subjects?: string | false;
-  classrooms?: string | false;
+  teachingGroups?: string | false;
+  classroomStages?: string | false;
+  groupSubjects?: string | false;
+  processSettings?: string | false;
+  allocation?: string | false;
+  planning?: string | false;
   requirements?: string | false;
   participants?: string | false;
   assignments?: string | false;
@@ -33,7 +38,12 @@ export type BuiltRepartoRoutes = {
   departments: string | false;
   teacherRoster: string | false;
   subjects: string | false;
-  classrooms: string | false;
+  teachingGroups: string | false;
+  classroomStages: string | false;
+  groupSubjects: string | false;
+  processSettings: string | false;
+  allocation: string | false;
+  planning: string | false;
   requirements: string | false;
   participants: string | false;
   assignments: string | false;
@@ -54,8 +64,9 @@ export type FaRepartoNavGroup = {
 };
 
 export type FaRepartoNav = {
-  setup: FaRepartoNavGroup;
-  process: FaRepartoNavGroup;
+  configuration: FaRepartoNavGroup;
+  planning: FaRepartoNavGroup;
+  assignment: FaRepartoNavGroup;
 };
 
 export type FaRepartoAstroOptions = {
@@ -72,25 +83,39 @@ export type FaRepartoAstroOptions = {
   views?: { strategy?: "none" | "package" | "scaffolded" };
 };
 
+// Mirrors the package's own DEFAULT_REPARTO_NAV: three stage groups in §8.2
+// setup order. The disabled build never renders it — the stub exists so a
+// build without the package still typechecks against the same shape.
 export const DEFAULT_REPARTO_NAV: FaRepartoNav = {
-  setup: {
-    labelKey: "nav.group.setup",
+  configuration: {
+    labelKey: "nav.group.configuration",
     entries: [
+      { labelKey: "nav.item.processes", route: "processList" },
+      { labelKey: "nav.item.dashboard", route: "dashboard" },
       { labelKey: "nav.item.schools", route: "schools" },
       { labelKey: "nav.item.academicYears", route: "academicYears" },
       { labelKey: "nav.item.departments", route: "departments" },
+      { labelKey: "nav.item.classroomStages", route: "classroomStages" },
       { labelKey: "nav.item.teacherRoster", route: "teacherRoster" },
+      { labelKey: "nav.item.allocation", route: "allocation" },
+      { labelKey: "nav.item.processParticipants", route: "participants" },
+      { labelKey: "nav.item.subjects", route: "subjects" },
+      { labelKey: "nav.item.teachingGroups", route: "teachingGroups" },
+      { labelKey: "nav.item.groupSubjects", route: "groupSubjects" },
+      { labelKey: "nav.item.processSettings", route: "processSettings" },
     ],
   },
-  process: {
-    labelKey: "nav.group.process",
+  planning: {
+    labelKey: "nav.group.planning",
     entries: [
-      { labelKey: "nav.item.dashboard", route: "dashboard" },
-      { labelKey: "nav.item.processes", route: "processList" },
-      { labelKey: "nav.item.classrooms", route: "classrooms" },
-      { labelKey: "nav.item.subjects", route: "subjects" },
+      { labelKey: "nav.item.planning", route: "planning" },
       { labelKey: "nav.item.requirements", route: "requirements" },
-      { labelKey: "nav.item.processParticipants", route: "participants" },
+      { labelKey: "nav.item.planningExports", route: "exports" },
+    ],
+  },
+  assignment: {
+    labelKey: "nav.group.assignment",
+    entries: [
       { labelKey: "nav.item.assignments", route: "assignments" },
       { labelKey: "nav.item.meeting", route: "meeting" },
       { labelKey: "nav.item.myView", route: "teacherView" },
@@ -116,7 +141,12 @@ export function buildRepartoRoutes(routes: RepartoRouteFragments = {}): BuiltRep
     departments: routes.departments ?? "/reparto/setup/departments",
     teacherRoster: routes.teacherRoster ?? "/reparto/setup/teacher-roster",
     subjects: routes.subjects ?? "/reparto/processes/[processId]/subjects",
-    classrooms: routes.classrooms ?? "/reparto/processes/[processId]/classrooms",
+    teachingGroups: routes.teachingGroups ?? "/reparto/processes/[processId]/teaching-groups",
+    classroomStages: routes.classroomStages ?? "/reparto/setup/classroom-stages",
+    groupSubjects: routes.groupSubjects ?? "/reparto/processes/[processId]/group-subjects",
+    processSettings: routes.processSettings ?? "/reparto/processes/[processId]/settings",
+    allocation: routes.allocation ?? "/reparto/processes/[processId]/allocation",
+    planning: routes.planning ?? "/reparto/processes/[processId]/planning",
     requirements: routes.requirements ?? "/reparto/processes/[processId]/requirements",
     participants: routes.participants ?? "/reparto/processes/[processId]/participants",
     assignments: routes.assignments ?? "/reparto/processes/[processId]/assignments",
@@ -139,8 +169,15 @@ export function buildRepartoNav(
   };
 
   return {
-    setup: { ...nav.setup, entries: nav.setup.entries.map(resolveHref) },
-    process: { ...nav.process, entries: nav.process.entries.map(resolveHref) },
+    configuration: {
+      ...nav.configuration,
+      entries: nav.configuration.entries.map(resolveHref),
+    },
+    planning: { ...nav.planning, entries: nav.planning.entries.map(resolveHref) },
+    assignment: {
+      ...nav.assignment,
+      entries: nav.assignment.entries.map(resolveHref),
+    },
   };
 }
 

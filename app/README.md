@@ -94,6 +94,17 @@ PUBLIC_AUTH_API_BASE=/user
 PUBLIC_SITE_URL=http://localhost:4321
 ```
 
+For direct LAN development over HTTPS, set `PUBLIC_SITE_URL` and every enabled
+plugin API base to the host's LAN address, then point Vite at a certificate that
+contains that IP in its SAN list:
+
+```ini
+PUBLIC_SITE_URL=https://192.168.1.36:4321
+DEV_HTTPS_CERT_FILE=../docker_compose/dev_local_full_ui_m8/traefik/certs/local.crt
+DEV_HTTPS_KEY_FILE=../docker_compose/dev_local_full_ui_m8/traefik/certs/local.key
+PUBLIC_AUTH_API_BASE=https://192.168.1.36:4430/user
+```
+
 Auth routes are localized through Starlight locales:
 
 - `/en/auth/login`, `/fr/auth/login`, `/es/auth/login`
@@ -106,7 +117,10 @@ Security model:
 - Access tokens are kept in memory only.
 - Refresh uses the HttpOnly `refresh_token` cookie with `credentials: "include"`.
 - The PKCE verifier is stored temporarily in `sessionStorage` and removed during callback handling.
-- Admin hooks check `user.is_superuser` before calling superuser endpoints.
+- Auth and media admin hooks check `user.is_superuser` before calling superuser endpoints.
+- The prompt admin surface gates on a role floor instead: `PUBLIC_PROMPT_ADMIN_ROLE`
+  (default `admin`), matching `require_admin` on `prompt-engine-m8`'s `/dashboard/*`.
+  An explicit `is_superuser` flag still passes.
 - API responses are validated with Zod schemas.
 
 Verification:
@@ -208,14 +222,25 @@ same `astro.config.mjs` serves every configuration.
 | :-- | :-- | :-- | :-- |
 | Auth | `@mano8/astro-auth-m8` | **Required** (the one mandatory peer) | always |
 | Media | `@mano8/astro-media-m8` | Opt-in (`optionalDependencies`) | package installed **and** `PUBLIC_MEDIA_API_BASE` set |
+| Prompt | `@mano8/astro-prompt-m8` | Opt-in (`optionalDependencies`) | package installed **and** `PUBLIC_PROMPT_API_BASE` set |
+| Reparto | `@mano8/astro-reparto-m8` | Opt-in (`optionalDependencies`) | package installed **and** `PUBLIC_REPARTO_API_BASE` set |
 
-How the media gate works: [`astro.config.mjs`](astro.config.mjs) reads
-`PUBLIC_MEDIA_API_BASE` and, only when it is set, `await import()`s the media
-package and wires it after auth. With the var unset the package is never imported,
-so an auth-only deployment builds even with the media package absent. Because the
-UI is a **static build** (`output: static`), this gate is evaluated at **build
-time** — the env var must be present when `astro build` runs (e.g. via the compose
-service's `environment:` block), not merely at runtime.
+How the gate works (the same shape for every optional plugin):
+[`astro.config.mjs`](astro.config.mjs) reads the plugin's `PUBLIC_*_API_BASE` and,
+only when it is set *and* the package is installed, `await import()`s it and wires
+it after auth. With the var unset the package is never imported, so an auth-only
+deployment builds even with the optional packages absent; when the var is set but
+the package is missing, the config warns and leaves the plugin off rather than
+failing the build. Because the UI is a **static build** (`output: static`), this
+gate is evaluated at **build time** — the env var must be present when
+`astro build` runs (e.g. via the compose service's `environment:` block), not
+merely at runtime.
+
+A disabled plugin's imports resolve to local stubs (`src/lib/reparto-stubs/`,
+and the equivalents for the other plugins), so a disabled build still typechecks
+and emits **none** of the plugin's routes. `npm run verify:plugin-matrix` asserts
+both directions across `auth-only`, `with-media`, `with-prompt`, `with-reparto`
+and `all-on`.
 
 Canonical env names (operator-facing — set these):
 
@@ -225,13 +250,124 @@ Canonical env names (operator-facing — set these):
 | `PUBLIC_MEDIA_API_BASE` | media | backend media base path **and** the media on/off gate |
 | `PUBLIC_MEDIA_V1_BASE` | media | versioned media routes sub-prefix |
 | `PUBLIC_MEDIA_STORAGE_ORIGIN` | media | browser-direct storage origin for CSP `connect-src` (e.g. `https://storage.example.com`); unset for same-origin storage |
+| `PUBLIC_PROMPT_API_BASE` | prompt | backend prompt base path **and** the prompt on/off gate |
+| `PUBLIC_PROMPT_API_PREFIX` | prompt | optional API sub-prefix; leave unset for the current contract, where routes live directly below the base |
+| `PUBLIC_PROMPT_ADMIN_ROLE` | prompt | minimum role for the prompt admin surface (defaults to `admin`, the `require_admin` floor the service enforces on `/dashboard/*`) |
+| `PUBLIC_REPARTO_API_BASE` | reparto | backend reparto base path **and** the reparto on/off gate |
+| `PUBLIC_REPARTO_API_PREFIX` | reparto | optional API sub-prefix; leave unset for the current contract, where routes live directly below the base |
 
-The media integration re-exposes the `PUBLIC_MEDIA_*` values internally as
-`PUBLIC_FA_MEDIA_*` at build time; those are an implementation detail and must not
-be set directly.
+Each integration re-exposes its `PUBLIC_<PLUGIN>_*` values internally as
+`PUBLIC_FA_<PLUGIN>_*` at build time; those are an implementation detail and must
+not be set directly.
 
 > Note: the `file:` dependency paths are local dev links; published configurations
 > will pin registry-versioned ranges once the plugins are published.
+
+## Teaching assignment — reparto (opt-in)
+
+`@mano8/astro-reparto-m8` adds the department teaching-assignment feature backed
+by `reparto-docente-m8` on `/reparto`. It is an opt-in plugin like media and
+prompt: install the package and set `PUBLIC_REPARTO_API_BASE`.
+
+### The three stages
+
+The domain is a three-stage workflow, and the left menu is grouped to match it.
+The stage boundaries are real state transitions in the service, not UI phases:
+
+1. **Configuration** — schools, academic years, departments, classroom stages,
+   the teacher roster, the process's participants, its subjects and teaching
+   groups, the group × subject matrix, and the leadership hour allocation.
+2. **Planning** — one teaching plan per process. Materialize the matrix into
+   *main* activities, add secondary ones (tutoring, co-teaching, support), reach
+   both hour balances, then **lock** the plan and **generate** requirements.
+3. **Assignment** — teachers take complete positions, in a LAN meeting with an
+   ordered selection turn or directly; versions, exports and the audit trail.
+
+### Routes
+
+22 routes per locale, mounted under each Starlight locale prefix
+(`/en/…`, `/es/…`, `/fr/…`). `[processId]` is the selected assignment process;
+nav entries point at the placeholder `current` until one is opened.
+
+| Group | Route | What |
+| :-- | :-- | :-- |
+| Configuration | `/reparto/processes` | process list — the entry point |
+| Configuration | `/reparto` | department-head dashboard |
+| Configuration | `/reparto/setup/schools` | schools |
+| Configuration | `/reparto/setup/academic-years` | academic years |
+| Configuration | `/reparto/setup/departments` | departments |
+| Configuration | `/reparto/setup/classroom-stages` | classroom stages |
+| Configuration | `/reparto/setup/teacher-roster` | teacher roster |
+| Configuration | `/reparto/processes/[processId]/allocation` | allocation revisions |
+| Configuration | `/reparto/processes/[processId]/participants` | process participants and their hours |
+| Configuration | `/reparto/processes/[processId]/subjects` | subjects |
+| Configuration | `/reparto/processes/[processId]/teaching-groups` | teaching groups |
+| Configuration | `/reparto/processes/[processId]/group-subjects` | the group × subject matrix |
+| Configuration | `/reparto/processes/[processId]/settings` | process settings |
+| Planning | `/reparto/processes/[processId]/planning` | the teaching plan: materialize, activities, balances, lock |
+| Planning | `/reparto/processes/[processId]/requirements` | generated positions |
+| Planning | `/reparto/processes/[processId]/exports` | export centre (planning draft and provisional exports) |
+| Assignment | `/reparto/processes/[processId]/assignments` | the assignment board |
+| Assignment | `/reparto/meeting/[processId]` | LAN meeting and selection turns |
+| Assignment | `/reparto/processes/[processId]/my-view` | a teacher's own view |
+| Assignment | `/reparto/processes/[processId]/shared` | shared projection screen (no participant names) |
+| Assignment | `/reparto/processes/[processId]/versions` | process versions |
+| Assignment | `/reparto/processes/[processId]/exports` | export centre |
+| Assignment | `/reparto/processes/[processId]/audit` | audit trail |
+
+`exports` deliberately appears in both Stage 2 and Stage 3 — one route serving
+the provisional and the final artifacts. `processes`/`dashboard` head the
+Configuration group because nothing else can be opened before a process is
+selected. Route paths are overridable through the integration's route fragments;
+the table lists the defaults. The nav is built from the same route map, so a
+route disabled in the config disappears from the menu rather than dangling.
+
+### Allocation revisions
+
+The leadership group-hour allocation is **immutable and append-only**. Recording
+a new figure on `/allocation` supersedes the previous revision inside one
+transaction and requires a reason plus its provenance; exactly one revision per
+process is current. Nothing edits a revision in place, so the history of what was
+allocated, when and on whose authority survives the plan being rebuilt.
+
+The current revision is the target of the plan's **group** hour balance. Changing
+it while a plan exists therefore invalidates that plan — the reconciliation panel
+on `/planning` is where that change is resolved.
+
+### The two balances
+
+A plan is balanced on two independent axes, and both must be exact:
+
+- **Group hours** — what the groups receive, against the current allocation
+  revision.
+- **Teacher hours** — what the teachers carry, against the sum of the
+  participants' base + extra weekly hours.
+
+They are legitimately different numbers: a co-teaching activity of 2 h for two
+teachers adds 2 group hours and 4 teacher hours. `120 / 124` is the shape of a
+correct plan, not a discrepancy. Only a `BALANCED` plan can be locked, and only a
+locked plan generates requirements.
+
+### Roles
+
+Configuration and planning mutations belong to the department head; a teacher
+reads planning-safe summaries and their own view, and the shared screen renders
+nameless aggregates. The service is authoritative — the UI mirrors those rules so
+the operator is not offered actions the backend will refuse.
+
+### Running it locally
+
+Only the [`dev_local_full_ui_m8`](../docker_compose/dev_local_full_ui_m8) stack
+runs `reparto_service`. It ships no UI container, so run the host from `app/`:
+
+```sh
+npm run dev     # http://localhost:4321, with PUBLIC_REPARTO_API_BASE set
+```
+
+For the development **database reset** — including the `shared_migrations/`
+step that makes it a clean one — and the `SEED_EXAMPLE_DATA` worked example
+that lands a ready stage-1 department to walk the three stages against, see
+[that stack's README](../docker_compose/dev_local_full_ui_m8/README.md).
 
 ## Content-Security-Policy (production)
 

@@ -30,6 +30,7 @@ function mediaObject(overrides: Partial<MediaObjectPublic> = {}): MediaObjectPub
     status: "ready",
     scan_status: "clean",
     moderation_status: "approved",
+    categories: [],
     created_at: "2026-06-25T08:00:00Z",
     updated_at: "2026-06-25T08:00:00Z",
     deleted_at: null,

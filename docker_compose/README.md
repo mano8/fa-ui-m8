@@ -1,6 +1,6 @@
 # Docker Compose Examples
 
-Five ready-to-run stacks, each targeting a distinct use case. Each runs the same two application services with different infrastructure and configuration.
+Three ready-to-run stacks for the `fa-ui-m8` host, each targeting a distinct use case. They differ in which backend services they run and in how the UI itself is served.
 
 ---
 
@@ -20,51 +20,57 @@ Five ready-to-run stacks, each targeting a distinct use case. Each runs the same
 
 ## Which stack should I use?
 
-| Stack | Database | Algorithm | Token mode | Secrets | Monitoring | Hardening | Best for |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [quickstart_m8](quickstart_m8/) | MariaDB | HS256 | `stateful` | env file | — | — | **Start here** — fastest onboarding |
-| [postgres_m8](postgres_m8/) | PostgreSQL 18 | HS256 | `stateful` | env file | — | — | PostgreSQL projects |
-| [rs256_m8](rs256_m8/) | MariaDB | RS256 | `hybrid` | env file | — | — | Asymmetric signing + JWKS |
-| [metrics_m8](metrics_m8/) | PostgreSQL 18 | HS256 | `stateful` | env file | Prometheus + Grafana | — | Metrics dashboards |
-| [hardened_m8](hardened_m8/) | PostgreSQL 18 | RS256 | `stateful` | env file | Prometheus + Grafana | container + network | Hardened posture without Vault |
-| [vault_m8](vault_m8/) | PostgreSQL 18 | RS256 | `stateful` | **HashiCorp Vault** | Prometheus + Grafana | container + network | Hardened + secrets manager |
+| Stack | Backend services | UI | Monitoring | Best for |
+| --- | --- | --- | --- | --- |
+| [dev_ui_m8](dev_ui_m8/) | auth + media (+ workers, MinIO, ClamAV) | `astro` container running `npm run dev` on `127.0.0.1:4321`, app and plugins bind-mounted for live reload | Prometheus + Grafana | Day-to-day UI development against auth + media |
+| [dev_local_full_ui_m8](dev_local_full_ui_m8/) | auth + media + **prompt** + **reparto** (+ workers, MinIO, ClamAV) | **none** — run `npm run dev` from [`../app`](../app) on the host | Prometheus + Grafana | The full platform; the only stack that runs `reparto_service` |
+| [hardened_ui_m8](hardened_ui_m8/) | auth + media (+ media worker, MinIO, ClamAV) | `ui` container serving the **built** `dist/` behind Traefik as a catch-all route | Prometheus + Grafana | Verifying the shipped static build, its CSP and the hardened posture |
+
+All three use PostgreSQL 18, RS256/JWKS between the issuer and its consumers,
+`stateful` token mode, container hardening and network segmentation, and build
+every application service from the sibling repositories rather than published
+images.
 
 **Decision guide:**
 
-- **Just want things running** → [quickstart_m8](quickstart_m8/)
-- **Need PostgreSQL without monitoring** → [postgres_m8](postgres_m8/)
-- **Asymmetric signing / multiple consumers** → [rs256_m8](rs256_m8/) or [hardened_m8](hardened_m8/)
-- **Metrics and dashboards** → [metrics_m8](metrics_m8/)
-- **Container hardening + observability** → [hardened_m8](hardened_m8/) — Docker Hub image, read-only rootfs, network segmentation
-- **Secrets manager (Vault)** → [vault_m8](vault_m8/) — credentials never live in plain env files
-- **Stateless mode** → start from [quickstart_m8](quickstart_m8/) and set `TOKEN_MODE=stateless` in `auth.env`
+- **Working on auth or media UI** → [dev_ui_m8](dev_ui_m8/) — everything in containers, live reload
+- **Working on the three-stage teaching-assignment (reparto) feature** → [dev_local_full_ui_m8](dev_local_full_ui_m8/) — it is the only stack with `reparto_service`, and the UI runs on the host so working-tree plugin source is exercised
+- **Checking what actually ships** → [hardened_ui_m8](hardened_ui_m8/) — the production CSP and the static build are only real here (both are no-ops under `astro dev`)
+- **A reparto-only backend, no UI** → [`reparto-docente-m8/docker_compose/dev_reparto_m8`](../../reparto-docente-m8/docker_compose/dev_reparto_m8)
+- **Stateless mode** → set `TOKEN_MODE=stateless` in `auth.env` (disables Google OAuth; see [Token modes](#token-modes))
 
 ---
 
 ## Common architecture
 
-All stacks share the same service layout:
+All stacks share the same shape — one Traefik entry point, one path prefix per
+service, and a per-service database on an internal network:
 
 ```text
 Browser / Frontend
        │
        ▼
-  Traefik :9000  ──────────────────────────────┐
-       │                                        │
-       ▼  /user/*                               ▼  /fastapi/*
-auth_user_service :8000            fastapi_service :8000
-       │                                        │
-       └──────────┬─────────────────────────────┘
-                  │
-          ┌───────┴────────┐
-          ▼                ▼
-        m8_db          redis_cache
-   (MariaDB / PG)      (Redis 8.8)
-
-(metrics_m8, hardened_m8, and vault_m8 also include Prometheus + Grafana)
+  Traefik :9000                          (app_net)
+       ├── /user/*    ─► auth_user_service :8000     (RS256 issuer)
+       ├── /media/*   ─► media_service :8000         (consumer via JWKS)
+       ├── /prompt/*  ─► prompt_engine_service :8000 (dev_local_full_ui_m8 only)
+       ├── /reparto/* ─► reparto_service :8000       (dev_local_full_ui_m8 only)
+       └── /*         ─► ui :8080                    (hardened_ui_m8 only)
+                          │
+                  (data_net, no gateway)
+                          ▼
+        m8_db (PostgreSQL 18) · redis_cache · media_redis_cache · minio
 ```
 
-Traefik is the single entry point. Both application services sit on an internal Docker network (`m8_app_network`) and are not directly reachable from the host.
+Traefik is the single entry point. Application services sit on `app_net` and
+`data_net`; the database, Redis and MinIO are only on `data_net` and are not
+reachable from the host except through the loopback ports each stack publishes
+for dev convenience. Consumers never touch the auth Redis — revocation goes
+through the issuer's private introspection endpoint over HTTP.
+
+Where the UI runs differs per stack: a dev-server container in `dev_ui_m8`, a
+static-file container behind the catch-all router in `hardened_ui_m8`, and a
+host-run `npm run dev` in `dev_local_full_ui_m8`.
 
 ---
 
@@ -91,9 +97,11 @@ Set `TOKEN_MODE` in `auth.env` to control how access tokens are validated:
 Every stack follows the same four steps:
 
 ```sh
-# 1. Copy env files and fill in all secrets (replace every 'changethis')
-cp auth.env.example auth.env
-cp api.env.example api.env
+# 1. Copy EVERY .env.example in the stack directory and fill in all secrets
+#    (replace every 'changethis'). Which files exist depends on the stack —
+#    dev_local_full_ui_m8 adds prompt.env and reparto.env.
+for f in *.env.example; do cp -n "$f" "${f%.example}"; done
+cp -n .env.example .env          # infrastructure vars, where the stack has one
 
 # 2. Generate keys (RS256/ES256 stacks) and TLS certificates
 bash init.sh
@@ -119,14 +127,29 @@ To rotate cryptographic keys without reinitializing: `bash init.sh --rotate-keys
 
 ## Environment file system
 
-Each stack uses **two env files** for the application services. Copy the `.example` files and fill in your values:
+Each stack uses **one env file per application service**. Copy the `.example` files and fill in your values:
 
 ```text
+.env          ← infrastructure/bootstrap: DB superuser, per-service *_DB_* triplets,
+                Redis and MinIO root passwords (read by the DB init script and by
+                Compose interpolation — never by the services themselves)
 auth.env      ← auth_user_service: algorithm, token mode, secrets, DB/Redis config, expiry
-api.env       ← fastapi_service: consumer role, token validation config, JWKS URI if RS256/ES256
+media.env     ← media_service: consumer role, token validation, MinIO credentials
+worker.env    ← media_worker
+prompt.env    ← prompt_engine_service   (dev_local_full_ui_m8 only)
+reparto.env   ← reparto_service         (dev_local_full_ui_m8 only)
+grafana.env   ← Grafana admin credentials
+test.env      ← security-tests-m8 live runner
 ```
 
-Some stacks also use a shared `.env` file at the stack root for infrastructure variables (DB root password, Redis password) that are read directly by the database container's init script.
+Service env files use the **generic** `DB_DATABASE` / `DB_USER` / `DB_PASSWORD`
+names; `.env` uses the **prefixed** `AUTH_DB_*` / `MEDIA_DB_*` / `PROMPT_DB_*` /
+`REPARTO_DB_*` triplets. The two must agree per service — they are not
+interchangeable spellings of the same variable.
+
+All runtime `*.env` files hold secrets and are git-ignored; only the `*.example`
+templates are tracked. When a service gains a setting, update its `.example`
+alongside the running file.
 
 Generate secrets with:
 
@@ -153,8 +176,10 @@ All services share one database and one user.
 **Scenario 2 — per-service isolation** (default in all stacks):
 
 ```ini
-AUTH_DB_USER=auth_user   AUTH_DB_PASSWORD=...  AUTH_DB_NAME=auth_db
-API_DB_USER=api_user     API_DB_PASSWORD=...   API_DB_NAME=api_db
+AUTH_DB_USER=auth_user        AUTH_DB_PASSWORD=...     AUTH_DB_NAME=auth_db
+MEDIA_DB_USER=media_user      MEDIA_DB_PASSWORD=...    MEDIA_DB_NAME=media_db
+PROMPT_DB_USER=prompt_user    PROMPT_DB_PASSWORD=...   PROMPT_DB_NAME=prompt_engine_db
+REPARTO_DB_USER=reparto_user  REPARTO_DB_PASSWORD=...  REPARTO_DB_NAME=reparto_db
 ```
 
 Each service gets its own database and credentials. `init-db.sh` creates them automatically.
@@ -176,15 +201,31 @@ Add any `PREFIX_DB_{USER,PASSWORD,NAME}` triplet. Prefixes must be `UPPERCASE`, 
 
 ## Shared migrations
 
-The `shared_migrations/` directory is created automatically on first start. It holds Alembic version files for both the auth schema and the application schema:
+The `shared_migrations/` directory is created automatically on first start. It holds one Alembic version tree per service schema:
 
 ```text
 shared_migrations/
-├── auth_user/versions/   ← users, sessions, API keys, rate limits
-└── m8_app/versions/      ← your application tables
+├── auth_user/versions/         ← users, sessions, API keys, rate limits
+├── media/versions/             ← media objects, variants, outbox
+├── prompt_engine/versions/     ← prompt engine tables
+└── reparto_docentes/versions/  ← teaching-assignment tables
 ```
 
-Migrations run automatically every time the containers start. If you switch stacks, the migration history is preserved across restarts because the directory is mounted as a volume.
+Migrations run automatically every time the containers start, and each service
+autogenerates a revision when its models differ from the live schema. The
+directory is a bind mount, so history is preserved across restarts — and
+**across `--reset-db`**, which deletes `db_data/` but not this tree. A reset that
+leaves revisions behind replays an old schema onto the new database, so a clean
+reset means deleting the relevant `versions/*.py` too:
+
+```sh
+bash init.sh --reset-db --yes
+rm -f shared_migrations/reparto_docentes/versions/*.py
+docker compose up -d
+```
+
+Booting the stack a second time must autogenerate **no** further revision. If it
+does, the models and the applied schema have drifted.
 
 ---
 
@@ -194,13 +235,14 @@ Migrations run automatically every time the containers start. If you switch stac
 | --- | --- | --- |
 | `8000` | `0.0.0.0` | Traefik HTTP — public |
 | `4430` | `0.0.0.0` | Traefik HTTPS — public |
-| `9000` | `127.0.0.1` | API services entry (override with `API_BIND_IP` in auth.env) |
+| `9000` | `127.0.0.1` | API services entry (override with `API_BIND_IP` in the stack's `.env`) |
 | `8080` | `127.0.0.1` | Traefik dashboard |
-| `3306` / `5432` | `127.0.0.1` | Database |
+| `5432` | `127.0.0.1` | PostgreSQL |
 | `6379` | `127.0.0.1` | Redis |
-| `8200` | `127.0.0.1` | HashiCorp Vault UI/API (`vault_m8` only) |
-| `9090` | `127.0.0.1` | Prometheus (`metrics_m8`, `hardened_m8`, `vault_m8`) |
-| `3000` | `127.0.0.1` | Grafana (`metrics_m8`, `hardened_m8`, `vault_m8`) |
+| `4321` | `127.0.0.1` | Astro dev server — a container in `dev_ui_m8`, a host process in `dev_local_full_ui_m8` |
+| `9005` / `9006` | `127.0.0.1` | MinIO API / console |
+| `9090` | `127.0.0.1` | Prometheus |
+| `3000` | `127.0.0.1` | Grafana |
 
 Port `9000` is the one you'll use most in development — all API requests go through it.
 
@@ -258,4 +300,4 @@ Then open `http://localhost:9000/user/docs` in a browser (requires `SET_DOCS=tru
 
 ---
 
-> Back to [repository root](https://github.com/mano8/fa-auth-m8/tree/main)
+> Back to [repository root](../) · UI deployment contract and route map: [`../app/README.md`](../app/README.md)

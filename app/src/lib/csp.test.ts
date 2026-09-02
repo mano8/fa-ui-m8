@@ -8,6 +8,7 @@ import {
   originOf,
   RELAXED_STYLE_SRC,
   relaxStyleSrc,
+  STARLIGHT_INLINE_SCRIPT_HASHES,
   STATIC_CSP_DIRECTIVES,
 } from '@/lib/csp';
 
@@ -129,6 +130,22 @@ describe('cspDirectives', () => {
   });
 });
 
+describe('STARLIGHT_INLINE_SCRIPT_HASHES', () => {
+  it('pins the five upstream is:inline scripts Astro cannot hash', () => {
+    expect(STARLIGHT_INLINE_SCRIPT_HASHES).toHaveLength(5);
+    expect(new Set(STARLIGHT_INLINE_SCRIPT_HASHES).size).toBe(5);
+  });
+
+  it("states each hash unquoted, as Astro's scriptDirective.hashes requires", () => {
+    // Astro wraps each entry in `'...'` itself and its schema rejects a value
+    // that does not start with the algorithm prefix, so a quoted hash is dead.
+    for (const hash of STARLIGHT_INLINE_SCRIPT_HASHES) {
+      expect(hash.startsWith('sha256-')).toBe(true);
+      expect(hash).not.toContain("'");
+    }
+  });
+});
+
 describe('buildSecurityConfig', () => {
   it('wires directives + a wasm-unsafe-eval script directive for Pagefind', () => {
     const config = buildSecurityConfig({});
@@ -137,6 +154,20 @@ describe('buildSecurityConfig', () => {
     // script-src is left for Astro to manage (self + per-build hashes); we never
     // hand it 'unsafe-inline'.
     expect(config.csp.scriptDirective.resources).not.toContain("'unsafe-inline'");
+  });
+
+  it("carries the Starlight inline-script hashes on the script directive (W2.2)", () => {
+    const config = buildSecurityConfig({});
+    expect(config.csp.scriptDirective.hashes).toEqual([...STARLIGHT_INLINE_SCRIPT_HASHES]);
+    // A copy, so a caller mutating the config cannot edit the pinned list.
+    expect(config.csp.scriptDirective.hashes).not.toBe(STARLIGHT_INLINE_SCRIPT_HASHES);
+  });
+
+  it('never relaxes script-src, whatever the style-src relaxation does', () => {
+    const config = buildSecurityConfig({});
+    const script = [...config.csp.scriptDirective.resources, ...config.csp.scriptDirective.hashes];
+    expect(script).not.toContain("'unsafe-inline'");
+    expect(script).not.toContain("'unsafe-eval'");
   });
 
   it('threads the provided env into connect-src', () => {

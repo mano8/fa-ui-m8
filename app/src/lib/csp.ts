@@ -6,7 +6,10 @@ type CspDirective = NonNullable<CspConfig['directives']>[number];
 type EnabledCspSecurityConfig = SecurityConfig & {
   csp: CspConfig & {
     directives: CspDirective[];
-    scriptDirective: NonNullable<CspConfig['scriptDirective']> & { resources: string[] };
+    scriptDirective: NonNullable<CspConfig['scriptDirective']> & {
+      resources: string[];
+      hashes: string[];
+    };
   };
 };
 
@@ -33,10 +36,14 @@ type EnabledCspSecurityConfig = SecurityConfig & {
  * strict-CSP-ready out of the box)
  * --------------------------------------------------------------------
  * - **scripts stay strict**: `script-src` is `'self'` + the per-build hashes Astro
- *   computes for Starlight's inline theme/init scripts and island bootstraps. No
+ *   computes for the scripts it processes (bundled page scripts and island
+ *   bootstraps), plus {@link STARLIGHT_INLINE_SCRIPT_HASHES} — the five upstream
+ *   `is:inline` scripts Astro's pass never sees, so it cannot hash them. No
  *   `'unsafe-inline'` for scripts — that is the real XSS vector and we keep it shut.
  *   `'wasm-unsafe-eval'` is added *only* so Starlight's Pagefind search (compiled
  *   WebAssembly) keeps working; it permits WASM compilation without enabling `eval()`.
+ *   `scripts/verify-csp.mjs` re-checks a real build and fails on any inline script
+ *   the shipped policy would refuse.
  * - **styles are relaxed**: React + Radix/shadcn set `element.style.*` and inject
  *   `<style>` at runtime (popover/dialog positioning, scroll-lock via
  *   react-remove-scroll), and Starlight renders inline `style="--sl-icon-size…"`
@@ -118,11 +125,64 @@ export function cspDirectives(env: EnvLike = process.env): CspDirective[] {
 }
 
 /**
+ * Starlight's `is:inline` scripts, which Astro's CSP pass cannot hash (W2.2).
+ *
+ * Astro hashes only the scripts it *processes*: bundled/inlined page scripts,
+ * `injectScript` payloads, client directives and the island bootstrap
+ * (`core/csp/common.ts` → `trackScriptHashes`). An `is:inline` script is copied
+ * into the HTML verbatim and never enters that set, so it ships unhashed and the
+ * browser refuses it. Measured against a real build served under enforcement:
+ * four of the five were reported blocked on every page — the sidebar's
+ * open/closed state and scroll offset were never restored, the search button
+ * kept the wrong platform shortcut, and the theme picker never synced with the
+ * applied theme.
+ *
+ * The fifth, ThemeProvider's, happens to execute today only because Astro emits
+ * it *above* the CSP `<meta>`, and a policy delivered that way binds nothing
+ * before it. That is document order we do not control rather than an exemption,
+ * so it is hashed with the rest.
+ *
+ * Each one is inline *on purpose* upstream (FOUC and an invalid keyboard hint
+ * are the stated reasons), so neither un-inlining it nor moving it to an
+ * external module is available to us without forking the component. Pinning the
+ * literal hash is the documented last resort, and it is the only entry here that
+ * needs maintenance: `scripts/verify-csp.mjs` fails the build with the new hash
+ * whenever a Starlight upgrade edits one of these scripts.
+ *
+ * Hashes are given unquoted — Astro's renderer wraps each one in `'…'` itself
+ * (`runtime/server/render/csp.ts`) and its schema rejects a quoted value.
+ *
+ * Measured against `@astrojs/starlight@0.41.3`.
+ */
+export const STARLIGHT_INLINE_SCRIPT_HASHES = [
+  // ThemeProvider.astro — defines `window.StarlightThemeProvider` and applies the
+  // stored theme to `<html data-theme>`. Inline upstream to avoid FOUC.
+  'sha256-VWo5Wp4aqSj6nSgMpeAp9cKieaoIfwFUAunAVugI5gA=',
+  // ThemeSelect.astro — `StarlightThemeProvider.updatePickers()`, syncing the
+  // theme picker with the theme the provider just applied.
+  'sha256-GkZBRnvSuhtx/cvzvukVkX2JJZW+DdPlVr7BX8Tefqo=',
+  // Search.astro — swaps the Ctrl/⌘ hint in the search button on Apple devices.
+  // Inline upstream so an invalid shortcut is never briefly shown.
+  'sha256-f/zAUE74ucc3JYp4r4QQvkJofoQdkOIhHYK+jeZ6eko=',
+  // SidebarPersister.astro (first) — restores the persisted open/closed state of
+  // the sidebar groups before they paint, via a `sl-sidebar-restore` element.
+  'sha256-wX2yOADeV+NMngflD5uYi3vl50SHC4sfM1EmylVjlX4=',
+  // SidebarPersister.astro (second) — restores the sidebar scroll offset stashed
+  // on `window._starlightScrollRestore` by the first script.
+  'sha256-7eCV4jtsr4t4knb3c4FCRPeu7GGZeOUGE3XvWix0XOQ=',
+] as const;
+
+/**
  * The object passed to Astro's `security` config. `script-src` is left to Astro
- * (it adds `'self'` + per-build hashes) and only extended with `'wasm-unsafe-eval'`
- * for Pagefind; the `style-src` relaxation happens later in {@link hardenCspMeta}.
- * `style-src` / `style-src-*` cannot be set here — Astro rejects them in
- * `security.csp.directives`.
+ * (it adds `'self'` + per-build hashes), extended with `'wasm-unsafe-eval'` for
+ * Pagefind and with {@link STARLIGHT_INLINE_SCRIPT_HASHES} for the upstream
+ * inline scripts Astro cannot see; the `style-src` relaxation happens later in
+ * {@link hardenCspMeta}. `style-src` / `style-src-*` cannot be set here — Astro
+ * rejects them in `security.csp.directives`.
+ *
+ * `'unsafe-inline'` is never added to `script-src`. Hashes are an allowlist of
+ * exactly five known scripts; `'unsafe-inline'` would admit every injected one,
+ * and the style relaxation above does not license the same trade for scripts.
  */
 export function buildSecurityConfig(env: EnvLike = process.env): EnabledCspSecurityConfig {
   return {
@@ -130,6 +190,7 @@ export function buildSecurityConfig(env: EnvLike = process.env): EnabledCspSecur
       directives: cspDirectives(env),
       scriptDirective: {
         resources: ["'self'", "'wasm-unsafe-eval'"],
+        hashes: [...STARLIGHT_INLINE_SCRIPT_HASHES],
       },
     },
   };

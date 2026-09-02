@@ -1,5 +1,7 @@
 // @ts-check
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
@@ -39,8 +41,23 @@ const mediaV1Base = publicEnv('PUBLIC_MEDIA_V1_BASE');
 const mediaStorageOrigin = publicEnv('PUBLIC_MEDIA_STORAGE_ORIGIN');
 const promptApiBase = publicEnv('PUBLIC_PROMPT_API_BASE');
 const promptApiPrefix = publicEnv('PUBLIC_PROMPT_API_PREFIX');
+const promptAdminRole = publicEnv('PUBLIC_PROMPT_ADMIN_ROLE');
 const repartoApiBase = publicEnv('PUBLIC_REPARTO_API_BASE');
 const repartoApiPrefix = publicEnv('PUBLIC_REPARTO_API_PREFIX');
+const devHttpsCertFile = publicEnv('DEV_HTTPS_CERT_FILE');
+const devHttpsKeyFile = publicEnv('DEV_HTTPS_KEY_FILE');
+const devApiProxyTarget = publicEnv('DEV_API_PROXY_TARGET');
+
+if (Boolean(devHttpsCertFile) !== Boolean(devHttpsKeyFile)) {
+	throw new Error('DEV_HTTPS_CERT_FILE and DEV_HTTPS_KEY_FILE must be set together.');
+}
+
+const devHttps = process.argv[2] === 'dev' && devHttpsCertFile && devHttpsKeyFile
+	? {
+			cert: readFileSync(resolve(devHttpsCertFile)),
+			key: readFileSync(resolve(devHttpsKeyFile)),
+		}
+	: undefined;
 const securityEnv = {
 	PUBLIC_SITE_URL: siteUrl,
 	PUBLIC_AUTH_API_BASE: authApiBase,
@@ -177,11 +194,11 @@ const mediaSidebarItems = mediaPluginEnabled
 						},
 					},
 					{
-						label: translations.en.media.tabs.upload,
-						link: '/media/upload',
+						label: translations.en.media.tabs.categories,
+						link: '/media/categories',
 						translations: {
-							es: translations.es.media.tabs.upload,
-							fr: translations.fr.media.tabs.upload,
+							es: translations.es.media.tabs.categories,
+							fr: translations.fr.media.tabs.categories,
 						},
 					},
 					{
@@ -223,9 +240,16 @@ if (promptPluginEnabled) {
 	promptIntegrations.push(
 		faPrompt({
 			apiBase: promptApiBase,
-			apiPrefix: promptApiPrefix ?? '/fastapi',
+			// Empty by default: prompt-engine-m8 mounts every route under its own
+			// API_PREFIX, which PUBLIC_PROMPT_API_BASE already addresses. The old
+			// '/fastapi' fallback pointed at a segment the service never mounts.
+			apiPrefix: promptApiPrefix ?? '',
 			mode: 'headless',
-			auth: { provider: 'fa-auth-astro' },
+			// 'admin', not the package's legacy 'is_superuser' default: the service
+			// gates /dashboard/* on require_admin (D-C2) and the plugin reads an M8
+			// role as a floor, so ADMIN and above pass. This define is what the
+			// provider actually reads when the plugin is enabled.
+			auth: { provider: 'fa-auth-astro', adminRole: promptAdminRole || 'admin' },
 			locales: ['en', 'es', 'fr'],
 			defaultLocale: 'en',
 		}),
@@ -309,6 +333,33 @@ function repartoSidebarEntry(entry, dictionaries) {
 }
 
 /**
+ * Stage groups declared by the installed plugin's nav, in declaration order.
+ *
+ * The plugin owns its own stage grouping and has changed it across majors — 1.x
+ * ships two groups (`setup`/`process`), 2.x ships three
+ * (`configuration`/`planning`/`assignment`). Reading whatever groups the nav
+ * carries keeps the host rendering the *installed* plugin's navigation instead
+ * of hardcoding one version's key names, which throws on the other.
+ *
+ * @param {unknown} nav
+ * @returns {Array<{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }>}
+ */
+function repartoNavGroups(nav) {
+	if (!nav || typeof nav !== 'object') return [];
+	/** @type {Array<{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }>} */
+	const groups = [];
+	for (const value of Object.values(nav)) {
+		if (!value || typeof value !== 'object') continue;
+		const candidate = /** @type {{ labelKey?: unknown, entries?: unknown }} */ (value);
+		if (typeof candidate.labelKey !== 'string' || !Array.isArray(candidate.entries)) continue;
+		groups.push(
+			/** @type {{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }} */ (value),
+		);
+	}
+	return groups;
+}
+
+/**
  * @param {{ labelKey: string, entries: Array<{ labelKey: string, href?: string }> }} group
  * @param {{ en: Record<string, unknown>, es: Record<string, unknown>, fr: Record<string, unknown> }} dictionaries
  */
@@ -362,10 +413,9 @@ if (repartoPluginEnabled) {
 				es: 'Reparto docente',
 				fr: 'Repartition docente',
 			},
-			items: [
-				repartoSidebarGroup(repartoNav.setup, repartoDictionaries),
-				repartoSidebarGroup(repartoNav.process, repartoDictionaries),
-			],
+			items: repartoNavGroups(repartoNav).map((group) =>
+				repartoSidebarGroup(group, repartoDictionaries),
+			),
 		},
 	];
 }
@@ -380,6 +430,24 @@ export default defineConfig({
 	// under `astro dev`; takes effect in `build`/`preview`. See src/lib/csp.ts.
 	security: buildSecurityConfig(securityEnv),
 	vite: {
+		server: {
+			strictPort: true,
+			...(devHttps ? { https: devHttps } : {}),
+			...(devApiProxyTarget
+				? {
+						proxy: Object.fromEntries(
+							['/user', '/media', '/prompt', '/reparto'].map((prefix) => [
+								prefix,
+								{
+									target: devApiProxyTarget,
+									changeOrigin: true,
+									secure: false,
+								},
+							]),
+						),
+					}
+				: {}),
+		},
 		cacheDir: process.env.VITE_CACHE_DIR ?? '.astro/vite',
 		ssr: {
 			// Local plugin junctions otherwise externalize Sonner from the plugin's
@@ -401,8 +469,8 @@ export default defineConfig({
 				? {}
 				: {
 						'import.meta.env.PUBLIC_FA_PROMPT_API_BASE': JSON.stringify(''),
-						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify('/fastapi'),
-						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('is_superuser'),
+						'import.meta.env.PUBLIC_FA_PROMPT_API_PREFIX': JSON.stringify(''),
+						'import.meta.env.PUBLIC_FA_PROMPT_ADMIN_ROLE': JSON.stringify('admin'),
 					}),
 			'import.meta.env.PUBLIC_FA_REPARTO_ENABLED': JSON.stringify(repartoPluginEnabled),
 			...(repartoPluginEnabled
@@ -487,6 +555,31 @@ export default defineConfig({
 ...mediaSidebarItems,
 			...promptSidebarItems,
 			...repartoSidebarItems,
+			// End-user documentation, grouped under one "Docs" entry kept last in
+			// the sidebar. The reparto guide is plain content shipped whether or
+			// not the plugin itself is enabled — a reader deciding whether to turn
+			// it on is exactly who needs it. Future doc sets are added here as
+			// sibling submenus. Order within each submenu comes from each page's
+			// `sidebar.order`, per locale.
+			{
+				label: 'Docs',
+				collapsed: true,
+				translations: {
+					es: 'Documentación',
+					fr: 'Documentation',
+				},
+				items: [
+					{
+						label: 'Reparto Docente guide',
+						collapsed: true,
+						translations: {
+							es: 'Guía de Reparto Docente',
+							fr: 'Guide Reparto Docente',
+						},
+						items: [{ autogenerate: { directory: 'docs/reparto' } }],
+					},
+				],
+			},
 		],
 	}),
 		react(),
