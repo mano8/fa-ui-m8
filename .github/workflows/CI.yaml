@@ -110,7 +110,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '22.18.0' && github.actor != 'dependabot[bot]' && env.CODECOV_TOKEN != ''
-        uses: codecov/codecov-action@04b047e8bb82a0c002c8312c1c880fbc6a999d45 # v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
         with:
           token: ${{ env.CODECOV_TOKEN }}
           files: app/coverage/lcov.info
