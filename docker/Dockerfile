@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ---- Build stage ----
-FROM node:24-bookworm AS build
+FROM node:26-bookworm AS build
 
 WORKDIR /app
 
@@ -56,7 +56,7 @@ RUN npm run build && \
 # `sirv-cli`: a small, purpose-built static file server (~8 tiny deps, no
 # install scripts) instead of shipping the app's full (much heavier)
 # node_modules tree just to serve prebuilt HTML/JS/CSS.
-FROM node:24-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 
 ARG UID=1000
 ARG GID=1000
