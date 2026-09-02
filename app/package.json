@@ -68,7 +68,7 @@
     "globals": "^17.11.0",
     "happy-dom": "^20.10.2",
     "shadcn": "^4.10.0",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
   "overrides": {
