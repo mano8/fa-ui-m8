@@ -276,7 +276,9 @@ Stage 2 has nothing to work with until all of this is true:
 - [x] **At least one matrix cell exists.**
 - [x] The process settings have been reviewed.
 
-The dashboard checklist tells you which of these are still open at any moment.
+The dashboard checklist tells you which of these are still open at any moment — as does
+the **Setup checklist** button at the top of whichever page you are on. Every line in it
+links to the page that step is done on.
 
 ---
 

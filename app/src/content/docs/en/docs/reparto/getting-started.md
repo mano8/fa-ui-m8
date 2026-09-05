@@ -1,6 +1,6 @@
 ---
 title: Getting started
-description: Signing in, finding the Reparto menu, choosing a process, and reading the setup checklist that tells you what is still missing.
+description: Signing in, finding the Reparto menu, choosing a process, and opening the setup checklist that tells you what is still missing.
 sidebar:
   label: Getting started
   order: 3
@@ -13,6 +13,11 @@ already installed and switched on the Reparto plugin for this site — see
 **On this page:** [sign in](#1-sign-in) · [find the menu](#2-find-the-menu) ·
 [choose a process](#3-choose-a-process) · [the checklist](#4-read-the-setup-checklist) ·
 [what to do first](#5-what-to-do-first)
+
+:::tip[Two buttons at the top of every page]
+**?** answers *what is this page, and how do I work it*. **Setup checklist** answers
+*where am I in the whole workflow*. Neither one takes over the page you are on.
+:::
 
 ---
 
@@ -56,6 +61,10 @@ Reparto Docente
 That menu **is** the running order. Working straight down it, top to bottom, is a valid
 way to set up a department from scratch.
 
+**Dashboard** and **Processes** sit at the head of Stage 1 because nothing else opens
+until a process is selected — but neither is a step you perform. They report on the work
+rather than do it, which is why their **?** panel says **Overview** rather than *Stage 1*.
+
 :::tip
 Every Reparto page also has **Previous** and **Next** links at the bottom, following the
 same order. You can walk the whole application with those alone.
@@ -68,14 +77,23 @@ department, in one school, for one academic year. A process is the container for
 year's work.
 
 Most pages carry a **Current process** bar at the top. If no process is selected yet,
-that bar becomes a picker: choose the academic year, then the school, then the
-department. Your choice is remembered on this browser, so you only do it once.
+the page shows **No process selected** in place of its content, with a single dropdown of
+the processes that exist. Pick one and the page fills in. Your choice is remembered on
+this browser, so you only do it once.
 
 ![The processes list showing the assignment processes that exist](../../../../../assets/reparto/en/processes.png)
 
-If no process exists yet, create one from the **Processes** page. You will need a school,
-an academic year and a department to exist first — the picker offers a **Create new**
-option for each of them, so you can do it all from the one screen.
+That screen only *chooses*. If no process exists yet, follow its **Create an assignment
+process** link — or go straight to the **Processes** page, which is where processes are
+created. Press **Create** there and pick the academic year, then the school, then the
+department. All three must exist first, and each dropdown offers a **Create new** option,
+so you can do the whole thing from that one screen.
+
+:::note[Why creating is not on the dashboard]
+A dashboard reports on a process, and it cannot report on one that does not exist. It
+used to open on the create form, so the first thing you met on a fresh browser was a form
+rather than the page you asked for. Creating now lives on **Processes** alone.
+:::
 
 :::note[The picker never asks for an identifier]
 You choose a process by year, school and department — never by typing an internal code.
@@ -84,15 +102,28 @@ Validation findings that concern a participant use the participant's display nam
 
 ## 4. Read the setup checklist
 
-The **Dashboard** is the first entry in the menu, and the top of it is a checklist
-called **Set up your reparto**. It has fifteen steps grouped by the three stages, and it
-tells you, right now, what is done and what is missing.
+**Set up your reparto** is a checklist of fifteen steps, grouped by the three stages,
+that tells you right now what is done and what is missing. You reach it two ways.
+
+**From any page.** Every Reparto page carries a **Setup checklist** button at the top,
+beside the **?** button. Press it and the checklist opens over the page; close it and you
+are back where you were. The page you came for is never buried underneath it.
+
+**On the dashboard.** The **Dashboard** shows the same checklist laid out in full,
+because reporting on where the process stands is what a dashboard is for. It opens with a
+progress bar and a count per stage — *Configuration 9/9, Planning 2/4, Assignment 0/2*
+— then **Next**, naming the one step to do now, and then the full fifteen rows.
 
 ![The setup checklist on the dashboard, showing progress through the fifteen steps](../../../../../assets/reparto/en/dashboard.png)
 
 Each step reads **Done**, **Open**, or **Not checked here**. The last one is not a
 failure: it means this particular screen does not read that piece of information — for
 example, no process has been selected yet, so the process-level steps cannot be checked.
+Those steps are counted separately and never counted as missing: *11 of 15 done, 2 not
+checked here* says something different from *11 of 15 done*.
+
+**Every step name is a link** to the page where that step is done, so you never have to
+go looking for it in the menu.
 
 The fifteen steps are:
 
@@ -114,7 +145,7 @@ The fifteen steps are:
 | 14 | Generate the requirement slots | 2 |
 | 15 | Hand out the positions in the meeting | 3 |
 
-Below the checklist, the dashboard shows the two balances, the three invariants, how
+Beside the checklist, the dashboard shows the two balances, the three invariants, how
 many positions are still free, and where each participant stands.
 
 ![The dashboard's assignment progress panel: 37 live slots, 10 assigned, 27 available](../../../../../assets/reparto/en/dashboard-progress.png)

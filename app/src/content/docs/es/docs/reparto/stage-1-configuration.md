@@ -276,7 +276,9 @@ La etapa 2 no tiene con qué trabajar hasta que todo esto sea cierto:
 - [x] **Existe al menos una celda de la matriz.**
 - [x] Se han revisado los ajustes del proceso.
 
-La lista de comprobación del panel le dice en cada momento cuáles siguen abiertos.
+La lista de comprobación del panel le dice en cada momento cuáles siguen abiertos, igual que
+el botón **Lista de configuración** que hay arriba en la página en la que esté. Cada línea
+enlaza con la página donde ese paso se hace.
 
 ---
 

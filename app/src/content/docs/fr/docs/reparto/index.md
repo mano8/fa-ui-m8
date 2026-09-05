@@ -55,7 +55,8 @@ vous cherchez un point précis, allez-y directement.
    sous-tendent toute l'application, en mots simples. Lisez-la une fois et le reste
    s'éclairera.
 2. **[Premiers pas](/fr/docs/reparto/getting-started/)** — se connecter, trouver le menu,
-   choisir un processus, et la liste de contrôle qui vous indique ce qui manque encore.
+   choisir un processus, et le bouton **Liste de configuration** qui, depuis n'importe
+   quelle page, vous indique ce qui manque encore.
 3. **[Qui peut faire quoi](/fr/docs/reparto/roles/)** — les cinq rôles de compte, et
    pourquoi un bouton est parfois tout simplement absent plutôt que grisé.
 

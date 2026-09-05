@@ -53,7 +53,8 @@ algo concreto, vaya directamente a ello.
    que hay detrás de toda la aplicación, en palabras llanas. Léalo una vez y el resto
    cobrará sentido.
 2. **[Primeros pasos](/es/docs/reparto/getting-started/)** — iniciar sesión, encontrar el
-   menú, elegir un proceso y la lista de comprobación que le dice qué falta todavía.
+   menú, elegir un proceso y el botón **Lista de configuración** que, desde cualquier
+   página, le dice qué falta todavía.
 3. **[Quién puede hacer qué](/es/docs/reparto/roles/)** — los cinco roles de cuenta, y
    por qué a veces un botón simplemente no está en vez de aparecer desactivado.
 

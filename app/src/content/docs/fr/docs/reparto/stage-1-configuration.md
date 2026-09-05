@@ -279,7 +279,9 @@ L'étape 2 n'a rien à traiter tant que tout ceci n'est pas vrai :
 - [x] **Au moins une cellule de la matrice existe.**
 - [x] Les paramètres du processus ont été vérifiés.
 
-La liste de contrôle du tableau de bord vous indique à tout moment lesquels restent ouverts.
+La liste de contrôle du tableau de bord vous indique à tout moment lesquels restent ouverts
+— tout comme le bouton **Liste de configuration** en haut de la page où vous vous trouvez.
+Chacune de ses lignes renvoie à la page où l'étape se fait.
 
 ---
 
