@@ -232,55 +232,59 @@ class TestMinioCorsNotWildcard:
 
 
 # ---------------------------------------------------------------------------
-# MINIO_PUBLIC_ENDPOINT in env.example — hardened + dev (Phase 4)
+# S3_PUBLIC_ENDPOINT in env.example — hardened + dev (Phase 4)
 # ---------------------------------------------------------------------------
+# NOTE: this class/file still carries its pre-T13 MINIO_* name
+# (T13-policy-tests-rename owns the file rename to test_compose_storage_policy.py
+# and the class/docstring vocabulary pass); only the env-var lookups below moved
+# to S3_PUBLIC_ENDPOINT, forced by T12-env-docs-sweep's media.env.example rename.
 
 
 class TestMinioPublicEndpointEnvExample:
-    """Every stack's media.env.example must declare MINIO_PUBLIC_ENDPOINT.
+    """Every stack's media.env.example must declare S3_PUBLIC_ENDPOINT.
     The dev stack must point at loopback; hardened (dev + production examples)
     must use https://."""
 
     def test_hardened_declares_public_endpoint(self):
         env = _env_vars(_HARDENED_ENV)
-        assert "MINIO_PUBLIC_ENDPOINT" in env, (
-            "hardened_ui_m8: media.env.example must declare MINIO_PUBLIC_ENDPOINT."
+        assert "S3_PUBLIC_ENDPOINT" in env, (
+            "hardened_ui_m8: media.env.example must declare S3_PUBLIC_ENDPOINT."
         )
 
     def test_hardened_public_endpoint_is_https(self):
         env = _env_vars(_HARDENED_ENV)
-        value = env.get("MINIO_PUBLIC_ENDPOINT", "")
+        value = env.get("S3_PUBLIC_ENDPOINT", "")
         assert value.startswith("https://"), (
-            "hardened_ui_m8: MINIO_PUBLIC_ENDPOINT must start with 'https://' — "
+            "hardened_ui_m8: S3_PUBLIC_ENDPOINT must start with 'https://' — "
             f"the storage router is on websecure (TLS). Got: {value!r}"
         )
 
     def test_hardened_production_declares_public_endpoint(self):
         env = _env_vars(_HARDENED_PROD_ENV)
-        assert "MINIO_PUBLIC_ENDPOINT" in env, (
+        assert "S3_PUBLIC_ENDPOINT" in env, (
             "hardened_ui_m8: media.env.production.example must declare "
-            "MINIO_PUBLIC_ENDPOINT."
+            "S3_PUBLIC_ENDPOINT."
         )
 
     def test_hardened_production_public_endpoint_is_https(self):
         env = _env_vars(_HARDENED_PROD_ENV)
-        value = env.get("MINIO_PUBLIC_ENDPOINT", "")
+        value = env.get("S3_PUBLIC_ENDPOINT", "")
         assert value.startswith("https://"), (
-            "hardened_ui_m8: production MINIO_PUBLIC_ENDPOINT must start with "
+            "hardened_ui_m8: production S3_PUBLIC_ENDPOINT must start with "
             f"'https://' (FQDN storage host over TLS). Got: {value!r}"
         )
 
     def test_dev_declares_public_endpoint(self):
         env = _env_vars(_DEV_ENV)
-        assert "MINIO_PUBLIC_ENDPOINT" in env, (
-            "dev_ui_m8: media.env.example must declare MINIO_PUBLIC_ENDPOINT."
+        assert "S3_PUBLIC_ENDPOINT" in env, (
+            "dev_ui_m8: media.env.example must declare S3_PUBLIC_ENDPOINT."
         )
 
     def test_dev_public_endpoint_is_loopback(self):
         env = _env_vars(_DEV_ENV)
-        value = env.get("MINIO_PUBLIC_ENDPOINT", "")
+        value = env.get("S3_PUBLIC_ENDPOINT", "")
         assert "127." in value, (
-            "dev_ui_m8: MINIO_PUBLIC_ENDPOINT must point at loopback (127.x.x.x) "
+            "dev_ui_m8: S3_PUBLIC_ENDPOINT must point at loopback (127.x.x.x) "
             f"for the dev stack. Got: {value!r}"
         )
 

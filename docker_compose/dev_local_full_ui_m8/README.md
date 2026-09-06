@@ -127,7 +127,7 @@ generic `DB_USER` / `DB_PASSWORD` / `DB_DATABASE` names in its own env file:
 
 - `auth.env` → `AUTH_DB_*`, plus `REDIS_PASSWORD` to match `.env` (only
   `auth_user_service` connects to the auth Redis).
-- `media.env` → `MEDIA_DB_*`, plus the `MEDIA_REDIS_*` and `MINIO_*` values.
+- `media.env` → `MEDIA_DB_*`, plus the `MEDIA_REDIS_*` and `S3_*` values.
 - `prompt.env` → `PROMPT_DB_*`:
 
   ```ini
@@ -145,7 +145,7 @@ generic `DB_USER` / `DB_PASSWORD` / `DB_DATABASE` names in its own env file:
   ```
 
 The `minio-init` one-shot provisions a MinIO user from `media.env`'s
-`MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` (the media-rw credentials, not the MinIO
+`S3_ACCESS_KEY` / `S3_SECRET_KEY` (the media-rw credentials, not the MinIO
 root user). `prompt_engine_service` and `reparto_service` use no object storage.
 
 ### Secure-by-default settings (auth-sdk-m8 2.1.1)
