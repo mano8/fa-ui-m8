@@ -116,7 +116,30 @@ services:
   # default (http://localhost:4321), so sitemap/canonical URLs are correct.
   # To bake in an opt-in plugin (media/prompt/reparto) for this deployment,
   # add its PUBLIC_*_API_BASE here too -- see app/.env.example.
+  #
+  # ── BUILD ONCE, DEPLOY THE ARTIFACT ──────────────────────────────────────
+  # The production host should not hold the source tree or a Node toolchain,
+  # and should not run a 5-minute Astro build during a deploy window. Build on
+  # a builder host, push, then pull on the target:
+  #
+  #   # on the builder (needs the repo + this stack's .env.production as .env)
+  #   COMPOSE="-f docker-compose.yml -f docker-compose.production.yml"
+  #   docker compose $COMPOSE build \
+  #     --build-arg VCS_REF=$(git rev-parse HEAD) \
+  #     --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) ui
+  #   docker compose $COMPOSE push ui
+  #
+  #   # on the production host
+  #   docker compose -f docker-compose.yml -f docker-compose.production.yml pull ui
+  #   docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+  #
+  # The tag below is OVERRIDDEN PER DEPLOYMENT, because PUBLIC_SITE_URL (and any
+  # plugin base added here) is baked into the static HTML: a build for
+  # ui.example.com is a different artifact from the base stack's auth-only
+  # localhost build and MUST NOT reuse its tag. Set UI_IMAGE in .env.production
+  # to the tag this deployment publishes.
   ui:
+    image: ${UI_IMAGE:-tepochtli/fa-ui-m8:0.1.0-production}
     build:
       args:
         PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:4321}

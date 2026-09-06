@@ -158,6 +158,29 @@ http:
         - security-headers
         - internal-only
 
+    # Static UI (fa-ui-m8), containerised — same shape as the RPi stack.
+    #
+    # An EXPLICIT prefix list, not a catch-all, and priority 2. The API routers
+    # above carry Traefik's default priority (their rule length, a much larger
+    # number), so they still win on /user, /media, /prompt and /reparto. Below
+    # this sits minio-public-router at priority 1, which stays the true catch-all
+    # so presigned S3 object paths (/<bucket>/<key>?X-Amz-...) keep resolving
+    # exactly as before — adding the UI changes nothing about media transfers.
+    #
+    # The prefixes are the top level of the Astro build output (dist/): the three
+    # locales, Astro's asset and search dirs, the reference section, and the root
+    # documents. IF YOU ADD A NEW TOP-LEVEL ROUTE to the Astro build, add its
+    # prefix here too, or it will fall through to MinIO and 404.
+    ui-router:
+      entryPoints:
+        - websecure
+      rule: "Path(`/`) || PathPrefix(`/en`) || PathPrefix(`/es`) || PathPrefix(`/fr`) || PathPrefix(`/_astro`) || PathPrefix(`/pagefind`) || PathPrefix(`/reference`) || PathPrefix(`/sitemap`) || Path(`/favicon.svg`) || Path(`/404.html`)"
+      service: ui-service
+      middlewares:
+        - security-headers-ui
+      tls: {}
+      priority: 2
+
     # Browser-facing S3 endpoint for presigned media transfers. Service routers
     # win on their longer path rules; MinIO management and health paths stay
     # unavailable through the LAN TLS entrypoint.
@@ -188,6 +211,10 @@ http:
       loadBalancer:
         servers:
           - url: "http://reparto_service:8000"
+    ui-service:
+      loadBalancer:
+        servers:
+          - url: "http://ui:8080"
     minio-service:
       loadBalancer:
         servers:
@@ -235,3 +262,26 @@ http:
         # stsSeconds: 31536000       # 1 year
         # stsIncludeSubdomains: true
         # stsPreload: false          # only set true after submitting to HSTS preload list
+
+    # UI-layer headers. Deliberately NOT `security-headers`: this fronts a
+    # user-facing Starlight app, not an internal JSON API, so it does not set
+    # X-Robots-Tag: noindex.
+    #
+    # frame-ancestors is set HERE and not by Astro because a CSP delivered via
+    # <meta> cannot carry frame-ancestors at all. Everything else
+    # (script/style/connect/img/...) is the per-page CSP the Astro build bakes
+    # into each HTML file -- see ../../app/src/lib/csp.ts.
+    security-headers-ui:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          Server: ""
+          Content-Security-Policy: "frame-ancestors 'none'"
+        # HSTS -- opt-in, public/production deployments only. Same caveats as
+        # `security-headers` above.
+        # stsSeconds: 31536000
+        # stsIncludeSubdomains: true
+        # stsPreload: false

@@ -13,10 +13,14 @@ sibling repos `../../../fa-auth-m8`, `../../../media-service-m8`,
 `../../../reparto-docente-m8`) instead of pulling published images, and **MinIO
 is published on loopback** (`127.0.0.1:9005`/`9006`) for host access.
 
-> **There is no UI container in this stack.** The Astro/Starlight host runs from
-> [`../../app`](../../app) with `npm run dev` on `http://localhost:4321` and calls
-> the services through Traefik on `:9000`. For a stack that serves the built
-> static UI from a container, use [`../hardened_ui_m8`](../hardened_ui_m8).
+> **Two ways to run the UI here.** The `ui` container serves the *production*
+> Astro build (media + prompt + reparto enabled) behind Traefik on `:4430` —
+> the same artifact shape the Raspberry Pi stack deploys, so you can check the
+> baked `PUBLIC_*` values, the build-time CSP and the same-origin routing before
+> shipping. For writing UI code, keep running the Astro host from
+> [`../../app`](../../app) with `npm run dev` on `http://localhost:4321`: it has
+> live reload, and the production CSP is a no-op under `astro dev`. The two do
+> not conflict — different ports, and the container is only rebuilt on `--build`.
 >
 > For a reparto-only stack (just `auth_user_service` + `reparto_service`, no
 > media/storage/scan/worker/prompt components), use
@@ -71,6 +75,7 @@ dev convenience).
 | media_worker | local `../../../media-worker-m8` build | internal — enqueue-driven (scan + variants) |
 | prompt_engine_service | local `../../../prompt-engine-m8` build | `/prompt` via Traefik |
 | reparto_service | local `../../../reparto-docente-m8` build | `/reparto` via Traefik |
+| ui | local `../../` build (`docker/Dockerfile`) -> `fa-ui-m8:0.1.0-dev-full` | `/` via Traefik on `:4430` |
 | clamav | `clamav/clamav:1.5-debian13-slim` | internal `scan_net` only |
 | m8_db | `postgres:18.4-alpine` | internal data network |
 | redis_cache | `redis:8.8.0-alpine` | auth Redis — internal data network |

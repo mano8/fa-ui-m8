@@ -397,22 +397,66 @@ services:
   # add the matching PUBLIC_*_API_BASE under `build.args` below and rebuild.
   # No host port: reachable only via Traefik (ui-router in
   # traefik/dynamic_conf.yml), same as auth_user_service/media_service.
+  #
+  # `image:` + `build:` together, deliberately. Every other service in this stack
+  # runs a pinned, immutable image; the UI was the one service whose deployed
+  # bytes were "whatever the last build produced", with no name to pin, push,
+  # scan or roll back to. Naming the build output fixes that WITHOUT changing the
+  # local workflow: `docker compose up -d --build` still builds from ../../, and
+  # the result is now a tagged artifact that `docker compose push ui` can publish
+  # for hosts that must not build from source (see rpi_server/docente_reparto).
+  #
+  # THE TAG IS BUILD-ARG-SPECIFIC. PUBLIC_* args are baked into the static HTML
+  # at build time, so a build with a different plugin set or site URL is a
+  # DIFFERENT image and needs a DIFFERENT tag — never re-push a changed build
+  # over this one. This tag means "auth-only defaults". Bump the version
+  # component with app/package.json.
   ui:
+    image: tepochtli/fa-ui-m8:0.1.0
     build:
       context: ../../
       dockerfile: docker/Dockerfile
+      args:
+        UI_VERSION: "0.1.0"
+    # PID 1 in this container would otherwise be sirv itself: no SIGTERM
+    # handling (so `compose down` waits the full 10s grace, then SIGKILLs) and
+    # no child reaping. tini forwards signals and reaps.
+    init: true
+    # The Dockerfile already sets USER 1000:1000. Pinning it here too makes the
+    # non-root guarantee auditable from the compose file — the artifact an
+    # operator actually reviews — and keeps it true even if the stack is later
+    # pointed at a rebuilt or substituted image.
+    user: "1000:1000"
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     read_only: true
+    # sirv writes nothing; /tmp exists only because Node may want it. Sized and
+    # noexec/nosuid/nodev so the one writable path in a read-only container
+    # cannot be used to stage and run a payload, or to fill the host disk.
     tmpfs:
-      - /tmp
+      - /tmp:mode=1777,size=16m,noexec,nosuid,nodev
     deploy:
       resources:
         limits:
           cpus: "0.5"
           memory: 128M
+          # A static file server forks nothing. Caps fork-bomb blast radius.
+          # Declared here rather than as the top-level `pids_limit:` — Compose
+          # rejects a project that sets both.
+          pids: 128
+    # Unbounded json-file logs are the default and will fill the host disk given
+    # enough 404s. Every long-lived service should cap them; the UI is the one
+    # that takes raw internet traffic first.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # healthcheck is inherited from the image (HEALTHCHECK in docker/Dockerfile,
+    # GET /en/) — not redeclared here so the probe cannot drift from the locale
+    # the build actually emits.
     restart: unless-stopped
     networks:
       - app_net
@@ -455,3 +499,11 @@ networks:
   clamav_egress:
     driver: bridge
     name: hardened_media_m8_clamav_egress
+
+# ClamAV's freshclam signature database. The clamav service mounts `clamav_db:`
+# as a NAMED volume, but no top-level `volumes:` key declared it — which makes the
+# whole project invalid, so `docker compose config` (and therefore `up`) failed
+# outright and the stack could never start. Named, not a bind mount: the DB is
+# opaque state written by clamav's own uid, not operator-editable config.
+volumes:
+  clamav_db:

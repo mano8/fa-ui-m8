@@ -40,7 +40,7 @@ services:
   # root-owned. Handing the shared root to uid 1000 lets every m8 service create and
   # write its own migration subdir. Runs to completion before any service starts.
   migrations-init:
-    image: alpine:3.22
+    image: alpine:3.21.3
     volumes:
       - ./shared_migrations:/opt/shared_migrations
     command:
@@ -74,7 +74,7 @@ services:
   # Docker Desktop on macOS/Windows ignores bind-mount ownership, so this only
   # bites on a Linux engine (including CI).
   grafana-init:
-    image: alpine:3.22
+    image: alpine:3.21.3
     volumes:
       - ./grafana/data:/grafana_data
     command:
@@ -595,6 +595,88 @@ services:
     networks:
       - app_net
       - data_net
+  # Static Astro/Starlight UI, containerised — the same artifact shape the RPi
+  # stack (rpi_server/docente_reparto) deploys, built here from local source so
+  # dev and production run the same server, the same headers and the same routes.
+  #
+  # This does NOT replace `npm run dev`. The host dev server still runs on :4321
+  # with live reload and is still the right tool for writing UI code; this
+  # container is how you check the PRODUCTION build — the baked PUBLIC_* values,
+  # the per-page CSP Astro emits at build time (a no-op under `astro dev`), and
+  # the Traefik same-origin routing — before it ships to the Pi.
+  #
+  # `docker compose up -d` reuses the built image; only `--build` rebuilds.
+  #
+  # Local tag, no registry namespace: this build enables media + prompt + reparto
+  # and is NOT the artifact the Pi runs (that one is reparto-only, and carries its
+  # own tag). PUBLIC_* values are baked in at build time, so a different plugin set
+  # is a different image — never push this one over a deployment tag.
+  ui:
+    image: fa-ui-m8:0.1.0-dev-full
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+      args:
+        UI_VERSION: "0.1.0"
+        # Served same-origin behind Traefik, so every base is a relative path and
+        # no CORS preflight is involved. Override PUBLIC_SITE_URL in .env when
+        # serving over the LAN (e.g. https://192.168.1.36:4430) so sitemap and
+        # canonical URLs are correct.
+        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-https://localhost:4430}
+        PUBLIC_AUTH_API_BASE: /user
+        PUBLIC_MEDIA_API_BASE: /media
+        PUBLIC_MEDIA_V1_BASE: /v1
+        # Presigned object transfers go through this stack's Traefik, which routes
+        # MinIO on the root catch-all — so the storage origin is the site origin.
+        PUBLIC_MEDIA_STORAGE_ORIGIN: ${PUBLIC_SITE_URL:-https://localhost:4430}
+        PUBLIC_PROMPT_API_BASE: /prompt
+        # Empty, not unset: prompt-engine-m8 and reparto-docente-m8 both serve
+        # their routes directly below the base (see app/.env.example).
+        PUBLIC_PROMPT_API_PREFIX: ""
+        PUBLIC_REPARTO_API_BASE: /reparto
+        PUBLIC_REPARTO_API_PREFIX: ""
+    # PID 1 would otherwise be sirv itself: no SIGTERM handling, no child reaping.
+    init: true
+    # The image already sets USER 1000:1000; pinned here so the non-root guarantee
+    # is auditable from the compose file an operator actually reviews.
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    # sirv writes nothing; /tmp exists only because Node may want it. noexec/nosuid/
+    # nodev so the one writable path in a read-only container cannot stage and run
+    # a payload, and sized so it cannot fill the disk.
+    tmpfs:
+      - /tmp:mode=1777,size=16m,noexec,nosuid,nodev
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+          # A static file server forks nothing. Caps fork-bomb blast radius.
+          # Declared here rather than as the top-level `pids_limit:` — Compose
+          # rejects a project that sets both.
+          pids: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # healthcheck is inherited from the image (GET /en/, astro.config.mjs's
+    # defaultLocale) — not redeclared so the probe cannot drift from the locale
+    # the build actually emits.
+    depends_on:
+      auth_user_service:
+        condition: service_started
+    restart: unless-stopped
+    # No host port: reachable only through Traefik (ui-router in
+    # traefik/dynamic_conf.yml), like every other service here. app_net only —
+    # a static file server has no backing store and never needs data_net.
+    networks:
+      - app_net
+
 # clamav_db: persists the freshclam signature database across restarts so the
 # daemon doesn't re-download the full set on every boot.
 volumes:
