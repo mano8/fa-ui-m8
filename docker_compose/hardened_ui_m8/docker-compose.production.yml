@@ -30,8 +30,8 @@
 #     (HTTP→HTTPS redirect) and :443 are published. The internal :9000 service
 #     entryPoint is reachable only on the Docker network.
 #   - No host-published DB / Redis / Prometheus / Grafana ports (`!reset []`) —
-#     reachable only on the Docker network. (MinIO already has no host ports in
-#     the hardened base — internal-only per plan item 0.2.)
+#     reachable only on the Docker network. (The storage backend already has
+#     no host ports in the hardened base — internal-only per plan item 0.2.)
 #   - FQDN host rules via traefik/production_dynamic_conf.yml + app-layer
 #     ALLOWED_HOSTS (set in auth.env.production / media.env.production).
 #   - Pinned auth image (media image already pinned in base).
@@ -92,6 +92,22 @@ services:
 
   grafana:
     ports: !reset []
+
+  # ── storage bootstrap ─────────────────────────────────────────────────────────
+  # storage-config bakes the backend's identity table and storage-init creates
+  # the buckets, so both must read the SAME credentials media_service
+  # authenticates with. Left on the dev media.env they would provision the
+  # placeholder values while media_service reads media.env.production — a
+  # stack that comes up and then 403s on every object.
+  storage-config:
+    env_file: !override
+      - ./.env
+      - ./media.env.production
+
+  storage-init:
+    env_file: !override
+      - ./.env
+      - ./media.env.production
 
   auth_user_service:
     image: tepochtli/fa-auth-m8:2.0.3   # pinned release (never :latest)

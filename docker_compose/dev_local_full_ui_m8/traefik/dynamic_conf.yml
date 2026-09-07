@@ -163,14 +163,14 @@ http:
     # An EXPLICIT prefix list, not a catch-all, and priority 2. The API routers
     # above carry Traefik's default priority (their rule length, a much larger
     # number), so they still win on /user, /media, /prompt and /reparto. Below
-    # this sits minio-public-router at priority 1, which stays the true catch-all
+    # this sits storage-public-router at priority 1, which stays the true catch-all
     # so presigned S3 object paths (/<bucket>/<key>?X-Amz-...) keep resolving
     # exactly as before — adding the UI changes nothing about media transfers.
     #
     # The prefixes are the top level of the Astro build output (dist/): the three
     # locales, Astro's asset and search dirs, the reference section, and the root
     # documents. IF YOU ADD A NEW TOP-LEVEL ROUTE to the Astro build, add its
-    # prefix here too, or it will fall through to MinIO and 404.
+    # prefix here too, or it will fall through to the storage backend and 404.
     ui-router:
       entryPoints:
         - websecure
@@ -182,13 +182,17 @@ http:
       priority: 2
 
     # Browser-facing S3 endpoint for presigned media transfers. Service routers
-    # win on their longer path rules; MinIO management and health paths stay
-    # unavailable through the LAN TLS entrypoint.
-    minio-public-router:
+    # win on their longer path rules. The storage backend's admin surfaces
+    # (master/volume/filer/webdav) are bound to the storage container's OWN
+    # loopback by `-ip.bind=127.0.0.1`, so they are unreachable through this
+    # router (or any other) regardless of path — the old `!PathPrefix(`/minio`)`
+    # exclusion is replaced by that binding, not by a path rule here. The S3
+    # port's own two non-S3 paths (`/healthz`, `/status`) are excluded below.
+    storage-public-router:
       entryPoints:
         - websecure
-      rule: "!PathPrefix(`/user`) && !PathPrefix(`/media`) && !PathPrefix(`/prompt`) && !PathPrefix(`/reparto`) && !PathPrefix(`/minio`)"
-      service: minio-service
+      rule: "!PathPrefix(`/user`) && !PathPrefix(`/media`) && !PathPrefix(`/prompt`) && !PathPrefix(`/reparto`) && !(PathPrefix(`/healthz`) || PathPrefix(`/status`))"
+      service: storage-service
       middlewares:
         - security-headers
       tls: {}
@@ -215,10 +219,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://ui:8080"
-    minio-service:
+    storage-service:
       loadBalancer:
+        passHostHeader: true   # REQUIRED — GET SigV4 signs the Host; proxy MUST forward it unchanged
         servers:
-          - url: "http://minio:9000"
+          - url: "http://storage:8333"
 
   middlewares:
     ip-allowlist:
