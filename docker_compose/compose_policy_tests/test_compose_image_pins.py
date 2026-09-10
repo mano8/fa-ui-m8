@@ -14,7 +14,7 @@ Previously unpinned images and their required pins (both stacks):
 
 Previously :latest service images now carry explicit version pins (both stacks
 track the same fleet versions):
-  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.0.3
+  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.2.0
   tepochtli/media-service-m8 → tepochtli/media-service-m8:2.1.1
   tepochtli/media-worker-m8  → tepochtli/media-worker-m8:0.4.1
 """
@@ -39,8 +39,10 @@ _PREVIOUSLY_BARE = {
 }
 _PREVIOUSLY_LATEST = {
     # Tracks the pin the stacks actually carry: the JTI-status v2 issuer floor is
-    # fa-auth-m8 2.0.0, and the stacks are pinned to the published 2.0.3 patch.
-    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.0.3",
+    # fa-auth-m8 2.0.0, and the stacks are pinned to 2.2.0 - 2.1.0 shipped the
+    # JWKS kid/key-binding fixes (audit J1-J4) and 2.2.0 realigns the issuer onto
+    # auth-sdk-m8 3.2.0, the consumer half of J3.
+    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.2.0",
     "tepochtli/media-service-m8": "tepochtli/media-service-m8:2.1.1",
     "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.4.1",
 }

@@ -42,7 +42,7 @@ not exposed through that network.
 | Service | Image/build | Local access |
 | --- | --- | --- |
 | traefik | `traefik:v3.7.5` | `:8000`, `:4430`, `127.0.0.1:9000`, `127.0.0.1:8080` |
-| auth_user_service | `tepochtli/fa-auth-m8:latest` | `/user` via Traefik |
+| auth_user_service | `tepochtli/fa-auth-m8:2.2.0` | `/user` via Traefik |
 | media_service | local `../../media_service` build | `/media` via Traefik |
 | ui | local `../../` build (`docker/Dockerfile`) | `/` via Traefik, static build served by sirv-cli |
 | m8_db | `postgres:18.4-alpine` | internal data network |
