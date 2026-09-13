@@ -188,6 +188,129 @@ class TestHardenedStorageAdminSurfaceLoopbackOnly:
 # ---------------------------------------------------------------------------
 # hardened_ui_m8 — Traefik storage router (Phase 4 / S6)
 # ---------------------------------------------------------------------------
+# All SeaweedFS stacks — the three extra listeners -s3.ip.bind=0.0.0.0 opens
+# ---------------------------------------------------------------------------
+
+_SEAWEED_STACKS = [
+    pytest.param(_HARDENED, id="hardened_ui_m8"),
+    pytest.param(_DEV, id="dev_ui_m8"),
+    pytest.param(_DEV_LOCAL_FULL, id="dev_local_full_ui_m8"),
+]
+
+
+class TestStorageExtraListenersClosed:
+    """`-s3.ip.bind=0.0.0.0` publishes more than the S3 gateway.
+
+    SeaweedFS 4.x starts an Iceberg REST catalog (8181) and a Lance namespace
+    server (9101) by default, and binds the S3 component's gRPC port
+    (8333+10000 = 18333) to the same address as the S3 gateway. All three were
+    measured reachable from a sibling container on this fleet's own networks,
+    and the gRPC one serves `messaging_pb.SeaweedS3IamCache`, whose
+    `PutIdentity` RPC accepted an UNAUTHENTICATED call and minted a working
+    `Admin` S3 credential — a full escape from invariant S4's scoped grant,
+    reachable from every service on `app_net`/`data_net`.
+
+    Iceberg and Lance are switched off at the listener. The gRPC port has no
+    bind flag of its own (`-s3.port.grpc=0` falls back to the default, and
+    neither `-s3.iam=false` nor `jwt.filer_signing.key` gates it — each
+    measured), so it is closed with mTLS instead: `seaweedfs/security.toml`
+    gives `[grpc.s3]` a certificate whose CA key `storage-tls-init` destroys
+    after signing, so no client certificate it would accept can ever exist.
+
+    Deleting any one of these settings must fail a test here.
+    """
+
+    @pytest.mark.parametrize("compose_path", _SEAWEED_STACKS)
+    def test_iceberg_catalog_listener_disabled(self, compose_path: Path):
+        command = _load(compose_path)["services"]["storage"].get("command", [])
+        assert "-s3.port.iceberg=0" in command, (
+            f"{compose_path.parent.name}: storage command must include "
+            "'-s3.port.iceberg=0'. SeaweedFS 4.x starts an Iceberg REST "
+            "catalog on 8181 bound to 0.0.0.0 by default; this stack is a "
+            f"plain S3 media store and must not publish it. Got: {command!r}"
+        )
+
+    @pytest.mark.parametrize("compose_path", _SEAWEED_STACKS)
+    def test_lance_namespace_listener_disabled(self, compose_path: Path):
+        command = _load(compose_path)["services"]["storage"].get("command", [])
+        assert "-s3.port.lance=0" in command, (
+            f"{compose_path.parent.name}: storage command must include "
+            "'-s3.port.lance=0'. SeaweedFS 4.x starts a Lance namespace "
+            "server on 9101 bound to 0.0.0.0 by default; this stack does not "
+            f"use it and must not publish it. Got: {command!r}"
+        )
+
+    @pytest.mark.parametrize("compose_path", _SEAWEED_STACKS)
+    def test_s3_grpc_port_is_locked_with_mtls(self, compose_path: Path):
+        stack = compose_path.parent
+        storage = _load(compose_path)["services"]["storage"]
+        mounts = [str(v) for v in storage.get("volumes", [])]
+
+        assert any("/etc/seaweedfs/security.toml" in m for m in mounts), (
+            f"{stack.name}: storage must mount security.toml at "
+            "/etc/seaweedfs/security.toml — without it the S3 gRPC port "
+            "(18333) accepts unauthenticated PutIdentity and any sibling "
+            f"container can mint an Admin S3 credential. Got: {mounts!r}"
+        )
+        assert any("/etc/seaweedfs/tls" in m for m in mounts), (
+            f"{stack.name}: storage must mount the gRPC mTLS material at "
+            f"/etc/seaweedfs/tls. Got: {mounts!r}"
+        )
+
+        security = (stack / "seaweedfs" / "security.toml").read_text()
+        assert "[grpc.s3]" in security, (
+            f"{stack.name}/seaweedfs/security.toml must configure [grpc.s3] — "
+            "that section is what turns the exposed S3 gRPC port into an "
+            "mTLS port."
+        )
+        for key in ("ca =", "cert =", "key ="):
+            assert key in security, (
+                f"{stack.name}/seaweedfs/security.toml must set {key.strip()} "
+                "— mTLS is not enabled unless the CA and the server keypair "
+                "are all given."
+            )
+
+    @pytest.mark.parametrize("compose_path", _SEAWEED_STACKS)
+    def test_storage_waits_for_the_grpc_certificate(self, compose_path: Path):
+        stack = compose_path.parent
+        compose = _load(compose_path)
+        depends = compose["services"]["storage"].get("depends_on", {})
+        assert "storage-tls-init" in depends, (
+            f"{stack.name}: storage must depend on storage-tls-init — "
+            "`weed` reads security.toml once at startup, so the certificate "
+            f"must exist before it boots. Got: {depends!r}"
+        )
+        assert (
+            depends["storage-tls-init"].get("condition")
+            == "service_completed_successfully"
+        ), (
+            f"{stack.name}: storage must wait for storage-tls-init to "
+            f"COMPLETE, not merely start. Got: {depends!r}"
+        )
+
+    @pytest.mark.parametrize("compose_path", _SEAWEED_STACKS)
+    def test_grpc_ca_key_is_destroyed_after_signing(self, compose_path: Path):
+        stack = compose_path.parent
+        command = _load(compose_path)["services"]["storage-tls-init"]["command"]
+        script = "".join(str(c) for c in command)
+        assert "rm -f /tls/ca.key" in script, (
+            f"{stack.name}: storage-tls-init must delete the CA private key "
+            "after signing. It is the only thing that could ever mint a "
+            "client certificate the S3 gRPC port would accept; leaving it on "
+            "disk leaves that port openable."
+        )
+
+    @pytest.mark.parametrize("compose_path", _SEAWEED_STACKS)
+    def test_grpc_private_key_is_gitignored(self, compose_path: Path):
+        stack = compose_path.parent
+        ignored = (stack / ".gitignore").read_text()
+        assert "seaweedfs/tls/" in ignored, (
+            f"{stack.name}/.gitignore must ignore seaweedfs/tls/ — it holds "
+            "the S3 gRPC server's private key."
+        )
+
+
+# ---------------------------------------------------------------------------
 
 
 class TestHardenedTraefikStorageRouter:
@@ -606,3 +729,31 @@ class TestDevLocalFullStorageCatchAllRouter:
             "dev_local_full_ui_m8: storage-public-router must route to the "
             f"'storage-service' service. Got: {router.get('service')!r}"
         )
+
+
+# ---------------------------------------------------------------------------
+# The loopback-mapping helper's own contract
+# ---------------------------------------------------------------------------
+
+
+class TestAssertLoopbackBoundHelper:
+    """`_assert_loopback_bound` decides whether a published port is safe.
+
+    Its reject branches are what keep a storage port off `0.0.0.0`, and no
+    stack in this repo currently carries a rejected mapping - so without these
+    cases the branches ship untested and the repo's own 100% coverage gate
+    fails. Exercised directly rather than by planting a bad mapping in a real
+    compose file.
+    """
+
+    def test_three_part_loopback_mapping_is_accepted(self):
+        _assert_loopback_bound("stack", "127.0.0.1:9005:8333")
+
+    def test_three_part_non_loopback_mapping_is_rejected(self):
+        with pytest.raises(AssertionError, match="not.*loopback"):
+            _assert_loopback_bound("stack", "0.0.0.0:9005:8333")
+
+    def test_two_part_mapping_without_explicit_host_ip_is_rejected(self):
+        """`9005:8333` has no host IP and Docker defaults it to 0.0.0.0."""
+        with pytest.raises(pytest.fail.Exception, match="no explicit host IP"):
+            _assert_loopback_bound("stack", "9005:8333")
