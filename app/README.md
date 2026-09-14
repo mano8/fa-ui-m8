@@ -399,7 +399,7 @@ Policy shape and the React/Tailwind trade-off:
   `'self'` (the UI calls same-origin `/user` and `/media`); if you point the UI at absolute API origins
   via `PUBLIC_AUTH_API_BASE` / `PUBLIC_MEDIA_API_BASE` / `PUBLIC_MEDIA_V1_BASE` / `PUBLIC_SITE_URL`,
   those origins are added to `connect-src` automatically at build time. For deployments where the browser
-  POSTs presigned uploads directly to a separate MinIO/object-storage host, set
+  POSTs presigned uploads directly to a separate S3 object-storage host, set
   `PUBLIC_MEDIA_STORAGE_ORIGIN` to that host's `scheme://host[:port]` and it is included in `connect-src`
   without needing to wildcard the directive.
 

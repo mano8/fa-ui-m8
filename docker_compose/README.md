@@ -22,9 +22,9 @@ Three ready-to-run stacks for the `fa-ui-m8` host, each targeting a distinct use
 
 | Stack | Backend services | UI | Monitoring | Best for |
 | --- | --- | --- | --- | --- |
-| [dev_ui_m8](dev_ui_m8/) | auth + media (+ workers, MinIO, ClamAV) | `astro` container running `npm run dev` on `127.0.0.1:4321`, app and plugins bind-mounted for live reload | Prometheus + Grafana | Day-to-day UI development against auth + media |
-| [dev_local_full_ui_m8](dev_local_full_ui_m8/) | auth + media + **prompt** + **reparto** (+ workers, MinIO, ClamAV) | **none** — run `npm run dev` from [`../app`](../app) on the host | Prometheus + Grafana | The full platform; the only stack that runs `reparto_service` |
-| [hardened_ui_m8](hardened_ui_m8/) | auth + media (+ media worker, MinIO, ClamAV) | `ui` container serving the **built** `dist/` behind Traefik as a catch-all route | Prometheus + Grafana | Verifying the shipped static build, its CSP and the hardened posture |
+| [dev_ui_m8](dev_ui_m8/) | auth + media (+ workers, S3 storage, ClamAV) | `astro` container running `npm run dev` on `127.0.0.1:4321`, app and plugins bind-mounted for live reload | Prometheus + Grafana | Day-to-day UI development against auth + media |
+| [dev_local_full_ui_m8](dev_local_full_ui_m8/) | auth + media + **prompt** + **reparto** (+ workers, S3 storage, ClamAV) | **none** — run `npm run dev` from [`../app`](../app) on the host | Prometheus + Grafana | The full platform; the only stack that runs `reparto_service` |
+| [hardened_ui_m8](hardened_ui_m8/) | auth + media (+ media worker, S3 storage, ClamAV) | `ui` container serving the **built** `dist/` behind Traefik as a catch-all route | Prometheus + Grafana | Verifying the shipped static build, its CSP and the hardened posture |
 
 All three use PostgreSQL 18, RS256/JWKS between the issuer and its consumers,
 `stateful` token mode, container hardening and network segmentation, and build
@@ -59,11 +59,11 @@ Browser / Frontend
                           │
                   (data_net, no gateway)
                           ▼
-        m8_db (PostgreSQL 18) · redis_cache · media_redis_cache · minio
+        m8_db (PostgreSQL 18) · redis_cache · media_redis_cache · storage (S3)
 ```
 
 Traefik is the single entry point. Application services sit on `app_net` and
-`data_net`; the database, Redis and MinIO are only on `data_net` and are not
+`data_net`; the database, Redis and the S3 storage backend are only on `data_net` and are not
 reachable from the host except through the loopback ports each stack publishes
 for dev convenience. Consumers never touch the auth Redis — revocation goes
 through the issuer's private introspection endpoint over HTTP.
@@ -131,10 +131,10 @@ Each stack uses **one env file per application service**. Copy the `.example` fi
 
 ```text
 .env          ← infrastructure/bootstrap: DB superuser, per-service *_DB_* triplets,
-                Redis and MinIO root passwords (read by the DB init script and by
+                Redis and S3 admin (S3_ROOT_*) passwords (read by the DB init script and by
                 Compose interpolation — never by the services themselves)
 auth.env      ← auth_user_service: algorithm, token mode, secrets, DB/Redis config, expiry
-media.env     ← media_service: consumer role, token validation, MinIO credentials
+media.env     ← media_service: consumer role, token validation, S3 (S3_*) credentials
 worker.env    ← media_worker
 prompt.env    ← prompt_engine_service   (dev_local_full_ui_m8 only)
 reparto.env   ← reparto_service         (dev_local_full_ui_m8 only)
@@ -240,7 +240,7 @@ does, the models and the applied schema have drifted.
 | `5432` | `127.0.0.1` | PostgreSQL |
 | `6379` | `127.0.0.1` | Redis |
 | `4321` | `127.0.0.1` | Astro dev server — a container in `dev_ui_m8`, a host process in `dev_local_full_ui_m8` |
-| `9005` / `9006` | `127.0.0.1` | MinIO API / console |
+| `9005` | `127.0.0.1` | S3 gateway (dev stacks only; admin surfaces stay loopback-bound inside the container) |
 | `9090` | `127.0.0.1` | Prometheus |
 | `3000` | `127.0.0.1` | Grafana |
 
@@ -253,14 +253,14 @@ Port `9000` is the one you'll use most in development — all API requests go th
 When using `media-service-m8` with browser-direct presigned URLs (Option A —
 uploads/downloads bypass the media service), you must configure:
 
-1. **`MINIO_PUBLIC_ENDPOINT`** in `media.env` — the URL the browser uses to
-   reach MinIO's data path (e.g. `http://127.0.0.1:9005` in dev, `https://storage.example.com` in prod).
-2. **Storage ingress** — The hardened stacks expose MinIO via a dedicated
+1. **`S3_PUBLIC_ENDPOINT`** in `media.env` — the URL the browser uses to
+   reach the storage data path (e.g. `http://127.0.0.1:9005` in dev, `https://storage.example.com` in prod).
+2. **Storage ingress** — The hardened stacks expose the S3 gateway via a dedicated
    Traefik router. See your stack's `hardened_ui_m8/README.md` or
    [hardened_media_m8/README.md](../media-service-m8/docker_compose/hardened_media_m8/README.md)
    for TLS + CORS setup.
 
-For proxy-through deployments (bytes transit the media service), omit `MINIO_PUBLIC_ENDPOINT`.
+For proxy-through deployments (bytes transit the media service), omit `S3_PUBLIC_ENDPOINT`.
 
 ---
 
