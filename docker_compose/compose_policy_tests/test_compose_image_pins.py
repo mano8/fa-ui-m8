@@ -15,8 +15,8 @@ Previously unpinned images and their required pins (both stacks):
 Previously :latest service images now carry explicit version pins (both stacks
 track the same fleet versions):
   tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.2.0
-  tepochtli/media-service-m8 → tepochtli/media-service-m8:2.3.0
-  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:0.5.0
+  tepochtli/media-service-m8 → tepochtli/media-service-m8:3.0.0
+  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:1.0.0
 """
 
 from __future__ import annotations
@@ -44,11 +44,13 @@ _PREVIOUSLY_LATEST = {
     # auth-sdk-m8 3.2.0, the consumer half of J3. (The 2.2.1 bump that adds
     # init-keys.sh's keys-exist kid-binding rerun check is being carried on
     # fix/jwks-kid-key-binding, a separate branch/plan; out of T26's scope.)
-    # media-service-m8 2.3.0 and media-worker-m8 0.5.0 fold the object-storage
-    # backend migration's Waves 1-4 (T26-changelog-release).
+    # media-service-m8 3.0.0 and media-worker-m8 1.0.0 (Wave 7 recut, was
+    # 2.3.0/0.5.0) fold the object-storage backend migration's Waves 1-4
+    # (T26-changelog-release) plus the Wave 7 legacy-shim removal and SDK
+    # floor bump (T33-T37).
     "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.2.0",
-    "tepochtli/media-service-m8": "tepochtli/media-service-m8:2.3.0",
-    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.5.0",
+    "tepochtli/media-service-m8": "tepochtli/media-service-m8:3.0.0",
+    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:1.0.0",
 }
 
 
