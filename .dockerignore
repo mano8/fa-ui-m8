@@ -1,3 +1,9 @@
+# Not build inputs. Only app/ and docker/ are ever COPYed, so everything else
+# is context the daemon transfers and the build never reads — and every file in
+# the context is a file a careless future COPY can leak into a layer.
+docker_compose/
+**/.npm-cache
+
 # Build artifacts
 **/node_modules
 **/.astro

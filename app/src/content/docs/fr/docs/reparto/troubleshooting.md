@@ -74,7 +74,20 @@ tant qu'au moins une cellule n'existe pas.
 ### La liste de contrôle indique « Non vérifié ici »
 
 Cette étape ne peut pas être évaluée depuis cet écran, généralement parce qu'aucun processus n'est
-encore sélectionné. Ce n'est pas un échec.
+encore sélectionné. Ce n'est pas un échec, et ce n'est jamais compté comme manquant : le tableau
+de bord signale ces étapes à part, à côté du compte d'avancement.
+
+### Je ne trouve pas la liste de contrôle
+
+C'est le bouton **Liste de configuration** en haut de chaque page, à côté du bouton **?**. Le
+**Tableau de bord** présente la même liste en entier, avec une barre de progression et
+l'étape suivante à faire.
+
+### Une page affiche « Aucun processus sélectionné »
+
+Elle n'a rien à présenter tant que vous n'en avez pas choisi un. Utilisez la liste déroulante
+de cet écran, ou suivez son lien **Créer un processus d'affectation** si aucun n'existe encore.
+Les processus se créent sur la page **Processus**, jamais sur le tableau de bord.
 
 ## Je n'arrive pas à verrouiller le plan
 

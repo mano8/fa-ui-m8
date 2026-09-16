@@ -154,8 +154,8 @@ _SECRET_FIELDS_MEDIA = (
     "MEDIA_REDIS_PASSWORD",
     "MEDIA_INTERNAL_SERVICE_TOKEN",
     "MEDIA_SHARE_SIGNING_SECRET",
-    "MINIO_ACCESS_KEY",
-    "MINIO_SECRET_KEY",
+    "S3_ACCESS_KEY",
+    "S3_SECRET_KEY",
     "REFRESH_SECRET_KEY",
     "PRIVATE_API_SECRET",
     "EVENT_SIGNING_KEY",
@@ -210,7 +210,7 @@ class TestRootProductionEnv:
         # API_BIND_IP is commented out (unused under the overlay); never 0.0.0.0.
         assert not ip_address(env.get("API_BIND_IP") or "127.0.0.1").is_unspecified
         for field in ("DB_PASSWORD", "REDIS_PASSWORD", "MEDIA_REDIS_PASSWORD",
-                      "MINIO_ROOT_PASSWORD"):
+                      "S3_ROOT_PASSWORD"):
             assert env[field] == "changethis", f"{field} must be fail-closed"
 
 

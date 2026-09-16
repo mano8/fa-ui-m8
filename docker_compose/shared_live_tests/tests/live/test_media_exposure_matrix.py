@@ -65,8 +65,17 @@ _CASE_A_PUBLIC_DENIED: list[str] = [
 _INTERNAL_ROUTE = f"{MEDIA_PREFIX}/internal/v1/health"
 
 # Keys that only appear in the *detailed* health body (1.4 token-gated detail).
+# "minio" is the retired key name — kept so a leak under the old name is
+# still caught, never because that backend is what runs.
 _HEALTH_DETAIL_KEYS = frozenset(
-    {"redis", "database", "minio", "storage", "degradation_modes", "circuit_breaker"}
+    {
+        "redis",
+        "database",
+        "minio",  # retired key name (see above)
+        "storage",
+        "degradation_modes",
+        "circuit_breaker",
+    }
 )
 
 

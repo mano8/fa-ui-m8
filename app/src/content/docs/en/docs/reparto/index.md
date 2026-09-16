@@ -51,7 +51,8 @@ If you are looking for one specific thing, jump straight to it.
 1. **[How the plugin works](/en/docs/reparto/how-it-works/)** — the ten ideas behind
    the whole application, in plain words. Read this once and the rest will make sense.
 2. **[Getting started](/en/docs/reparto/getting-started/)** — signing in, finding the
-   menu, choosing a process, and the checklist that tells you what is still missing.
+   menu, choosing a process, and the **Setup checklist** button that tells you what is
+   still missing, from any page.
 3. **[Who can do what](/en/docs/reparto/roles/)** — the five account roles, and why a
    button is sometimes simply absent instead of greyed out.
 

@@ -8,15 +8,15 @@ Policy (both stacks):
   - Previously-bare images now resolve to their expected pinned prefixes.
 
 Previously unpinned images and their required pins (both stacks):
-  alpine              → alpine:3.21.3
-  quay.io/minio/minio → quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
-  minio/mc            → quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+  alpine                 → alpine:3.21.3
+  chrislusf/seaweedfs    → chrislusf/seaweedfs:4.45
+  amazon/aws-cli         → amazon/aws-cli:2.36.40
 
 Previously :latest service images now carry explicit version pins (both stacks
 track the same fleet versions):
-  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.0.3
-  tepochtli/media-service-m8 → tepochtli/media-service-m8:2.1.1
-  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:0.4.1
+  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.2.0
+  tepochtli/media-service-m8 → tepochtli/media-service-m8:3.0.0
+  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:1.0.0
 """
 
 from __future__ import annotations
@@ -34,15 +34,23 @@ _DEV = _COMPOSE_DIR / "dev_ui_m8" / "docker-compose.yml"
 # Use prefix matching so release-tag formats (RELEASE.…) don't need to be re-asserted char-by-char.
 _PREVIOUSLY_BARE = {
     "alpine": "alpine:3.21.3",
-    "quay.io/minio/minio": "quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772",
-    "quay.io/minio/mc": "quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z",
+    "chrislusf/seaweedfs": "chrislusf/seaweedfs:4.45",
+    "amazon/aws-cli": "amazon/aws-cli:2.36.40",
 }
 _PREVIOUSLY_LATEST = {
     # Tracks the pin the stacks actually carry: the JTI-status v2 issuer floor is
-    # fa-auth-m8 2.0.0, and the stacks are pinned to the published 2.0.3 patch.
-    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.0.3",
-    "tepochtli/media-service-m8": "tepochtli/media-service-m8:2.1.1",
-    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:0.4.1",
+    # fa-auth-m8 2.0.0, and the stacks are pinned to 2.2.0 - 2.1.0 shipped the
+    # JWKS kid/key-binding fixes (audit J1-J4) and 2.2.0 realigns the issuer onto
+    # auth-sdk-m8 3.2.0, the consumer half of J3. (The 2.2.1 bump that adds
+    # init-keys.sh's keys-exist kid-binding rerun check is being carried on
+    # fix/jwks-kid-key-binding, a separate branch/plan; out of T26's scope.)
+    # media-service-m8 3.0.0 and media-worker-m8 1.0.0 (Wave 7 recut, was
+    # 2.3.0/0.5.0) fold the object-storage backend migration's Waves 1-4
+    # (T26-changelog-release) plus the Wave 7 legacy-shim removal and SDK
+    # floor bump (T33-T37).
+    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.2.0",
+    "tepochtli/media-service-m8": "tepochtli/media-service-m8:3.0.0",
+    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:1.0.0",
 }
 
 
@@ -66,7 +74,7 @@ def _all_images(compose: dict) -> dict[str, str]:
 
 def _assert_no_bare_images(compose: dict, stack_label: str) -> None:
     for service, image in _all_images(compose).items():
-        # A bare image has no colon (no tag) — e.g. "alpine" or "quay.io/minio/minio".
+        # A bare image has no colon (no tag) — e.g. "alpine" or "chrislusf/seaweedfs".
         assert ":" in image, (
             f"{stack_label}:{service} uses bare image '{image}' (no tag) — "
             "pin it to an explicit version or digest."
