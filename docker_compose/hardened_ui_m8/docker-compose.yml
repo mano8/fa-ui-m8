@@ -666,7 +666,7 @@ services:
       - scan_net
 
   media_service:
-    image: tepochtli/media-service-m8:3.0.0
+    image: tepochtli/media-service-m8:3.0.1
     security_opt:
       - no-new-privileges:true
     cap_drop:
