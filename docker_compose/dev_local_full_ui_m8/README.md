@@ -189,6 +189,12 @@ Initialize keys and local certificates:
 bash init.sh
 ```
 
+Re-running this on a stack that already has a keypair does not regenerate it,
+but it does re-check `ACCESS_KEY_ID` against the mounted key and re-binds it
+(with a `NOTE:`) if the two have drifted apart, instead of skipping silently.
+Use `--rotate-keys` to actually generate a new keypair with the JWKS overlap
+window.
+
 On Windows, run this from Git Bash. Start the stack:
 
 ```sh
@@ -301,6 +307,15 @@ Grafana uses the local Prometheus datasource; default credentials come from
   the `*.example` files are tracked.
 - Service base paths: auth `/user`, media `/media`, prompt `/prompt`, reparto
   `/reparto`.
+- `app_net` / `scan_net` / `clamav_egress` carry **no** explicit `name:` —
+  Compose project-prefixes each one, so this stack never shares a network
+  with another project. Two compose projects must never declare the same
+  literal `networks.*.name`: an explicit name is external and Docker treats
+  it as shared, so whichever project boots first "owns" it and the second
+  silently attaches, letting Docker DNS resolve a service name (e.g.
+  `auth_user_service`) to **either** stack's container. See
+  `.workspace/plans/stack/analysis/audit-fa-auth-jwks-kid-key-binding-2026-09-08.md`
+  §0.2 for the measured collision this caused.
 
 ## Database reset (reparto)
 

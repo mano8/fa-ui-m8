@@ -42,7 +42,7 @@ not exposed through that network.
 | Service | Image/build | Local access |
 | --- | --- | --- |
 | traefik | `traefik:v3.7.5` | `:8000`, `:4430`, `127.0.0.1:9000`, `127.0.0.1:8080` |
-| auth_user_service | `tepochtli/fa-auth-m8:2.2.0` | `/user` via Traefik |
+| auth_user_service | `tepochtli/fa-auth-m8:2.2.1` | `/user` via Traefik |
 | media_service | local `../../media_service` build | `/media` via Traefik |
 | ui | local `../../` build (`docker/Dockerfile`) | `/` via Traefik, static build served by sirv-cli |
 | m8_db | `postgres:18.4-alpine` | internal data network |
@@ -228,6 +228,15 @@ controlled by `grafana/config.monitoring`.
   convenience. This contract is locked by
   `docker_compose/compose_policy_tests/test_compose_socket_policy.py`.
 - Other compose examples are not updated by this hardened example.
+- `app_net` / `scan_net` / `clamav_egress` carry **no** explicit `name:` —
+  Compose project-prefixes each one, so this stack never shares a network
+  with another project. Two compose projects must never declare the same
+  literal `networks.*.name`: an explicit name is external and Docker treats
+  it as shared, so whichever project boots first "owns" it and the second
+  silently attaches, letting Docker DNS resolve a service name (e.g.
+  `auth_user_service`) to **either** stack's container. See
+  `.workspace/plans/stack/analysis/audit-fa-auth-jwks-kid-key-binding-2026-09-08.md`
+  §0.2 for the measured collision this caused.
 
 ## Production deployment
 
