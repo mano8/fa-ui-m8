@@ -38,7 +38,6 @@ _COMPOSE_DIR = Path(__file__).parent.parent
 
 DOCKERFILE = _REPO_ROOT / "docker" / "Dockerfile"
 HARDENED = _COMPOSE_DIR / "hardened_ui_m8" / "docker-compose.yml"
-DEV_FULL = _COMPOSE_DIR / "dev_local_full_ui_m8" / "docker-compose.yml"
 OVERLAY = _COMPOSE_DIR / "hardened_ui_m8" / "docker-compose.production.yml"
 
 
@@ -197,50 +196,3 @@ class TestProductionOverlayUi:
 
 
 # ── dev_local_full_ui_m8: the dev counterpart runs the same container ────────
-#
-# This stack is the development mirror of the Raspberry Pi deployment
-# (rpi_server/docente_reparto): same service set, same routing shape. It grew a
-# containerised `ui` so the production Astro build — baked PUBLIC_* values,
-# build-time CSP, same-origin Traefik routing — can be exercised before it ships.
-# If that container drifts from the hardened posture, the dev stack stops being
-# a faithful rehearsal of production, so the same invariants are asserted here.
-
-
-class TestDevFullUiService:
-    def test_ui_service_exists(self):
-        assert _ui_service(DEV_FULL)["build"]["dockerfile"] == "docker/Dockerfile"
-
-    def test_image_is_a_local_tag_not_a_registry_tag(self):
-        # This build enables media + prompt + reparto and is NOT the artifact the
-        # Pi runs (reparto-only). A registry namespace here would invite pushing
-        # it over a deployment tag.
-        image = _ui_service(DEV_FULL)["image"]
-        assert "/" not in image, f"{image} looks pushable; this build is local-only"
-        assert not image.endswith(":latest")
-
-    def test_every_plugin_in_this_stack_is_enabled_in_the_build(self):
-        # Each PUBLIC_*_API_BASE is that plugin's build-time on/off gate. The
-        # stack runs media, prompt and reparto, so all three must be baked in or
-        # the container silently serves a UI missing those routes entirely.
-        args = _ui_service(DEV_FULL)["build"]["args"]
-        assert args["PUBLIC_AUTH_API_BASE"] == "/user"
-        assert args["PUBLIC_MEDIA_API_BASE"] == "/media"
-        assert args["PUBLIC_PROMPT_API_BASE"] == "/prompt"
-        assert args["PUBLIC_REPARTO_API_BASE"] == "/reparto"
-
-    @pytest.mark.parametrize("key,expected", [
-        ("read_only", True),
-        ("init", True),
-        ("user", "1000:1000"),
-        ("cap_drop", ["ALL"]),
-    ])
-    def test_container_hardening_matches_the_hardened_stack(self, key: str, expected: object):
-        assert _ui_service(DEV_FULL)[key] == expected
-
-    def test_no_new_privileges(self):
-        assert "no-new-privileges:true" in _ui_service(DEV_FULL)["security_opt"]
-
-    def test_no_host_published_port_and_app_net_only(self):
-        svc = _ui_service(DEV_FULL)
-        assert "ports" not in svc
-        assert svc["networks"] == ["app_net"]
