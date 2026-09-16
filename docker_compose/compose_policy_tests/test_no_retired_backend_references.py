@@ -16,7 +16,7 @@ is a leftover this test exists to catch.
 from __future__ import annotations
 
 import re
-import subprocess
+import subprocess  # nosec B404 -- fixed `git ls-files` argv below, never a shell.
 from pathlib import Path
 
 _REPO = Path(__file__).resolve().parents[2]
@@ -61,7 +61,7 @@ _ALLOWED_CONTEXT = re.compile(
 
 
 def _tracked_files(repo: Path) -> list[Path]:
-    out = subprocess.run(
+    out = subprocess.run(  # nosec B603 -- constant argv, no shell, no untrusted input.
         ["git", "ls-files", "-z"],
         cwd=repo,
         check=True,
