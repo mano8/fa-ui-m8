@@ -2,6 +2,7 @@
 prometheus/data/*
 grafana/data/*
 db_data/*
+db_data_back/*
 mysql_db/*
 db/*
 redis/*
