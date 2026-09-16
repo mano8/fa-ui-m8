@@ -5,13 +5,14 @@ Local dev stack for the **full M8 platform** behind one Traefik entry point:
 `reparto_service`, plus the async workers and infrastructure.
 
 Same hardened posture as the media hardened stack (PostgreSQL 18, two Redis
-instances (auth + media), MinIO, ClamAV, Traefik, Prometheus, Grafana,
-RS256/JWKS auth, container hardening, network segmentation), with two developer
-conveniences: **all application services are built from local source** (the
-sibling repos `../../../fa-auth-m8`, `../../../media-service-m8`,
-`../../../media-worker-m8`, `../../../prompt-engine-m8`,
-`../../../reparto-docente-m8`) instead of pulling published images, and **MinIO
-is published on loopback** (`127.0.0.1:9005`/`9006`) for host access.
+instances (auth + media), SeaweedFS (S3 object storage), ClamAV, Traefik,
+Prometheus, Grafana, RS256/JWKS auth, container hardening, network
+segmentation), with two developer conveniences: **all application services
+are built from local source** (the sibling repos `../../../fa-auth-m8`,
+`../../../media-service-m8`, `../../../media-worker-m8`,
+`../../../prompt-engine-m8`, `../../../reparto-docente-m8`) instead of
+pulling published images, and **the storage S3 gateway is published on
+loopback** (`127.0.0.1:9005`) for host access.
 
 > **Two ways to run the UI here.** The `ui` container serves the *production*
 > Astro build (media + prompt + reparto enabled) behind Traefik on `:4430` —
@@ -51,13 +52,15 @@ Browser  ──►  npm run dev  :4321   (Astro/Starlight host, ../../app)
        +--> PostgreSQL (media_db) on data_net
        +--> auth_user_service private API (HTTP introspection) for token revocation
        +--> Media Redis on data_net for queues/rate limits/cache
-       +--> MinIO on data_net
+       +--> Object storage (SeaweedFS) on data_net
 ```
 
 `app_net` is external-facing for Traefik, app services, and observability.
-`data_net` is internal and has no gateway; DB, Redis, and MinIO are not exposed
-through that network (MinIO additionally publishes loopback-only host ports for
-dev convenience).
+`data_net` is internal and has no gateway; DB, Redis, and object storage are
+not exposed through that network (the storage backend additionally publishes
+one loopback-only host port, the S3 gateway, for dev convenience — its
+admin/filer surfaces stay loopback-bound *inside* the container and are never
+published).
 
 > **Token revocation:** consumers do **not** connect to the auth Redis. In
 > `stateful` mode each consumer queries the auth service's private introspection
@@ -80,8 +83,9 @@ dev convenience).
 | m8_db | `postgres:18.4-alpine` | internal data network |
 | redis_cache | `redis:8.8.0-alpine` | auth Redis — internal data network |
 | media_redis_cache | `redis:8.8.0-alpine` | media Redis — internal data network |
-| minio | `quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772` | `127.0.0.1:9005` API, `127.0.0.1:9006` console |
-| minio-init | `quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z` | one-shot: buckets + `media-rw` policy |
+| storage-config | `alpine:3.21.3` | one-shot: writes the SeaweedFS identity table (no host port) |
+| storage | `chrislusf/seaweedfs:4.45` | `127.0.0.1:9005` S3 gateway (admin surfaces loopback-bound inside the container) |
+| storage-init | `amazon/aws-cli:2.36.40` | one-shot: buckets + per-bucket CORS |
 | prometheus | `ubuntu/prometheus:3.11-26.04_stable` | `127.0.0.1:9090` |
 | grafana | `grafana/grafana:13.1.0-25530058790` | `127.0.0.1:3000` |
 
@@ -122,8 +126,9 @@ REPARTO_DB_PASSWORD=<reparto-db-password>
 REPARTO_DB_NAME=reparto_db
 REDIS_PASSWORD=<auth-redis-password>
 MEDIA_REDIS_PASSWORD=<media-redis-password>
-MINIO_ROOT_USER=<minio-root-user>
-MINIO_ROOT_PASSWORD=<minio-root-password>
+S3_ROOT_USER=<storage-root-user>
+S3_ROOT_PASSWORD=<storage-root-password>
+S3_CORS_ALLOW_ORIGIN=http://localhost:4321,http://localhost:5173,http://localhost:9000
 ```
 
 `init-db.sh` provisions a per-service PostgreSQL user + database from each
@@ -149,9 +154,10 @@ generic `DB_USER` / `DB_PASSWORD` / `DB_DATABASE` names in its own env file:
   DB_PASSWORD=<same-as-REPARTO_DB_PASSWORD>
   ```
 
-The `minio-init` one-shot provisions a MinIO user from `media.env`'s
-`S3_ACCESS_KEY` / `S3_SECRET_KEY` (the media-rw credentials, not the MinIO
-root user). `prompt_engine_service` and `reparto_service` use no object storage.
+The `storage-config` one-shot writes the SeaweedFS identity table from
+`media.env`'s `S3_ACCESS_KEY` / `S3_SECRET_KEY` (the scoped `media-rw`
+identity, not the `S3_ROOT_USER` admin identity). `prompt_engine_service` and
+`reparto_service` use no object storage.
 
 ### Secure-by-default settings (auth-sdk-m8 2.1.1)
 
@@ -246,12 +252,16 @@ reparto route map and the three-stage workflow.
 | Traefik dashboard | `http://localhost:8080` |
 | Prometheus | `http://localhost:9090` |
 | Grafana | `http://localhost:3000` |
-| MinIO console | `http://127.0.0.1:9006` |
+| Storage S3 API | `http://127.0.0.1:9005` |
 
 The public `/user`, `/media`, `/prompt`, and `/reparto` routers accept LAN
 hostnames on port 4430 while retaining their private/metrics path exclusions.
-Presigned MinIO object transfers also use that TLS origin; MinIO management and
-health paths remain excluded from the public router.
+Presigned object transfers also use that TLS origin, through the
+`storage-public-router` catch-all; the storage backend's admin/filer surfaces
+are unreachable through Traefik (or any sibling) because the boot command
+binds them to the container's own loopback, and the two liveness-only paths
+the S3 gateway itself serves (`/healthz`, `/status`) remain excluded from the
+public router.
 
 ## Observability
 
@@ -274,9 +284,12 @@ Grafana uses the local Prometheus datasource; default credentials come from
 
 - `.env` is infrastructure/bootstrap config. It provisions `AUTH_DB_*`,
   `MEDIA_DB_*`, `PROMPT_DB_*`, and `REPARTO_DB_*` through
-  `../shared/db_init/init-db.sh`, and supplies the Redis and MinIO root
-  passwords used by `redis_cache`, `media_redis_cache`, and `minio` via Compose
-  interpolation.
+  `../shared/db_init/init-db.sh`, and supplies the Redis passwords used by
+  `redis_cache` / `media_redis_cache` and the storage admin identity
+  (`S3_ROOT_USER` / `S3_ROOT_PASSWORD`) read by `storage-config` /
+  `storage-init` via `env_file`. `storage-init`'s `S3_CORS_ALLOW_ORIGIN` is
+  overridden directly in its compose `environment:` block (not read from
+  `.env`) so the optional `M8_LAN_IP` origin can be interpolated.
 - `auth.env`, `media.env`, `prompt.env`, and `reparto.env` are runtime
   application configs consumed by `fastapi-m8` / `auth-sdk-m8`. They use generic
   `DB_DATABASE`, `DB_USER`, `DB_PASSWORD` — do **not** replace those with the
