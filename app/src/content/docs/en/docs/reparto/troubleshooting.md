@@ -71,7 +71,20 @@ one cell exists.
 ### The checklist says "Not checked here"
 
 That step cannot be evaluated from this screen — usually because no process is selected
-yet. It is not a failure.
+yet. It is not a failure, and it is never counted as missing: the dashboard reports those
+steps separately, beside the progress count.
+
+### I cannot find the setup checklist
+
+It is the **Setup checklist** button at the top of every page, beside the **?** button.
+The **Dashboard** shows the same checklist laid out in full, with a progress bar and the
+next step to do.
+
+### A page says "No process selected"
+
+It has nothing to report on until you pick one. Use the dropdown on that screen, or follow
+its **Create an assignment process** link if none exists yet. Processes are created on the
+**Processes** page, never on the dashboard.
 
 ## I cannot lock the plan
 

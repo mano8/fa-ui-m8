@@ -71,7 +71,20 @@ exista al menos una celda.
 ### La lista de comprobación dice «No comprobado aquí»
 
 Ese paso no se puede evaluar desde esta pantalla, normalmente porque todavía no hay un proceso
-seleccionado. No es un fallo.
+seleccionado. No es un fallo, y nunca se cuenta como pendiente: el panel informa de esos pasos
+aparte, junto al recuento de avance.
+
+### No encuentro la lista de comprobación
+
+Es el botón **Lista de configuración** que hay arriba en todas las páginas, junto al botón
+**?**. El **Panel** muestra la misma lista entera, con una barra de progreso y el paso
+siguiente que toca.
+
+### Una página dice «Ningún proceso seleccionado»
+
+No tiene nada de lo que informar hasta que elija uno. Use el desplegable de esa pantalla, o
+siga su enlace **Crear un proceso de reparto** si todavía no existe ninguno. Los procesos se
+crean en la página **Procesos**, nunca en el panel.
 
 ## No puedo bloquear el plan
 

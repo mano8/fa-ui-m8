@@ -159,13 +159,17 @@ http:
         - internal-only
 
     # Browser-facing S3 endpoint for presigned media transfers. Service routers
-    # win on their longer path rules; MinIO management and health paths stay
-    # unavailable through the LAN TLS entrypoint.
-    minio-public-router:
+    # win on their longer path rules. The storage backend's admin surfaces
+    # (master/volume/filer/webdav) are bound to the storage container's OWN
+    # loopback by `-ip.bind=127.0.0.1`, so they are unreachable through this
+    # router (or any other) regardless of path — the old `!PathPrefix(`/minio`)`
+    # exclusion is replaced by that binding, not by a path rule here. The S3
+    # port's own two non-S3 paths (`/healthz`, `/status`) are excluded below.
+    storage-public-router:
       entryPoints:
         - websecure
-      rule: "!PathPrefix(`/user`) && !PathPrefix(`/media`) && !PathPrefix(`/prompt`) && !PathPrefix(`/reparto`) && !PathPrefix(`/minio`)"
-      service: minio-service
+      rule: "!PathPrefix(`/user`) && !PathPrefix(`/media`) && !PathPrefix(`/prompt`) && !PathPrefix(`/reparto`) && !(PathPrefix(`/healthz`) || PathPrefix(`/status`))"
+      service: storage-service
       middlewares:
         - security-headers
       tls: {}
@@ -188,10 +192,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://reparto_service:8000"
-    minio-service:
+    storage-service:
       loadBalancer:
+        passHostHeader: true   # REQUIRED — GET SigV4 signs the Host; proxy MUST forward it unchanged
         servers:
-          - url: "http://minio:9000"
+          - url: "http://storage:8333"
 
   middlewares:
     ip-allowlist:

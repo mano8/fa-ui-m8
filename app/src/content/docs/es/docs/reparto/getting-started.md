@@ -1,6 +1,6 @@
 ---
 title: Primeros pasos
-description: Iniciar sesión, encontrar el menú de Reparto, elegir un proceso y leer la lista de comprobación que le dice qué falta todavía.
+description: Iniciar sesión, encontrar el menú de Reparto, elegir un proceso y abrir la lista de comprobación que le dice qué falta todavía.
 sidebar:
   label: Primeros pasos
   order: 3
@@ -14,6 +14,11 @@ que alguien ya ha instalado y activado el complemento Reparto en este sitio; con
 [elegir proceso](#3-elegir-un-proceso) ·
 [la lista de comprobación](#4-leer-la-lista-de-comprobación) ·
 [qué hacer primero](#5-qué-hacer-primero)
+
+:::tip[Dos botones arriba en cada página]
+**?** responde a *qué es esta página y cómo se usa*. **Lista de configuración** responde a
+*dónde estoy dentro de todo el recorrido*. Ninguno de los dos tapa la página en la que está.
+:::
 
 ---
 
@@ -56,6 +61,11 @@ Reparto docente
 Ese menú **es** el orden de trabajo. Recorrerlo de arriba abajo es una forma válida de
 configurar un departamento desde cero.
 
+**Panel** y **Procesos** encabezan la etapa 1 porque nada más se abre hasta que hay un
+proceso seleccionado, pero ninguno de los dos es un paso que se ejecute. Informan sobre el
+trabajo en lugar de hacerlo, y por eso su panel **?** pone **Vista general** en lugar de
+*Etapa 1*.
+
 :::tip
 Todas las páginas de Reparto tienen además enlaces **Anterior** y **Siguiente** al pie, con
 el mismo orden. Puede recorrer toda la aplicación solo con ellos.
@@ -67,15 +77,23 @@ Casi todo en Reparto Docente pertenece a un **proceso de reparto**: un departame
 centro, para un curso académico. El proceso es el contenedor del trabajo de todo un curso.
 
 La mayoría de las páginas llevan arriba una barra **Proceso actual**. Si todavía no hay un
-proceso seleccionado, esa barra se convierte en un selector: elija el curso académico,
-después el centro y después el departamento. Su elección se recuerda en este navegador, así
-que solo lo hará una vez.
+proceso seleccionado, la página muestra **Ningún proceso seleccionado** en lugar de su
+contenido, con un único desplegable de los procesos que existen. Elija uno y la página se
+rellena. Su elección se recuerda en este navegador, así que solo lo hará una vez.
 
 ![La lista de procesos de reparto existentes](../../../../../assets/reparto/es/processes.png)
 
-Si todavía no existe ningún proceso, créelo desde la página **Procesos**. Antes tendrán que
-existir un centro, un curso académico y un departamento: el selector ofrece una opción
-**Crear nuevo** para cada uno, así que puede hacerlo todo desde la misma pantalla.
+Esa pantalla solo *elige*. Si todavía no existe ningún proceso, siga su enlace **Crear un
+proceso de reparto**, o vaya directamente a la página **Procesos**, que es donde se crean.
+Allí pulse **Crear** y elija el curso académico, después el centro y después el
+departamento. Los tres tienen que existir antes, y cada desplegable ofrece una opción
+**Crear nuevo**, así que puede hacerlo todo desde esa sola pantalla.
+
+:::note[Por qué crear no está en el panel]
+Un panel informa sobre un proceso, y no puede informar sobre uno que no existe. Antes se
+abría con el formulario de creación, de modo que lo primero que veía en un navegador nuevo
+era un formulario y no la página que había pedido. Crear vive ahora solo en **Procesos**.
+:::
 
 :::note[El selector nunca le pide un identificador]
 El proceso se elige por curso, centro y departamento, nunca por un código largo. Los
@@ -84,15 +102,29 @@ mensajes de validación compuestos por el servidor también nombran al participa
 
 ## 4. Leer la lista de comprobación
 
-El **Panel** es la primera entrada del menú, y arriba tiene una lista de comprobación
-llamada **Configura tu reparto**. Tiene quince pasos agrupados por las tres etapas, y le
-dice, ahora mismo, qué está hecho y qué falta.
+**Configura tu reparto** es una lista de quince pasos, agrupados por las tres etapas, que
+le dice ahora mismo qué está hecho y qué falta. Se llega a ella de dos maneras.
+
+**Desde cualquier página.** Todas las páginas de Reparto llevan arriba un botón **Lista de
+configuración**, junto al botón **?**. Púlselo y la lista se abre sobre la página;
+ciérrela y vuelve a donde estaba. La página a la que venía nunca queda enterrada debajo.
+
+**En el panel.** El **Panel** muestra la misma lista entera, porque informar de cómo va el
+proceso es justo para lo que sirve un panel. Empieza con una barra de progreso y un
+recuento por etapa — *Configuración 9/9, Planificación 2/4, Reparto 0/2* —, después
+**Siguiente**, que nombra el único paso que toca ahora, y después las quince filas
+completas.
 
 ![La lista de comprobación del panel, con el avance por los quince pasos](../../../../../assets/reparto/es/dashboard.png)
 
 Cada paso pone **Hecho**, **Abrir** o **No comprobado aquí**. Este último no es un fallo:
 significa que esta pantalla concreta no lee ese dato; por ejemplo, si todavía no ha
-seleccionado un proceso, los pasos de nivel de proceso no se pueden comprobar.
+seleccionado un proceso, los pasos de nivel de proceso no se pueden comprobar. Esos pasos
+se cuentan aparte y nunca como pendientes: *11 de 15 hechas, 2 sin comprobar aquí* no dice
+lo mismo que *11 de 15 hechas*.
+
+**El nombre de cada paso es un enlace** a la página donde ese paso se hace, así que nunca
+tiene que buscarlo en el menú.
 
 Los quince pasos son:
 
@@ -114,7 +146,7 @@ Los quince pasos son:
 | 14 | Generar los puestos horarios | 2 |
 | 15 | Repartir los puestos en la sesión | 3 |
 
-Debajo de la lista, el panel muestra los dos balances, los tres invariantes, cuántos
+Junto a la lista, el panel muestra los dos balances, los tres invariantes, cuántos
 puestos quedan libres y cómo va cada participante.
 
 ![El panel de avance del reparto: 37 puestos vivos, 10 asignados, 27 disponibles](../../../../../assets/reparto/es/dashboard-progress.png)

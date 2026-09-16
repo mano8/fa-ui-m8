@@ -30,8 +30,8 @@
 #     (HTTP→HTTPS redirect) and :443 are published. The internal :9000 service
 #     entryPoint is reachable only on the Docker network.
 #   - No host-published DB / Redis / Prometheus / Grafana ports (`!reset []`) —
-#     reachable only on the Docker network. (MinIO already has no host ports in
-#     the hardened base — internal-only per plan item 0.2.)
+#     reachable only on the Docker network. (The storage backend already has
+#     no host ports in the hardened base — internal-only per plan item 0.2.)
 #   - FQDN host rules via traefik/production_dynamic_conf.yml + app-layer
 #     ALLOWED_HOSTS (set in auth.env.production / media.env.production).
 #   - Pinned auth image (media image already pinned in base).
@@ -93,8 +93,24 @@ services:
   grafana:
     ports: !reset []
 
+  # ── storage bootstrap ─────────────────────────────────────────────────────────
+  # storage-config bakes the backend's identity table and storage-init creates
+  # the buckets, so both must read the SAME credentials media_service
+  # authenticates with. Left on the dev media.env they would provision the
+  # placeholder values while media_service reads media.env.production — a
+  # stack that comes up and then 403s on every object.
+  storage-config:
+    env_file: !override
+      - ./.env
+      - ./media.env.production
+
+  storage-init:
+    env_file: !override
+      - ./.env
+      - ./media.env.production
+
   auth_user_service:
-    image: tepochtli/fa-auth-m8:2.0.3   # pinned release (never :latest)
+    image: tepochtli/fa-auth-m8:2.2.1   # pinned release (never :latest)
     env_file: !override
       - ./auth.env.production
     volumes: !override
@@ -116,7 +132,30 @@ services:
   # default (http://localhost:4321), so sitemap/canonical URLs are correct.
   # To bake in an opt-in plugin (media/prompt/reparto) for this deployment,
   # add its PUBLIC_*_API_BASE here too -- see app/.env.example.
+  #
+  # ── BUILD ONCE, DEPLOY THE ARTIFACT ──────────────────────────────────────
+  # The production host should not hold the source tree or a Node toolchain,
+  # and should not run a 5-minute Astro build during a deploy window. Build on
+  # a builder host, push, then pull on the target:
+  #
+  #   # on the builder (needs the repo + this stack's .env.production as .env)
+  #   COMPOSE="-f docker-compose.yml -f docker-compose.production.yml"
+  #   docker compose $COMPOSE build \
+  #     --build-arg VCS_REF=$(git rev-parse HEAD) \
+  #     --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) ui
+  #   docker compose $COMPOSE push ui
+  #
+  #   # on the production host
+  #   docker compose -f docker-compose.yml -f docker-compose.production.yml pull ui
+  #   docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+  #
+  # The tag below is OVERRIDDEN PER DEPLOYMENT, because PUBLIC_SITE_URL (and any
+  # plugin base added here) is baked into the static HTML: a build for
+  # ui.example.com is a different artifact from the base stack's auth-only
+  # localhost build and MUST NOT reuse its tag. Set UI_IMAGE in .env.production
+  # to the tag this deployment publishes.
   ui:
+    image: ${UI_IMAGE:-tepochtli/fa-ui-m8:0.1.0-production}
     build:
       args:
         PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:4321}
