@@ -153,10 +153,12 @@ class TestHardenedUiService:
     @pytest.mark.parametrize("option", ["noexec", "nosuid", "nodev", "size="])
     def test_tmpfs_is_constrained(self, option: str):
         mounts = _ui_service(HARDENED)["tmpfs"]
-        tmp = [m for m in mounts if m.startswith("/tmp")]
+        # "/tmp" here is the container's tmpfs mount string read out of the
+        # compose file, not a host path this test opens.
+        tmp = [m for m in mounts if m.startswith("/tmp")]  # nosec B108
         assert tmp, mounts
         assert option in tmp[0], (
-            f"/tmp is the only writable path in a read-only container; {option} "
+            f"/tmp is the only writable path in a read-only container; {option} "  # nosec B108
             "keeps it from being used to stage and run a payload, or to fill the disk."
         )
 
