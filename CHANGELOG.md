@@ -31,8 +31,9 @@ platform, composing optional backend features as feature-flagged plugins.
   registry.
 - Production build-time Content-Security-Policy via Astro's `security.csp`.
 - App container images and entrypoints, plus dev and hardened Docker Compose
-  orchestration stacks, including dev/hardened MinIO public-endpoint and CORS
-  configuration for browser-direct media uploads.
+  orchestration stacks, including public-endpoint and CORS configuration for
+  browser-direct media uploads against the then-current object-storage
+  backend (the now-retired MinIO, later replaced fleet-wide).
 - Compose policy tests (image pins, npm audit policy) and live security
   tests.
 - CI, Dependabot, editor and ignore configuration.
