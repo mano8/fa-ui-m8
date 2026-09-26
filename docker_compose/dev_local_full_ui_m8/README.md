@@ -397,3 +397,31 @@ both, then restart the dev server.
 **Browser requests to `/reparto` are blocked by CORS**: the dev server's origin
 must appear in `reparto.env`'s `BACKEND_CORS_ORIGINS` (`http://localhost:4321` by
 default; add the LAN origin when serving the meeting screen off-host).
+
+<!-- env-files:start -->
+## Environment files
+
+Copy each template to the name after the arrow (`init.sh` does this where the stack has one), then replace every
+`changethis`. Every key is documented in its template; each secret carries a `# Value:` line with its minimum
+and maximum length and allowed characters. Real env files are gitignored and never committed.
+
+| Template → file | Read by | Must be set (placeholders) |
+| --- | --- | --- |
+| `.env.example` → `.env` | Compose itself (`${VAR}` interpolation) and the engine init scripts | `DB_PASSWORD`, `AUTH_DB_USER`, `AUTH_DB_PASSWORD`, `MEDIA_DB_USER`, `MEDIA_DB_PASSWORD`, `PROMPT_DB_USER`, `PROMPT_DB_PASSWORD`, `REPARTO_DB_USER`, `REPARTO_DB_PASSWORD`, `REDIS_PASSWORD`, `MEDIA_REDIS_PASSWORD`, `S3_ROOT_USER`, `S3_ROOT_PASSWORD` |
+| `auth.env.example` → `auth.env` | `auth_user_service` | `DB_USER`, `DB_PASSWORD`, `REDIS_PASSWORD`, `ACCESS_KEY_ID`, `REFRESH_SECRET_KEY`, `FIRST_SUPERUSER_PASSWORD`, `PRIVATE_API_SECRET`, `SESSION_SECRET`, `TOKENS_ENCRYPTION_KEY`, `EVENT_SIGNING_KEY` |
+| `grafana.env.example` → `grafana.env` | `grafana` | `GF_SECURITY_ADMIN_PASSWORD` |
+| `media.env.example` → `media.env` | `media_service`, `media_service_worker`, `storage-config`, `storage-init` | `DB_USER`, `DB_PASSWORD`, `MEDIA_REDIS_PASSWORD`, `MEDIA_INTERNAL_SERVICE_TOKEN`, `MEDIA_SHARE_SIGNING_SECRET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `REFRESH_SECRET_KEY`, `PRIVATE_API_SECRET`, `EVENT_SIGNING_KEY` |
+| `prompt.env.example` → `prompt.env` | `prompt_engine_service` | `DB_USER`, `DB_PASSWORD`, `REFRESH_SECRET_KEY`, `PRIVATE_API_SECRET`, `EVENT_SIGNING_KEY` |
+| `reparto.env.example` → `reparto.env` | `reparto_service` | `DB_USER`, `DB_PASSWORD`, `REFRESH_SECRET_KEY`, `PRIVATE_API_SECRET`, `EVENT_SIGNING_KEY` |
+| `test.env.example` → `test.env` | the live security tests (`shared_live_tests`), not a container | `LIVE_TEST_ADMIN_EMAIL`, `LIVE_TEST_ADMIN_PASSWORD`, `LIVE_TEST_PRIVATE_API_SECRET`, `LIVE_TEST_REFRESH_SECRET_KEY` |
+| `worker.env.example` → `worker.env` | `media_worker` | `MEDIA_INTERNAL_SERVICE_TOKEN`, `MEDIA_REDIS_PASSWORD`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` |
+
+Generate a value that satisfies every secret rule (48 chars: upper, lower, digit and `-`):
+
+```sh
+python -c "import secrets,string; a=string.ascii_letters+string.digits; print('Aa1-'+''.join(secrets.choice(a) for _ in range(44)))"
+```
+
+Values must avoid spaces, `$`, `#`, quotes and backslashes: Compose interpolates `$`, dotenv treats `#` as a
+comment, and several values are embedded in URLs, JSON or the Redis ACL.
+<!-- env-files:end -->
