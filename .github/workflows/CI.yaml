@@ -159,6 +159,16 @@ jobs:
       - name: Run npm audit (HIGH/CRITICAL advisories)
         run: npm audit --audit-level=high
 
+      # `B38-static-server-lock` (`G37`): the runtime image's sirv-cli tree
+      # installs from docker/static-server/package-lock.json, not app/'s, so
+      # it is guarded and audited here too. Neither step needs an install.
+      - name: Static-server lock integrity
+        run: node scripts/verify-lock-integrity.mjs ../docker/static-server/package-lock.json
+
+      - name: Static-server npm audit (HIGH/CRITICAL advisories)
+        working-directory: docker/static-server
+        run: npm audit --audit-level=high
+
   compose-policy:
     name: Compose policy
     runs-on: ubuntu-latest

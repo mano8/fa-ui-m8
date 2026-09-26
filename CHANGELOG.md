@@ -30,6 +30,19 @@ entry rather than a per-release history.
 
 ### Security
 
+- **The runtime image's static server installs from a hash-pinned lock**
+  (`B38-static-server-lock`, finding `G37`). The server stage ran
+  `npm install sirv-cli@3.0.1`, which pins one package: its eight direct
+  dependencies are caret ranges (`sirv` is `^3.0.0`, with its own), so the
+  thirteen packages that serve the production UI were re-resolved on every
+  build, with no lock for `B34`'s guard to read. `docker/static-server/`
+  now holds that tree as a `package.json` (`sirv-cli` `3.0.1`, exact) and a
+  `package-lock.json` pinning all thirteen by sha512; the server stage copies
+  both, runs the lock guard, then `npm ci --ignore-scripts`. CI's Security
+  job guards and audits the lock, Dependabot watches the directory, and two
+  compose-policy tests hold the stage's order (both read red on the old
+  Dockerfile). The image built from this commit carries exactly the lock's
+  thirteen versions, and still ships no npm.
 - **The UI image installs a verified dependency graph again**
   (`B33-npm-lock-integrity-repair`, finding `G33`). 909 of the 1,084
   entries in `app/package-lock.json`, 517 of them production packages, had
@@ -42,6 +55,17 @@ entry rather than a per-release history.
 
 ### Changed
 
+- **The app runs the plugin releases that ship their changelogs**
+  (`B39-astro-ui-changelog-release`, finding `G38`). `@mano8/astro-ui-m8`
+  `1.5.2` is the first release of the shared UI package whose tarball
+  carries `CHANGELOG.md`, and the four plugins patch-released to track it.
+  The `app/package.json` floors move to the newest published versions:
+  `@mano8/astro-auth-m8` `^2.7.0` → `^2.7.1`, `@mano8/astro-ui-m8`
+  `^1.5.1` → `^1.5.2`, and the optional `@mano8/astro-media-m8` `^2.3.0` →
+  `^2.3.1`, `@mano8/astro-prompt-m8` `^2.2.0` → `^2.2.1` and
+  `@mano8/astro-reparto-m8` `^2.3.0` → `^2.3.1`. The lock moves those five
+  entries, each `integrity` equal to the registry's. No plugin changed a
+  contract, a service range or a tested service version.
 - **Both stacks pin the fleet's pending service releases**
   (`B32-pre-publish-pin-alignment`). `dev_ui_m8` and `hardened_ui_m8`
   (compose, production overlay and `README.md`) and

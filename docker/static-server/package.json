@@ -1,0 +1,9 @@
+{
+  "name": "fa-ui-m8-static-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The runtime image's static file server, installed from this lock by docker/Dockerfile's server stage (B38-static-server-lock).",
+  "dependencies": {
+    "sirv-cli": "3.0.1"
+  }
+}
