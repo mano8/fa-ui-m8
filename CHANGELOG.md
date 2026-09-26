@@ -17,10 +17,22 @@ entry rather than a per-release history.
   `compose_policy_tests/test_compose_image_pins.py` move
   `tepochtli/fa-auth-m8` `2.2.1` → `2.2.3`, `tepochtli/media-service-m8`
   `3.0.1` → `3.0.2` and `tepochtli/media-worker-m8` `1.0.0` → `1.0.2`. All
-  three are pending publish, so the stacks pull once the fleet's publish
-  sweep reads each tag back, and not before. The plugin dependency floors
-  in `app/package.json` do not move here: npm can only lock a published
-  version.
+  three were pinned ahead of their publish, and all three have been
+  published and read back since (2026-09-26), so both stacks pull. The plugin
+  dependency floors moved in a separate change (below), once npm could lock
+  them.
+- **The app runs the plugin releases that track the published services**
+  (`B31-plugin-tracking-tail`). The `app/package.json` floors move to the
+  newest published versions: `@mano8/astro-auth-m8` `^2.6.0` → `^2.7.0`,
+  `@mano8/astro-media-m8` `^2.2.0` → `^2.3.0`, `@mano8/astro-prompt-m8`
+  `^2.1.0` → `^2.2.0` and `@mano8/astro-reparto-m8` `^2.2.0` → `^2.3.0`.
+  `@mano8/astro-ui-m8` stays `^1.5.1`. Each plugin's tested service version
+  is now the published service release: `fa-auth-m8` `2.2.3` and
+  `media-service-m8` `3.0.2` (the images these stacks pin),
+  `prompt-engine-m8` `2.2.1` and `reparto-docente-m8` `2.2.2`. No plugin's
+  contract or service range moved.
+  `app/package-lock.json` was regenerated with `npm install`, and its only
+  changes are those five `@mano8` entries.
 
 ## [0.1.0] - 2026-07-12
 
