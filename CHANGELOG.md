@@ -28,6 +28,18 @@ entry rather than a per-release history.
   It read red on 909 entries of `app/package-lock.json` until `B33`
   (below) restored them.
 
+### Security
+
+- **The UI image installs a verified dependency graph again**
+  (`B33-npm-lock-integrity-repair`, finding `G33`). 909 of the 1,084
+  entries in `app/package-lock.json`, 517 of them production packages, had
+  no `integrity` and no `resolved` since `da40e03`, so the image's `npm ci`
+  installed them without checking a hash. Each is filled from the npm
+  registry's record of its exact version: no version moves, a clean `npm ci`
+  verifies all 1,084 hashes, a following `npm install` leaves the lock
+  byte-identical, and the image built from this lock carries the same five
+  `@mano8` versions.
+
 ### Changed
 
 - **Both stacks pin the fleet's pending service releases**
