@@ -30,6 +30,19 @@ entry rather than a per-release history.
 
 ### Security
 
+- **The runtime image's static server installs from a hash-pinned lock**
+  (`B38-static-server-lock`, finding `G37`). The server stage ran
+  `npm install sirv-cli@3.0.1`, which pins one package: its eight direct
+  dependencies are caret ranges (`sirv` is `^3.0.0`, with its own), so the
+  thirteen packages that serve the production UI were re-resolved on every
+  build, with no lock for `B34`'s guard to read. `docker/static-server/`
+  now holds that tree as a `package.json` (`sirv-cli` `3.0.1`, exact) and a
+  `package-lock.json` pinning all thirteen by sha512; the server stage copies
+  both, runs the lock guard, then `npm ci --ignore-scripts`. CI's Security
+  job guards and audits the lock, Dependabot watches the directory, and two
+  compose-policy tests hold the stage's order (both read red on the old
+  Dockerfile). The image built from this commit carries exactly the lock's
+  thirteen versions, and still ships no npm.
 - **The UI image installs a verified dependency graph again**
   (`B33-npm-lock-integrity-repair`, finding `G33`). 909 of the 1,084
   entries in `app/package-lock.json`, 517 of them production packages, had

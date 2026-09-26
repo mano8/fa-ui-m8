@@ -17,6 +17,14 @@ updates:
     commit-message:
       prefix: "deps"
 
+  # npm — the runtime image's static file server (B38-static-server-lock)
+  - package-ecosystem: "npm"
+    directory: "/docker/static-server"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "deps"
+
   # Docker — front-end image base
   - package-ecosystem: "docker"
     directory: "/docker"

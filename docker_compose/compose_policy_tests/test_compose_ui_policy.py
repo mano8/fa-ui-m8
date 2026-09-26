@@ -13,7 +13,9 @@ Image supply chain
     lets the same Dockerfile produce a different image tomorrow.
   - The build stage runs the lock integrity guard before `npm ci`, so a lock
     whose entries are not sha512-pinned to the npm registry builds no image.
-  - sirv-cli is pinned to an exact version and installed with --ignore-scripts.
+  - sirv-cli is pinned to an exact version and, with everything below it,
+    installed from a committed lock that the same guard refuses first, with
+    --ignore-scripts.
   - The runtime image strips npm/npx/corepack — a static file server needs no
     package manager, and their absence removes the ability to fetch and execute
     new code after a compromise.
@@ -30,6 +32,7 @@ Compose posture (hardened_ui_m8)
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -39,6 +42,7 @@ _REPO_ROOT = Path(__file__).parent.parent.parent
 _COMPOSE_DIR = Path(__file__).parent.parent
 
 DOCKERFILE = _REPO_ROOT / "docker" / "Dockerfile"
+_STATIC_SERVER = _REPO_ROOT / "docker" / "static-server"
 HARDENED = _COMPOSE_DIR / "hardened_ui_m8" / "docker-compose.yml"
 OVERLAY = _COMPOSE_DIR / "hardened_ui_m8" / "docker-compose.production.yml"
 
@@ -68,6 +72,10 @@ def _ui_service(path: Path) -> dict:
 
 def _dockerfile() -> str:
     return DOCKERFILE.read_text(encoding="utf-8")
+
+
+def _server_stage() -> str:
+    return _dockerfile().split(" AS server", 1)[1].split(" AS runtime", 1)[0]
 
 
 # ── Dockerfile: image supply chain ───────────────────────────────────────────
@@ -109,9 +117,38 @@ class TestDockerfileSupplyChain:
         )
 
     def test_sirv_cli_is_version_pinned_and_scripts_ignored(self):
-        text = _dockerfile()
-        assert "sirv-cli@3.0.1" in text, "sirv-cli must be pinned to an exact version"
-        assert "--ignore-scripts" in text
+        # `B38-static-server-lock` (`G37`): the exact pin lives in the
+        # static-server manifest, and its lock pins everything below it.
+        manifest = json.loads((_STATIC_SERVER / "package.json").read_text(encoding="utf-8"))
+        assert manifest["dependencies"] == {"sirv-cli": "3.0.1"}, (
+            "sirv-cli must be the static server's only dependency, pinned to an exact version"
+        )
+        lock = json.loads((_STATIC_SERVER / "package-lock.json").read_text(encoding="utf-8"))
+        assert lock["packages"]["node_modules/sirv-cli"]["version"] == "3.0.1"
+        assert "--ignore-scripts" in _server_stage()
+
+    def test_static_server_installs_from_its_guarded_lock(self):
+        # `B38-static-server-lock` (`G37`): `npm install <name>@<version>` pins
+        # one package and re-resolves every range below it on each build. The
+        # server stage must install from the committed lock, and refuse that
+        # lock with the same guard as the build stage before it fetches.
+        instructions = [
+            line for line in _server_stage().splitlines() if not line.lstrip().startswith("#")
+        ]
+        copied_lock = (
+            "COPY docker/static-server/package.json docker/static-server/package-lock.json ./"
+        )
+        copied_guard = "COPY app/scripts/verify-lock-integrity.mjs ./scripts/"
+        guard = [i for i, line in enumerate(instructions) if line == "RUN node scripts/verify-lock-integrity.mjs"]
+        install = [i for i, line in enumerate(instructions) if line.startswith("RUN npm ci ")]
+        assert not any("npm install" in line for line in instructions), (
+            "the server stage must not resolve packages by name; install from the lock"
+        )
+        assert copied_lock in instructions and copied_guard in instructions
+        assert len(guard) == 1 and len(install) == 1
+        assert max(instructions.index(copied_lock), instructions.index(copied_guard)) < guard[0] < install[0], (
+            "the static-server lock must be copied, then guarded, then installed"
+        )
 
     def test_runtime_strips_every_package_manager(self):
         text = _dockerfile()

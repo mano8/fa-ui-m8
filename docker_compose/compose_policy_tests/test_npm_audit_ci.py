@@ -16,6 +16,7 @@ import yaml
 _REPO_ROOT = Path(__file__).parent.parent.parent
 _CI_WORKFLOW = _REPO_ROOT / ".github" / "workflows" / "CI.yaml"
 _PACKAGE_LOCK = _REPO_ROOT / "app" / "package-lock.json"
+_STATIC_SERVER_LOCK = _REPO_ROOT / "docker" / "static-server" / "package-lock.json"
 
 _AUDIT_LEVELS = {"high", "critical"}  # either is an acceptable gate
 
@@ -78,6 +79,23 @@ class TestNpmAuditCI:
                 f"npm audit step does not specify --audit-level={{high|critical}}:\n{run}\n"
                 "HIGH/CRITICAL advisories must gate the build."
             )
+
+    def test_static_server_lock_is_guarded_and_audited(self):
+        # `B38-static-server-lock` (`G37`): the runtime image's server installs
+        # from its own lock, which app/'s guard and audit never read.
+        assert _STATIC_SERVER_LOCK.exists(), f"{_STATIC_SERVER_LOCK} is missing"
+        runs = [
+            (step.get("working-directory", ""), step.get("run", ""))
+            for job in _load_ci().get("jobs", {}).values()
+            for step in job.get("steps", [])
+        ]
+        assert any(
+            "verify-lock-integrity.mjs" in run and "docker/static-server/package-lock.json" in run
+            for _, run in runs
+        ), "CI must run the lock integrity guard on docker/static-server/package-lock.json"
+        assert any(
+            wd == "docker/static-server" and "npm audit --audit-level=high" in run for wd, run in runs
+        ), "CI must run `npm audit --audit-level=high` in docker/static-server"
 
     def test_security_job_installs_deps_before_audit(self):
         ci = _load_ci()

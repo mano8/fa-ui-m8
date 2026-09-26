@@ -89,12 +89,21 @@ WORKDIR /opt/static-server
 # forward yields a binary that cannot resolve its own imports. A local prefix
 # keeps the whole resolvable tree under one path that copies as a unit.
 #
-# Pinned exact version — bump deliberately, never track a moving tag.
-# --ignore-scripts: sirv-cli and its ~8 transitive deps declare no install
-# scripts, so this changes nothing today and fails closed if one ever appears.
+# Installed from a committed lock, not by name (`B38-static-server-lock`,
+# `G37`). `npm install sirv-cli@3.0.1` pinned one package: its eight direct
+# dependencies are caret ranges (`sirv` is `^3.0.0`, with its own), so the
+# thirteen packages this server runs were re-resolved on every build, and no
+# lock guard could see them. docker/static-server/ pins every one of them by
+# sha512, and the same guard as the build stage refuses that lock before
+# `npm ci` fetches anything. Bump sirv-cli there, deliberately, with the lock.
+# --ignore-scripts: none of the thirteen declares an install script, so this
+# changes nothing today and fails closed if one ever appears.
 # The final `--version` is a build-time smoke test: it fails the build here if
 # the copied-forward tree is ever incomplete, instead of at container start.
-RUN npm install --ignore-scripts --omit=dev --no-audit --no-fund sirv-cli@3.0.1 && npm cache clean --force && node node_modules/sirv-cli/bin.js --version
+COPY docker/static-server/package.json docker/static-server/package-lock.json ./
+COPY app/scripts/verify-lock-integrity.mjs ./scripts/
+RUN node scripts/verify-lock-integrity.mjs
+RUN npm ci --ignore-scripts --omit=dev --no-audit --no-fund && npm cache clean --force && node node_modules/sirv-cli/bin.js --version
 
 
 # ---- Runtime image ----
