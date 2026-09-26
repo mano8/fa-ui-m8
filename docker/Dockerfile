@@ -20,6 +20,18 @@ WORKDIR /app
 # ever needs to carry an auth token, switch to a `--mount=type=secret` instead
 # of copying it into a layer.
 COPY app/package.json app/package-lock.json app/.npmrc ./
+
+# `npm ci` verifies a package only against the `integrity` its lock entry
+# records, and installs an entry that has none without a word — 909 of this
+# lock's entries were in that state for weeks (`G33`). The guard refuses such a
+# lock, and any entry not sha512-pinned to registry.npmjs.org, before a single
+# package is fetched, so an unpinned lock cannot produce an image even from a
+# local `docker compose build` that no CI run ever sees. Dependency-free: it
+# runs on the bare base image. Same relative path as in app/, so it reads the
+# lock copied above.
+COPY app/scripts/verify-lock-integrity.mjs ./scripts/
+RUN node scripts/verify-lock-integrity.mjs
+
 RUN --mount=type=cache,target=/root/.npm \
     npm ci
 

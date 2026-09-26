@@ -13,6 +13,7 @@
     "verify:auth-only": "node scripts/verify-auth-only.mjs",
     "verify:plugin-matrix": "node scripts/verify-plugin-matrix.mjs",
     "verify:csp": "node scripts/verify-csp.mjs",
+    "verify:lock-integrity": "node scripts/verify-lock-integrity.mjs",
     "astro": "astro",
     "lint": "eslint src",
     "typecheck": "astro sync && tsc -p tsconfig.json --noEmit",

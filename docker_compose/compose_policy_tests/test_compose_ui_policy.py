@@ -11,6 +11,8 @@ cannot regress silently:
 Image supply chain
   - Both Dockerfile base images are DIGEST-pinned, not tag-only: a floating tag
     lets the same Dockerfile produce a different image tomorrow.
+  - The build stage runs the lock integrity guard before `npm ci`, so a lock
+    whose entries are not sha512-pinned to the npm registry builds no image.
   - sirv-cli is pinned to an exact version and installed with --ignore-scripts.
   - The runtime image strips npm/npx/corepack — a static file server needs no
     package manager, and their absence removes the ability to fetch and execute
@@ -87,6 +89,24 @@ class TestDockerfileSupplyChain:
 
     def test_no_latest_base_image(self):
         assert ":latest" not in _dockerfile()
+
+    def test_lock_integrity_guard_runs_before_npm_ci(self):
+        # `B34-npm-lock-integrity-guard`: `npm ci` installs a lock entry with no
+        # `integrity` unverified (`G33`), so the build stage must refuse such a
+        # lock before it installs anything.
+        build_stage = _dockerfile().split(" AS server", 1)[0]
+        instructions = [
+            line for line in build_stage.splitlines() if not line.lstrip().startswith("#")
+        ]
+        guard = [i for i, line in enumerate(instructions) if line == "RUN node scripts/verify-lock-integrity.mjs"]
+        install = [i for i, line in enumerate(instructions) if line.strip() == "npm ci"]
+        copied = "COPY app/scripts/verify-lock-integrity.mjs ./scripts/"
+        assert copied in instructions, "the guard script is not copied into the build stage"
+        assert len(guard) == 1, "the build stage must run the lock integrity guard exactly once"
+        assert len(install) == 1, "expected exactly one `npm ci` in the build stage"
+        assert instructions.index(copied) < guard[0] < install[0], (
+            "the lock integrity guard must run after its script is copied and before `npm ci`"
+        )
 
     def test_sirv_cli_is_version_pinned_and_scripts_ignored(self):
         text = _dockerfile()
