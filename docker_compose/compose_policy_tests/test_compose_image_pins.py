@@ -14,9 +14,9 @@ Previously unpinned images and their required pins (both stacks):
 
 Previously :latest service images now carry explicit version pins (both stacks
 track the same fleet versions):
-  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.2.1
-  tepochtli/media-service-m8 → tepochtli/media-service-m8:3.0.1
-  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:1.0.0
+  tepochtli/fa-auth-m8       → tepochtli/fa-auth-m8:2.2.3
+  tepochtli/media-service-m8 → tepochtli/media-service-m8:3.0.2
+  tepochtli/media-worker-m8  → tepochtli/media-worker-m8:1.0.2
 """
 
 from __future__ import annotations
@@ -39,18 +39,23 @@ _PREVIOUSLY_BARE = {
 }
 _PREVIOUSLY_LATEST = {
     # Tracks the pin the stacks actually carry: the JTI-status v2 issuer floor is
-    # fa-auth-m8 2.0.0, and the stacks are pinned to 2.2.1 - 2.1.0 shipped the
+    # fa-auth-m8 2.0.0, and the stacks are pinned to 2.2.3 - 2.1.0 shipped the
     # JWKS kid/key-binding fixes (audit J1-J4), 2.2.0 realigns the issuer onto
-    # auth-sdk-m8 3.2.0 (the consumer half of J3), and 2.2.1 makes the bundled
-    # init-keys.sh verify the kid binding on a keys-exist rerun (W3.1).
+    # auth-sdk-m8 3.2.0 (the consumer half of J3), 2.2.1 makes the bundled
+    # init-keys.sh verify the kid binding on a keys-exist rerun (W3.1), and
+    # 2.2.3 carries the patch layer, the aligned lock and the UTC session
+    # clock (B23, B29, B30).
     # media-service-m8 3.0.0 and media-worker-m8 1.0.0 (Wave 7 recut, was
     # 2.3.0/0.5.0) fold the object-storage backend migration's Waves 1-4
     # (T26-changelog-release) plus the Wave 7 legacy-shim removal and SDK
     # floor bump (T33-T37); media-service-m8 3.0.1 is the hard-purge FK fix
-    # found by the Wave 8 live run (T31-operator-closeout).
-    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.2.1",
-    "tepochtli/media-service-m8": "tepochtli/media-service-m8:3.0.1",
-    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:1.0.0",
+    # found by the Wave 8 live run (T31-operator-closeout), and 3.0.2 /
+    # media-worker-m8 1.0.2 carry the same B23/B29/B30 releases.
+    # All three are pinned while pending publish (B32-pre-publish-pin-alignment):
+    # the stacks pull once the fleet's publish sweep reads each tag back.
+    "tepochtli/fa-auth-m8": "tepochtli/fa-auth-m8:2.2.3",
+    "tepochtli/media-service-m8": "tepochtli/media-service-m8:3.0.2",
+    "tepochtli/media-worker-m8": "tepochtli/media-worker-m8:1.0.2",
 }
 
 

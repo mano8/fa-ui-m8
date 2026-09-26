@@ -9,6 +9,19 @@ entry rather than a per-release history.
 
 ## [Unreleased]
 
+### Changed
+
+- **Both stacks pin the fleet's pending service releases**
+  (`B32-pre-publish-pin-alignment`). `dev_ui_m8` and `hardened_ui_m8`
+  (compose, production overlay and `README.md`) and
+  `compose_policy_tests/test_compose_image_pins.py` move
+  `tepochtli/fa-auth-m8` `2.2.1` → `2.2.3`, `tepochtli/media-service-m8`
+  `3.0.1` → `3.0.2` and `tepochtli/media-worker-m8` `1.0.0` → `1.0.2`. All
+  three are pending publish, so the stacks pull once the fleet's publish
+  sweep reads each tag back, and not before. The plugin dependency floors
+  in `app/package.json` do not move here: npm can only lock a published
+  version.
+
 ## [0.1.0] - 2026-07-12
 
 Initial version. Astro 7 + Starlight static-first front end for the M8
