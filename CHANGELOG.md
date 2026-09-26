@@ -55,6 +55,17 @@ entry rather than a per-release history.
 
 ### Changed
 
+- **The app runs the plugin releases that ship their changelogs**
+  (`B39-astro-ui-changelog-release`, finding `G38`). `@mano8/astro-ui-m8`
+  `1.5.2` is the first release of the shared UI package whose tarball
+  carries `CHANGELOG.md`, and the four plugins patch-released to track it.
+  The `app/package.json` floors move to the newest published versions:
+  `@mano8/astro-auth-m8` `^2.7.0` → `^2.7.1`, `@mano8/astro-ui-m8`
+  `^1.5.1` → `^1.5.2`, and the optional `@mano8/astro-media-m8` `^2.3.0` →
+  `^2.3.1`, `@mano8/astro-prompt-m8` `^2.2.0` → `^2.2.1` and
+  `@mano8/astro-reparto-m8` `^2.3.0` → `^2.3.1`. The lock moves those five
+  entries, each `integrity` equal to the registry's. No plugin changed a
+  contract, a service range or a tested service version.
 - **Both stacks pin the fleet's pending service releases**
   (`B32-pre-publish-pin-alignment`). `dev_ui_m8` and `hardened_ui_m8`
   (compose, production overlay and `README.md`) and
