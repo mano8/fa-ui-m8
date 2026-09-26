@@ -1,7 +1,7 @@
 # Same base line as the production image (docker/Dockerfile): Node 24 LTS on
 # Debian trixie, digest-pinned so Dependabot moves both files together and a
 # dev container can never silently diverge from what production runs.
-FROM node:26-trixie@sha256:e961046fec20896e8904f2b4a8b4c7e5ca91826d84d8d33d83dbaa61f942069e
+FROM node:26-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0
 
 ENV DEBIAN_FRONTEND=noninteractive
 
