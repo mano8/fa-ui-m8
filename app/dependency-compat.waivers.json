@@ -1,0 +1,9 @@
+{
+  "waivers": [
+    {
+      "requirer": "@hookform/resolvers",
+      "dependency": "ajv-formats",
+      "reason": "optional peer of the ajv resolver only; src/ imports @hookform/resolvers/zod and never @hookform/resolvers/ajv, and the ajv-formats 3.x present is shadcn's (via @modelcontextprotocol/sdk), hoisted there by legacy-peer-deps"
+    }
+  ]
+}

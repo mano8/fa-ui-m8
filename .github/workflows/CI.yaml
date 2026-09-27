@@ -42,6 +42,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # `.npmrc` sets `legacy-peer-deps=true` so Dependabot and lock
+      # regenerations never stall on a peer conflict; npm then no longer checks
+      # peer ranges itself. This gate does, over the tree `npm ci` just built:
+      # an installed package outside any range declared on it fails the build.
+      # The test job runs it again (app/tests/dependency-compat.test.ts), and
+      # `dependency-compat.waivers.json` lists the one optional peer it excuses.
+      - name: Dependency compatibility
+        run: npm run verify:dependency-compat
+
       - name: Lint
         run: npm run lint
 
