@@ -27,6 +27,26 @@ entry rather than a per-release history.
   dependency-free and byte-identical in the fleet's six npm repositories.
   It read red on 909 entries of `app/package-lock.json` until `B33`
   (below) restored them.
+- **A tree that breaks a declared range fails the build.**
+  `app/scripts/verify-dependency-compat.mjs`
+  (`npm run verify:dependency-compat`) reads `npm ls --all --json --long`
+  with peer edges forced on. It names every installed package outside a
+  range declared on it, and every missing required dependency or peer that a
+  required edge reaches. `app/.npmrc` keeps `legacy-peer-deps=true`, now
+  byte-identical fleet-wide and documented, so Dependabot never drops an
+  update over a peer conflict. `legacy-peer-deps` had also switched off
+  npm's own check, which is how Dependabot #36 (a parser behind its ESLint
+  plugin), #39 (`react-dom` ahead of `react`) and #40 (`@astrojs/react` 7
+  against the plugins' `^6` peer) reached this repository with CI green.
+  Run on `main`, the gate named three more: `lucide-react` 1.45 against
+  `@mano8/astro-ui-m8`'s exact `1.28.0` peer (the reason the old `.npmrc`
+  gave), `@astrojs/markdown-remark` 7.2 against astro 7.3's `^7.3.0` peer
+  (Starlight 0.41's), and `ajv-formats`. CI runs it after `npm ci`, and
+  `app/tests/dependency-compat.test.ts` runs it again on the real tree. The
+  script and test are byte-identical with the five `@mano8` packages.
+  `app/dependency-compat.waivers.json` excuses the one edge that is not a
+  defect: `ajv-formats` is an optional peer of `@hookform/resolvers`'s ajv
+  resolver, which `src/` never imports (it uses `/zod`).
 
 ### Security
 
@@ -55,6 +75,25 @@ entry rather than a per-release history.
 
 ### Changed
 
+- **The app runs `@astrojs/react` 7, Starlight 0.42 and React 19.3 on the
+  plugin releases that admit them.** The `app/package.json` floors move to
+  the newest published versions, each read back as npm `latest`:
+  `@mano8/astro-ui-m8` `^1.5.2` → `^1.5.3` (its `lucide-react` peer is now
+  `^1.28.0`) and `@mano8/astro-auth-m8` `^2.7.1` → `^2.7.2`. The optional
+  `@mano8/astro-media-m8` moves `^2.3.1` → `^2.3.2`, `@mano8/astro-prompt-m8`
+  `^2.2.1` → `^2.2.2` and `@mano8/astro-reparto-m8` `^2.3.1` → `^2.3.2`.
+  All four plugins now accept `@astrojs/react` `^6.0.1 || ^7.0.0` and
+  Starlight `^0.41.3 || ^0.42.0`. With them, `@astrojs/react` `^6.0.1` →
+  `^7.0.0` (Dependabot #40) and `@astrojs/starlight` `^0.41.3` → `^0.42.4`.
+  Starlight 0.42 is the line built for astro 7.3, and its breaking changes
+  (mobile-menu markup, `tagline`) touch neither overridden component
+  (`SocialIcons`, `Sidebar`). `react` / `react-dom` / `@types/react` /
+  `@types/react-dom` move to `^19.3.0` (Dependabot #39 with the `react` half
+  it lacked). `vite` and its override `^8.0.13` → `^8.3.0`, the floor
+  `@astrojs/react` 7 requires: the override had held the tree on 8.2.0 and,
+  because npm reports an overridden edge as satisfied, the gate could not
+  see it. One `vite` (8.3.1) still serves the whole tree. Each `@mano8`
+  lock entry's `integrity` equals the registry's.
 - **The app runs the plugin releases that ship their changelogs**
   (`B39-astro-ui-changelog-release`, finding `G38`). `@mano8/astro-ui-m8`
   `1.5.2` is the first release of the shared UI package whose tarball
