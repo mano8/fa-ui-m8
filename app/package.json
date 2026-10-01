@@ -30,7 +30,7 @@
     "@mano8/astro-ui-m8": "^1.5.3",
     "@tailwindcss/vite": "^4.3.1",
     "@tanstack/react-query": "^5.102.8",
-    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-table": "^9.2.4",
     "astro": "^7.3.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
