@@ -10,7 +10,7 @@
 # unfixed low/medium CVEs that never get backported. Node 24, not 26: 24 is the
 # Active LTS line and is what CI actually exercises (see .github/workflows,
 # matrix 22.18.0 + 24.x). Revisit 26 once it enters LTS and CI covers it.
-FROM node:26-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 AS build
+FROM node:26-trixie@sha256:6d2c7d5d074bf72f81ddc252b4fbb5d625bc028eeda49cb4b8c2ff8eda1ee617 AS build
 
 WORKDIR /app
 
@@ -79,7 +79,7 @@ RUN npm run build && \
 # sirv-cli is resolved in its OWN stage so the runtime image never sees npm's
 # working state (cache, lockfile metadata, temp trees) — only the finished
 # node_modules tree is copied forward.
-FROM node:26-trixie-slim@sha256:ec7758ee051e457b468b32bde57b0879010b325bb9862718e9615225ce4aaae1 AS server
+FROM node:26-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS server
 
 WORKDIR /opt/static-server
 
@@ -113,7 +113,7 @@ RUN npm ci --ignore-scripts --omit=dev --no-audit --no-fund && npm cache clean -
 # `sirv-cli`: a small, purpose-built static file server (~8 tiny deps, no
 # install scripts) instead of shipping the app's full (much heavier)
 # node_modules tree just to serve prebuilt HTML/JS/CSS.
-FROM node:26-trixie-slim@sha256:ec7758ee051e457b468b32bde57b0879010b325bb9862718e9615225ce4aaae1 AS runtime
+FROM node:26-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS runtime
 
 ARG UID=1000
 ARG GID=1000
